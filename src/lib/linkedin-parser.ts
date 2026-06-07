@@ -270,7 +270,26 @@ function splitIntoSections(lines: string[]): Section[] {
 
 // ── Parsers par section ─────────────────────────────────────────
 
-function parseContacts(lines: string[]): Partial<ParsedProfile> {
+function parseContacts(rawLines: string[]): Partial<ParsedProfile> {
+  // Les longs emails sont parfois coupés sur deux lignes par le PDF
+  // (".../gmail.c" + "om"). On rejoint la suite quand la ligne porte un "@"
+  // sans TLD valide et que la suivante est une fin de domaine.
+  const lines: string[] = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const line = rawLines[i].trim();
+    const next = (rawLines[i + 1] ?? "").trim();
+    if (
+      line.includes("@") &&
+      !/\.[a-z]{2,}$/i.test(line) &&
+      /^[a-z]{1,6}$/i.test(next)
+    ) {
+      lines.push(line + next);
+      i++;
+    } else {
+      lines.push(line);
+    }
+  }
+
   let phone = "",
     email = "",
     website = "";
@@ -385,9 +404,11 @@ function parseMainContent(lines: string[]): {
       continue;
     }
 
-    // 4. Lignes URL rattachées au titre (ex: "404factory.vincent-bichat.fr")
-    //    On les saute — l'info est redondante avec le champ website
+    // 4. Lignes URL rattachées au titre (ex: "404factory.vincent-bichat.fr"
+    //    ou "Montpellier Portfolio: github.com/…") — redondantes avec website
     if (isUrl) continue;
+    if (/\b(www\.|https?:|portfolio\s*:)/i.test(line) || /\.[a-z]{2,}\//i.test(line))
+      continue;
 
     // 5. Reste = titre du poste (peut être sur 2 lignes)
     jobTitleParts.push(line);
@@ -410,6 +431,60 @@ function isLocationLine(line: string): boolean {
   if (line.endsWith(":")) return false;
   if (parseDateRange(line)) return false;
   return line.split(/\s+/).length <= 6;
+}
+
+/** Nom propre : 1–4 mots capitalisés, sans ponctuation de titre/URL ni chiffre. */
+function looksLikeName(line: string): boolean {
+  const s = line.trim();
+  if (!s || s.length > 40) return false;
+  if (/[|/:•@()]/.test(s)) return false; // ponctuation de titre/contact
+  if (/\s[-–]\s/.test(s)) return false; // séparateur de titre
+  if (/\d/.test(s)) return false;
+  if (/\bwww\.|https?:/i.test(s) || /\.[a-z]{2,}(\/|$)/i.test(s)) return false; // URL
+  const words = s.split(/\s+/);
+  if (words.length < 1 || words.length > 4) return false;
+  const particles = new Set([
+    "de", "du", "da", "van", "von", "le", "la", "den", "der", "dos", "das",
+  ]);
+  return words.every(
+    (w) => particles.has(w.toLowerCase()) || /^[A-ZÀ-Ý]/.test(w),
+  );
+}
+
+/**
+ * Sépare le bloc profil (nom, titre, localisation) accolé à la fin d'une section
+ * sidebar, juste avant le contenu principal.
+ *
+ * pdf-parse extrait la sidebar (Coordonnées → Compétences → Languages) avant le
+ * contenu principal (nom, titre, ville, Résumé…). Le bloc profil se retrouve donc
+ * collé à la fin de la dernière section sidebar — peu importe laquelle (skills si
+ * pas de Languages, sinon languages). On l'isole génériquement :
+ *   - ancre basse  = dernière ligne de localisation ("Ville, Région, Pays") ;
+ *   - ancre haute  = première ligne ressemblant à un nom, en remontant.
+ */
+function splitProfileTail(region: string[]): {
+  block: string[];
+  content: string[];
+} {
+  let anchor = -1;
+  for (let i = region.length - 1; i >= 0; i--) {
+    if (isLocationLine(region[i]) && region[i].includes(",")) {
+      anchor = i;
+      break;
+    }
+  }
+  if (anchor === -1) return { block: [], content: region };
+
+  let start = anchor;
+  for (let i = anchor - 1; i >= 0; i--) {
+    start = i;
+    if (looksLikeName(region[i])) break;
+  }
+
+  return {
+    block: region.slice(start, anchor + 1),
+    content: [...region.slice(0, start), ...region.slice(anchor + 1)],
+  };
 }
 
 /**
@@ -484,7 +559,7 @@ function parseEducation(lines: string[]): ParsedEducation[] {
     const next = (lines[i + 1] ?? "").trim();
 
     // Détecter le séparateur "·" ou "•"
-    const degreeMatch = next.match(/^(.+?)\s*[·•]\s*(.+)$/);
+    const degreeMatch = next.match(/^(.*?)\s*[·•]\s*(.+)$/);
     if (degreeMatch) {
       const institution = line;
       let degree = degreeMatch[1].trim();
@@ -564,6 +639,26 @@ export function parseLinkedInText(rawText: string): LinkedInParseResult {
 
   const sections = splitIntoSections(lines);
 
+  // ── Isoler le bloc profil avant de répartir les sections ────────────────
+  //
+  // Le bloc nom/titre/ville est collé à la fin de la dernière section sidebar,
+  // juste avant la première section de contenu principal (Résumé / Expérience /
+  // Formation). On le retire de cette section pour qu'il ne pollue ni les
+  // compétences ni les langues.
+  const MAIN_SECTIONS = new Set<SectionName>([
+    "summary",
+    "experience",
+    "education",
+  ]);
+  let profileBlock: string[] = [];
+  const firstMainIdx = sections.findIndex((s) => MAIN_SECTIONS.has(s.name));
+  if (firstMainIdx > 0) {
+    const prev = sections[firstMainIdx - 1];
+    const split = splitProfileTail(prev.lines);
+    profileBlock = split.block;
+    prev.lines = split.content;
+  }
+
   // Collecter les sections
   const contactLines: string[] = [];
   const skillLines: string[] = [];
@@ -599,33 +694,10 @@ export function parseLinkedInText(rawText: string): LinkedInParseResult {
     }
   }
 
-  // ── Localiser le bloc profil (nom, titre, localisation) ─────────────────
-  //
-  // pdf-parse extrait les PDFs LinkedIn dans l'ordre du flux de contenu :
-  // sidebar d'abord (Coordonnées → Compétences → Languages), puis contenu
-  // principal (nom, titre, résumé, expérience…).
-  //
-  // Conséquence : "Vincent Bichat" + titre + ville se retrouvent accolés
-  // à la FIN de languageLines, après les vraies entrées de langues.
-  //
-  // On détecte la frontière : les entrées de langues finissent par "(Niveau)",
-  // les lignes suivantes sont le bloc profil.
-
-  // Trouver le dernier index d'une vraie entrée de langue
-  let lastLangIdx = -1;
-  for (let i = 0; i < languageLines.length; i++) {
-    if (/\([^)]+\)\s*$/.test(languageLines[i])) lastLangIdx = i;
-  }
-
-  // Les langues réelles
-  const cleanLanguageLines = languageLines.slice(0, lastLangIdx + 1);
-  // Les lignes en trop = bloc profil s'il n'est pas dans unknownLines
-  const overflowLines = languageLines.slice(lastLangIdx + 1);
-
-  // Source du bloc profil : unknownLines si le PDF commence par le contenu
-  // principal, sinon l'overflow extrait des languageLines.
+  // Source du bloc profil : la queue isolée de la section sidebar (cas normal),
+  // ou unknownLines si le PDF commence directement par le contenu principal.
   const profileHeaderLines =
-    unknownLines.length > 0 ? unknownLines : overflowLines;
+    profileBlock.length > 0 ? profileBlock : unknownLines;
 
   const mainInfo = parseMainContent(profileHeaderLines);
   const contacts = parseContacts(contactLines);
@@ -646,6 +718,6 @@ export function parseLinkedInText(rawText: string): LinkedInParseResult {
     experience: parseExperiences(experienceLines),
     education: parseEducation(educationLines),
     skills: parseSkills(skillLines),
-    languages: parseLanguages(cleanLanguageLines),
+    languages: parseLanguages(languageLines),
   };
 }
