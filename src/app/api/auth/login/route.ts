@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import { validationError } from "@/lib/api-response";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { loginSchema } from "@/lib/validations";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { issueSession } from "@/lib/auth";
+
+export async function POST(request: Request) {
+  try {
+    // Throttle by IP: 10 login attempts / 15 min. Blunts brute-force and
+    // credential stuffing without locking out legitimate retries.
+    const rl = checkRateLimit(`login:${getClientIp(request)}`, 10, 15 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez plus tard." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+      );
+    }
+
+    const body = await request.json();
+    const parsed = loginSchema.safeParse(body);
+
+    if (!parsed.success) return validationError(parsed.error);
+
+    const { email, password } = parsed.data;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // Always run bcrypt to prevent timing-based email enumeration
+    const hashToCompare =
+      user?.passwordHash ??
+      "$2a$12$invalidhashfortimingattackprevention000000000000000000000";
+    const passwordValid = await bcrypt.compare(password, hashToCompare);
+
+    if (!user || !passwordValid) {
+      return NextResponse.json(
+        { error: "Email ou mot de passe incorrect" },
+        { status: 401 },
+      );
+    }
+
+    const accessToken = await issueSession(user);
+
+    return NextResponse.json({
+      user: { id: user.id, email: user.email, name: user.name },
+      accessToken,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Erreur interne du serveur" },
+      { status: 500 },
+    );
+  }
+}

@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Runs the postinstall `prisma generate`, producing the gitignored client.
+      - run: npm ci
+
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:run
+      - run: npm run build
+        env:
+          # Build never connects to the DB, but these satisfy module-load reads.
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
+          JWT_SECRET: ci-build-secret
+          JWT_REFRESH_SECRET: ci-build-refresh-secret
+          NEXT_PUBLIC_APP_URL: http://localhost:3000

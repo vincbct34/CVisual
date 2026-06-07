@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  resumes      Resume[]
+  coverLetters CoverLetter[]
+  refreshTokens RefreshToken[]
+  resetTokens  ResetToken[]
+}
+
+model ResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Resume {
+  id        String   @id @default(cuid())
+  title     String   @default("Mon CV")
+  language  String   @default("fr")
+  template  String   @default("classic")
+  style     Json     @default("{}")
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sections Section[]
+
+  // Multi-language: link translations of the same CV
+  parentId     String?
+  parent       Resume?   @relation("ResumeTranslations", fields: [parentId], references: [id], onDelete: SetNull)
+  translations Resume[]  @relation("ResumeTranslations")
+
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Section {
+  id       String @id @default(cuid())
+  type     String // "profile", "experience", "education", "skills", "languages", "projects", "certifications", "interests", "custom"
+  title    String
+  content  Json   @default("{}") // Flexible JSON content per section type
+  order    Int    @default(0)
+  visible  Boolean @default(true)
+
+  resumeId String
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId])
+}
+
+model CoverLetter {
+  id        String   @id @default(cuid())
+  title     String   @default("Ma lettre de motivation")
+  content   Json     @default("{}")
+  style     Json     @default("{}")
+  language  String   @default("fr")
+  resumeId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
