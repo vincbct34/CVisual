@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
@@ -40,13 +41,19 @@ export function DashboardHeader() {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <h1
-          className="text-xl font-extrabold tracking-tight"
-          style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}
+        <Link
+          href="/dashboard"
+          aria-label="Retour au tableau de bord"
+          className="transition-opacity hover:opacity-80"
         >
-          <span className="text-gradient">CV</span>
-          <span style={{ color: "var(--fg)" }}>Maker</span>
-        </h1>
+          <h1
+            className="text-xl font-extrabold tracking-tight"
+            style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}
+          >
+            <span className="text-gradient">CV</span>
+            <span style={{ color: "var(--fg)" }}>Visual</span>
+          </h1>
+        </Link>
 
         <div className="flex items-center gap-2">
           {/* Theme toggle */}

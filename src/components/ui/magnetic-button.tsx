@@ -49,10 +49,13 @@ export function MagneticButton({
     y.set(0);
   }
 
-  // Expand the hit area so the magnet activates slightly before the cursor touches the element
+  // Expand the hit area so the magnet activates slightly before the cursor touches the element.
+  // content-box keeps width:100% (w-full) from absorbing the padding, so the negative margins
+  // stay symmetric and the element isn't shifted off-center.
   const hitStyle = {
     padding,
     margin: -padding,
+    boxSizing: "content-box",
   } as const;
 
   return (

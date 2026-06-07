@@ -50,7 +50,7 @@ export default function RegisterPage() {
           style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}
         >
           <span className="text-gradient">CV</span>
-          <span style={{ color: "var(--fg)" }}>Maker</span>
+          <span style={{ color: "var(--fg)" }}>Visual</span>
         </h1>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           Créez votre compte

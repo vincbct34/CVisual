@@ -25,7 +25,7 @@ export default function HomePage() {
             transition={{ duration: 0.4 }}
           >
             <span className="text-gradient">CV</span>
-            <span style={{ color: "var(--fg)" }}>Maker</span>
+            <span style={{ color: "var(--fg)" }}>Visual</span>
           </motion.h1>
 
           <motion.div

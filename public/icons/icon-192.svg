@@ -1,41 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2563eb"/>
-      <stop offset="100%" stop-color="#1d4ed8"/>
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="50%" stop-color="#a29bfe"/>
+      <stop offset="100%" stop-color="#74b9ff"/>
     </linearGradient>
   </defs>
-  <rect width="192" height="192" rx="34.56" fill="url(#bg)"/>
+  <rect width="192" height="192" rx="43.2" fill="url(#bg)"/>
   <!-- Document shape with folded corner -->
-  <path d="M55.68 33.599999999999994
+  <path d="M55.68 33.6
     H122.88
     L144 54.72
     V150.72
     Q144 158.4 136.32 158.4
     H55.68
     Q48 158.4 48 150.72
-    V41.279999999999994
-    Q48 33.599999999999994 55.68 33.599999999999994Z"
-    fill="white" fill-opacity="0.95"/>
+    V41.28
+    Q48 33.6 55.68 33.6Z"
+    fill="white" fill-opacity="0.97"/>
   <!-- Fold triangle -->
-  <path d="M122.88 33.599999999999994
+  <path d="M122.88 33.6
     V54.72
     H144Z"
     fill="white" fill-opacity="0.6"/>
-  <!-- RF text -->
-  <text x="96" y="99.84"
+  <!-- CV mark -->
+  <text x="96" y="98.4"
     font-family="system-ui, -apple-system, sans-serif"
     font-weight="800"
-    font-size="38.400000000000006"
-    fill="#2563eb"
+    font-size="42"
+    letter-spacing="-2.4"
+    fill="#6c5ce7"
     text-anchor="middle"
-    dominant-baseline="middle">RF</text>
+    dominant-baseline="middle">CV</text>
   <!-- Lines representing text -->
-  <line x1="62.4" y1="130.94400000000002"
-        x2="129.6" y2="130.94400000000002"
-        stroke="#2563eb" stroke-opacity="0.3" stroke-width="2.88" stroke-linecap="round"/>
+  <line x1="62.4" y1="130.944"
+        x2="129.6" y2="130.944"
+        stroke="#6c5ce7" stroke-opacity="0.3" stroke-width="2.88" stroke-linecap="round"/>
   <line x1="62.4" y1="140.928"
         x2="110.4" y2="140.928"
-        stroke="#2563eb" stroke-opacity="0.2" stroke-width="2.88" stroke-linecap="round"/>
+        stroke="#6c5ce7" stroke-opacity="0.2" stroke-width="2.88" stroke-linecap="round"/>
 </svg>

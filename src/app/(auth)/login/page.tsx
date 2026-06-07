@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -39,7 +41,7 @@ export default function LoginPage() {
           style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}
         >
           <span className="text-gradient">CV</span>
-          <span style={{ color: "var(--fg)" }}>Maker</span>
+          <span style={{ color: "var(--fg)" }}>Visual</span>
         </h1>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           Connectez-vous à votre compte
@@ -79,20 +81,40 @@ export default function LoginPage() {
               Mot de passe
             </Label>
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-            style={{
-              background: "var(--input-bg)",
-              border: "1px solid var(--input-border)",
-              color: "var(--fg)",
-            }}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="pr-9"
+              style={{
+                background: "var(--input-bg)",
+                border: "1px solid var(--input-border)",
+                color: "var(--fg)",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={
+                showPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+              className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-80 transition-opacity"
+              style={{ color: "var(--fg-muted)" }}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <MagneticButton className="w-full" strength={0.15} padding={8}>
