@@ -407,7 +407,10 @@ function parseMainContent(lines: string[]): {
     // 4. Lignes URL rattachées au titre (ex: "404factory.vincent-bichat.fr"
     //    ou "Montpellier Portfolio: github.com/…") — redondantes avec website
     if (isUrl) continue;
-    if (/\b(www\.|https?:|portfolio\s*:)/i.test(line) || /\.[a-z]{2,}\//i.test(line))
+    if (
+      /\b(www\.|https?:|portfolio\s*:)/i.test(line) ||
+      /\.[a-z]{2,}\//i.test(line)
+    )
       continue;
 
     // 5. Reste = titre du poste (peut être sur 2 lignes)
@@ -444,7 +447,17 @@ function looksLikeName(line: string): boolean {
   const words = s.split(/\s+/);
   if (words.length < 1 || words.length > 4) return false;
   const particles = new Set([
-    "de", "du", "da", "van", "von", "le", "la", "den", "der", "dos", "das",
+    "de",
+    "du",
+    "da",
+    "van",
+    "von",
+    "le",
+    "la",
+    "den",
+    "der",
+    "dos",
+    "das",
   ]);
   return words.every(
     (w) => particles.has(w.toLowerCase()) || /^[A-ZÀ-Ý]/.test(w),
