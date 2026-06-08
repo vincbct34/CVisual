@@ -42,7 +42,6 @@ export const LEGACY_OPENAI_KEY = "cvmaker_openai_key";
 export const LEGACY_OPENAI_MODEL = "cvmaker_openai_model";
 
 export const DEFAULT_PROVIDER: AIProvider = "gemini";
-export const DEFAULT_MODEL: AIModel = "gemini-2.5-flash";
 
 export const PROVIDER_MODELS: Record<
   AIProvider,

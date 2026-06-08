@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Logo } from "@/components/ui/logo";
 import { AuthCard } from "../auth-card";
 
 export default function RegisterPage() {
@@ -16,7 +17,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -45,13 +46,9 @@ export default function RegisterPage() {
     <AuthCard outerClassName="px-4 py-8">
       {/* Logo */}
       <div className="text-center mb-8">
-        <h1
-          className="text-3xl font-extrabold tracking-tight mb-1"
-          style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}
-        >
-          <span className="text-gradient">CV</span>
-          <span style={{ color: "var(--fg)" }}>Visual</span>
-        </h1>
+        <div className="mb-1 flex justify-center">
+          <Logo href={null} size={32} />
+        </div>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           Créez votre compte
         </p>
@@ -192,7 +189,7 @@ export default function RegisterPage() {
         <Link
           href="/login"
           className="font-semibold hover:opacity-80 transition-opacity"
-          style={{ color: "var(--color-accent-violet)" }}
+          style={{ color: "var(--accent-violet)" }}
         >
           Se connecter
         </Link>

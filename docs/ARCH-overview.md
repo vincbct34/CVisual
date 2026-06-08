@@ -13,7 +13,8 @@ Next.js 16 app (App Router). PostgreSQL via Prisma 7. No external auth provider 
 | AI        | OpenAI / Gemini / Anthropic (user-supplied key, stored in localStorage) |
 | Export    | Puppeteer (PDF + HTML capture), `docx` lib (DOCX), JSON                 |
 | Editor    | Tiptap 3 (rich text), dnd-kit (drag-and-drop sections)                  |
-| UI        | shadcn/ui components + Tailwind 4                                       |
+| UI        | shadcn/ui + Tailwind 4; editorial design system (see ARCH-design.md)    |
+| Design    | Light-only "editorial" theme — OKLCH paper/ink tokens, Newsreader/Schibsted Grotesk/JetBrains Mono |
 | PWA       | Serwist 9 (service worker)                                              |
 
 ## Directory Layout
@@ -41,8 +42,8 @@ src/
     editor/              # section forms, preview, sortable, style panel + style-controls, signature pad, paged preview
     templates/           # 5 CV templates + cover letter template + template-shared / template-utils
     pwa/                 # install prompt
-    ui/                  # shadcn primitives
-    providers.tsx        # AuthProvider + ThemeProvider
+    ui/                  # shadcn primitives + shared bits (logo, file-dropzone, page-loading, motion)
+    providers.tsx        # AuthProvider + ThemeProvider (theme forced light)
   hooks/
     use-auth.tsx           # AuthContext: login/register/logout/authFetch
     use-ai.ts              # AI state: provider, model, key, streaming
@@ -59,6 +60,7 @@ src/
     sanitize.ts          # client DOMPurify wrapper + allowed tags/attrs
     linkedin-parser.ts   # LinkedIn PDF text → structured sections
     utils.ts             # cn, safeFilename, triggerBlobDownload
+    export-download.ts   # downloadExport — shared client export→blob→save (resume + cover letter)
     ai/                  # AI client abstraction (see ARCH-ai.md)
     export/              # PDF + DOCX + HTML + JSON generators + puppeteer-render + strip-html
   types/

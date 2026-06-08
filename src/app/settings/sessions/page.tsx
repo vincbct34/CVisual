@@ -90,7 +90,7 @@ export default function SessionsPage() {
           {sessions.map((s, i) => (
             <div
               key={s.id}
-              className="glass-card flex items-center justify-between p-4 rounded-xl"
+              className="glass-card flex items-center justify-between p-4"
               style={{ cursor: "default" }}
             >
               <div>
@@ -103,8 +103,8 @@ export default function SessionsPage() {
                     <span
                       className="ml-1 text-xs font-semibold px-2 py-0.5 rounded-full"
                       style={{
-                        background: "rgba(162,155,254,0.15)",
-                        color: "var(--accent-violet)",
+                        background: "var(--accent-soft)",
+                        color: "var(--accent-strong)",
                       }}
                     >
                       actuelle
@@ -123,7 +123,7 @@ export default function SessionsPage() {
               </div>
               <button
                 className="btn-danger text-xs"
-                style={{ padding: "0.4rem 0.9rem", borderRadius: "0.6rem" }}
+                style={{ padding: "0.4rem 0.9rem", borderRadius: "var(--radius)" }}
                 disabled={revoking === s.id}
                 onClick={() => revokeSession(s.id)}
               >

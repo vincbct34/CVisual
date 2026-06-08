@@ -10,6 +10,7 @@
 @docs/ARCH-export.md
 @docs/ARCH-templates.md
 @docs/ARCH-editor.md
+@docs/ARCH-design.md
 
 <!-- rtk-instructions v2 -->
 

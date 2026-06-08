@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -54,11 +54,11 @@ export default function ForgotPasswordPage() {
       {isSuccess ? (
         <div className="space-y-5">
           <p
-            className="text-sm text-center rounded-xl p-4"
+            className="text-sm text-center rounded p-4"
             style={{
-              background: "rgba(85, 239, 196, 0.1)",
+              background: "var(--success-soft)",
               color: "var(--accent-mint)",
-              border: "1px solid rgba(85, 239, 196, 0.2)",
+              border: "1px solid var(--success)",
             }}
           >
             Si un compte est associé à <strong>{email}</strong>, un email

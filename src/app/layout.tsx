@@ -1,29 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, Inter, Geist_Mono } from "next/font/google";
+import { Newsreader, Schibsted_Grotesk, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import "./globals.css";
 
-const outfit = Outfit({
+// Editorial type system. CSS var names are kept legacy (--font-outfit = heading
+// slot, --font-inter = body slot, --font-geist-mono = mono) so the whole app
+// inherits the new fonts without per-file churn.
+const newsreader = Newsreader({
   variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "700", "800"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const inter = Inter({
+const schibsted = Schibsted_Grotesk({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
+const jetbrainsMono = JetBrains_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#f7f4ee",
   width: "device-width",
   initialScale: 1,
 };
@@ -76,7 +81,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${outfit.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${schibsted.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

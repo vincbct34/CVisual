@@ -236,10 +236,6 @@ export function getVisibleSections(sections: Section[]): Section[] {
   return sections.filter((s) => s.visible).sort((a, b) => a.order - b.order);
 }
 
-export function getSectionTitle(sections: Section[], type: string): string {
-  return sections.find((s) => s.type === type)?.title ?? "";
-}
-
 export function formatDate(date: string): string {
   if (!date) return "";
   const d = new Date(date);

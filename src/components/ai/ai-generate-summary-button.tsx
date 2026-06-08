@@ -98,11 +98,12 @@ export function AIGenerateSummaryButton({
               ? "Génère un résumé à partir de vos expériences, compétences et formations (remplace le texte actuel). Pour retoucher le texte existant, utilisez « Améliorer »."
               : "Clé API IA non configurée"
           }
-          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 transition-all"
           style={{
-            background: hasKey ? "rgba(162,155,254,0.1)" : "var(--input-bg)",
-            border: `1px solid ${hasKey ? "rgba(162,155,254,0.25)" : "var(--input-border)"}`,
-            color: hasKey ? "var(--accent-violet)" : "var(--fg-muted)",
+            background: hasKey ? "var(--accent-soft)" : "var(--input-bg)",
+            border: `1px solid ${hasKey ? "var(--accent)" : "var(--input-border)"}`,
+            borderRadius: "var(--radius)",
+            color: hasKey ? "var(--accent-strong)" : "var(--fg-muted)",
             opacity: hasKey ? (isLoading ? 0.6 : 1) : 0.45,
             cursor: hasKey ? "pointer" : "not-allowed",
           }}
@@ -122,7 +123,7 @@ export function AIGenerateSummaryButton({
           <div className="flex gap-2">
             <button
               className="btn-gradient text-xs"
-              style={{ padding: "0.3rem 0.75rem", borderRadius: "0.5rem" }}
+              style={{ padding: "0.3rem 0.75rem", borderRadius: "var(--radius)" }}
               onClick={() => {
                 onAccept(result);
                 setResult(null);
@@ -133,7 +134,7 @@ export function AIGenerateSummaryButton({
             </button>
             <button
               className="btn-ghost text-xs"
-              style={{ padding: "0.3rem 0.75rem", borderRadius: "0.5rem" }}
+              style={{ padding: "0.3rem 0.75rem", borderRadius: "var(--radius)" }}
               onClick={() => setResult(null)}
             >
               Annuler

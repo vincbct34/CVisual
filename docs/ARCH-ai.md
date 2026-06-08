@@ -32,7 +32,8 @@ the request and parse responses/stream chunks for its provider; the engine in
 | gemini | gemini-2.5-flash | gemini-2.5-pro |
 | anthropic | claude-3-5-haiku-latest | claude-3-5-sonnet-latest |
 
-Default: `gemini` / `gemini-2.5-flash` (`DEFAULT_PROVIDER` / `DEFAULT_MODEL`).
+Default provider: `gemini` (`DEFAULT_PROVIDER`); the model is derived per provider
+from `PROVIDER_MODELS` (fast/powerful) via `useAI`'s `getFastModel` / `getPowerfulModel`.
 
 ## localStorage Keys
 
@@ -57,8 +58,11 @@ French, output in the resume's `language`).
 | `generateSummaryPrompt(resumeData)`                     | Generate profile summary       | HTML `<p>`            |
 | `translateContentPrompt(json, from, to)`                | Translate section content      | JSON (same shape)     |
 | `atsScorePrompt(resumeData)`                            | Score CV vs a job description  | JSON (score + advice) |
-| `linkedinImportPrompt(text)`                            | Structure raw LinkedIn text    | JSON (sections)       |
 | `generateCoverLetterPrompt(resumeData)`                 | Generate cover letter body     | HTML `<p>` tags       |
+
+> LinkedIn import does **not** use the AI: the PDF is parsed server-side
+> (`/api/cv/parse-linkedin-pdf` → `lib/linkedin-parser.ts`) into structured
+> sections — no API key required.
 
 JSON-returning prompts are parsed via `parseJsonResponse` (`json.ts`), which strips
 code fences / prose around the JSON before `JSON.parse`.
@@ -79,7 +83,7 @@ and `hasKey` / `isConfigured` flags.
 | `ai-generate-summary-button.tsx` | Generate profile summary from CV data                                                        |
 | `ai-cover-letter-dialog.tsx`     | Dialog: pick a CV + paste job description → full cover letter                                |
 | `ai-ats-score-button.tsx`        | Score the CV against a job description (returns JSON advice)                                 |
-| `ai-linkedin-import-dialog.tsx`  | Paste LinkedIn text → structured sections                                                    |
+| `ai-linkedin-import-dialog.tsx`  | Upload a LinkedIn PDF → structured sections (server-side parse, **no AI**)                    |
 | `ai-setup-banner.tsx`            | Banner shown when no key is configured                                                       |
 | `ai-shared.tsx`                  | Shared `SparklesIcon` + `notifyAINotConfigured` toast helper                                 |
 

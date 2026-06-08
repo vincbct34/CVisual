@@ -3,14 +3,12 @@
 import { motion } from "framer-motion";
 import type { CSSProperties, ReactNode } from "react";
 
-// Shared glass card chrome for the auth screens (login / register / forgot /
-// reset). Each page supplies only its own header + form as children.
+// Shared editorial card chrome for the auth screens (login / register / forgot /
+// reset). Flat paper, hairline ink border, hard offset shadow.
 const cardStyle: CSSProperties = {
   background: "var(--card-bg)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid var(--card-border)",
-  boxShadow: "0 8px 32px 0 var(--card-shadow)",
+  border: "1px solid var(--ink)",
+  boxShadow: "10px 12px 0 -2px var(--paper), 10px 12px 0 0 var(--ink)",
 };
 
 export function AuthCard({
@@ -24,7 +22,7 @@ export function AuthCard({
   /** Extra classes on the full-screen centering wrapper (e.g. vertical padding). */
   outerClassName?: string;
 }) {
-  const cardClassName = "w-full max-w-md rounded-2xl p-8 relative z-10";
+  const cardClassName = "w-full max-w-md rounded-md p-8 relative z-10";
   return (
     <div
       className={`flex min-h-screen items-center justify-center ${outerClassName}`}

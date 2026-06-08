@@ -44,7 +44,8 @@ import {
 } from "@/types/cover-letter";
 import { useResizablePanels } from "@/hooks/use-resizable-panels";
 import { useDebouncedAutosave } from "@/hooks/use-debounced-autosave";
-import { triggerBlobDownload } from "@/lib/utils";
+import { downloadExport } from "@/lib/export-download";
+import { PageLoading } from "@/components/ui/page-loading";
 
 /** Compose the French date line: "Paris, le 6 juin 2026" / "Le 6 juin 2026". */
 function composeLetterDate(city: string, iso: string): string {
@@ -170,17 +171,13 @@ export default function CoverLetterEditorPage({
 
   async function handleExport(format: string) {
     try {
-      const res = await authFetch(
-        `/api/cover-letters/${id}/export?format=${format}`,
+      await downloadExport(
+        authFetch,
+        `/api/cover-letters/${id}/export`,
+        format,
+        letter?.title ?? "",
+        "lettre",
       );
-      if (!res.ok) {
-        toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
-        return;
-      }
-      const blob = await res.blob();
-      const ext =
-        format === "pdf" ? "pdf" : format === "docx" ? "docx" : "html";
-      triggerBlobDownload(blob, `${letter?.title ?? "lettre"}.${ext}`);
       toast.success(`${format.toUpperCase()} téléchargé !`);
     } catch {
       toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
@@ -189,12 +186,7 @@ export default function CoverLetterEditorPage({
 
   if (authLoading || isLoading || !letter) {
     return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{ background: "var(--bg)" }}
-      >
-        <p style={{ color: "var(--fg-muted)" }}>Chargement...</p>
-      </div>
+      <PageLoading />
     );
   }
 

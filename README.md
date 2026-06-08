@@ -11,8 +11,9 @@ French UI throughout.
 ## Stack
 
 Next.js 16 (App Router, React 19) · PostgreSQL + Prisma 7 · custom JWT auth
-(`jose`, bcrypt) · Tiptap 3 + dnd-kit editor · shadcn/ui + Tailwind 4 · Puppeteer
-and `docx` export · Serwist 9 PWA. See [`docs/ARCH-overview.md`](docs/ARCH-overview.md).
+(`jose`, bcrypt) · Tiptap 3 + dnd-kit editor · shadcn/ui + Tailwind 4 with a
+light-only editorial design system · Puppeteer and `docx` export · Serwist 9 PWA.
+See [`docs/ARCH-overview.md`](docs/ARCH-overview.md).
 
 ## Quick Start
 
@@ -70,7 +71,7 @@ Per-area docs live in [`docs/`](docs/) and are loaded as context for AI agents
 
 - [Overview](docs/ARCH-overview.md) · [Auth](docs/ARCH-auth.md) · [Data model](docs/ARCH-data.md)
 - [API routes](docs/ARCH-api.md) · [AI](docs/ARCH-ai.md) · [Export](docs/ARCH-export.md)
-- [Templates](docs/ARCH-templates.md) · [Editor](docs/ARCH-editor.md)
+- [Templates](docs/ARCH-templates.md) · [Editor](docs/ARCH-editor.md) · [Design](docs/ARCH-design.md)
 
 ## Deployment
 

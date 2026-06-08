@@ -30,11 +30,11 @@ const JsonImportDialog = dynamic(
   { ssr: false },
 );
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MagneticButton } from "@/components/ui/magnetic-button";
 import { FadeUp, StaggerList, StaggerItem } from "@/components/ui/motion";
 import { useAI } from "@/hooks/use-ai";
 import { toast } from "sonner";
 import { AISettingsDialog } from "@/components/ai/ai-settings-dialog";
+import { PageLoading } from "@/components/ui/page-loading";
 
 interface Resume {
   id: string;
@@ -140,29 +140,8 @@ export default function DashboardPage() {
     setCoverLetters((prev) => prev.filter((cl) => cl.id !== id));
   }
 
-  const ghostBtnStyle = {
-    background: "var(--card-bg)",
-    backdropFilter: "blur(12px)" as const,
-    WebkitBackdropFilter: "blur(12px)" as const,
-    border: "1px solid var(--card-border)",
-    color: "var(--fg)",
-    borderRadius: "0.75rem",
-    padding: "0.5rem 1rem",
-    fontSize: "0.875rem",
-    fontWeight: 600,
-    cursor: "pointer",
-    transition: "opacity 0.2s, transform 0.2s",
-  };
-
   if (authLoading || isLoading) {
-    return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{ background: "var(--bg)" }}
-      >
-        <p style={{ color: "var(--fg-muted)" }}>Chargement...</p>
-      </div>
-    );
+    return <PageLoading />;
   }
 
   return (
@@ -191,7 +170,7 @@ export default function DashboardPage() {
                   className="text-2xl font-extrabold tracking-tight"
                   style={{
                     color: "var(--fg)",
-                    fontFamily: "var(--font-outfit), Outfit, sans-serif",
+                    fontFamily: "var(--serif)",
                   }}
                 >
                   Mes CV
@@ -203,37 +182,30 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <MagneticButton strength={0.2} padding={10}>
-                  <button
-                    style={ghostBtnStyle}
-                    onClick={() => setShowLinkedInImport(true)}
-                  >
-                    Importer LinkedIn
-                  </button>
-                </MagneticButton>
-                <MagneticButton strength={0.2} padding={10}>
-                  <button
-                    style={ghostBtnStyle}
-                    onClick={() => setShowJsonImport(true)}
-                  >
-                    Importer JSON
-                  </button>
-                </MagneticButton>
-                <MagneticButton strength={0.2} padding={10}>
-                  <button
-                    className="btn-gradient"
-                    style={{
-                      borderRadius: "0.75rem",
-                      padding: "0.5rem 1rem",
-                      fontSize: "0.875rem",
-                      opacity: isCreating ? 0.7 : 1,
-                    }}
-                    onClick={handleCreateResume}
-                    disabled={isCreating}
-                  >
-                    {isCreating ? "Création..." : "Nouveau CV"}
-                  </button>
-                </MagneticButton>
+                <button
+                  className="btn-chip"
+                  onClick={() => setShowLinkedInImport(true)}
+                >
+                  Importer LinkedIn
+                </button>
+                <button
+                  className="btn-chip"
+                  onClick={() => setShowJsonImport(true)}
+                >
+                  Importer JSON
+                </button>
+                <button
+                  className="btn-gradient"
+                  style={{
+                    padding: "0.5rem 1rem",
+                    fontSize: "0.875rem",
+                    opacity: isCreating ? 0.7 : 1,
+                  }}
+                  onClick={handleCreateResume}
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Création..." : "Nouveau CV"}
+                </button>
               </div>
             </div>
 
@@ -245,20 +217,17 @@ export default function DashboardPage() {
                 >
                   Créez votre premier CV professionnel
                 </p>
-                <MagneticButton>
-                  <button
-                    className="btn-gradient"
-                    style={{
-                      borderRadius: "1rem",
-                      padding: "0.875rem 2rem",
-                      opacity: isCreating ? 0.7 : 1,
-                    }}
-                    onClick={handleCreateResume}
-                    disabled={isCreating}
-                  >
-                    {isCreating ? "Création..." : "Créer un CV"}
-                  </button>
-                </MagneticButton>
+                <button
+                  className="btn-gradient"
+                  style={{
+                    padding: "0.875rem 2rem",
+                    opacity: isCreating ? 0.7 : 1,
+                  }}
+                  onClick={handleCreateResume}
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Création..." : "Créer un CV"}
+                </button>
               </FadeUp>
             ) : (
               <StaggerList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -282,7 +251,7 @@ export default function DashboardPage() {
                   className="text-2xl font-extrabold tracking-tight"
                   style={{
                     color: "var(--fg)",
-                    fontFamily: "var(--font-outfit), Outfit, sans-serif",
+                    fontFamily: "var(--serif)",
                   }}
                 >
                   Mes lettres de motivation
@@ -294,48 +263,43 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <MagneticButton strength={0.2} padding={10}>
-                  <button
-                    style={{
-                      ...ghostBtnStyle,
-                      color: hasKey ? "var(--fg)" : "var(--fg-muted)",
-                      opacity: hasKey ? 1 : 0.45,
-                      cursor: hasKey ? "pointer" : "not-allowed",
-                    }}
-                    title={hasKey ? undefined : "Clé API IA non configurée"}
-                    onClick={() => {
-                      if (!hasKey) {
-                        toast.warning("Fonctionnalité IA non configurée", {
-                          description:
-                            "Ajoutez une clé API dans vos paramètres pour générer une lettre de motivation.",
-                          action: {
-                            label: "Configurer",
-                            onClick: () => setShowAISettings(true),
-                          },
-                        });
-                        return;
-                      }
-                      setShowAICoverLetter(true);
-                    }}
-                  >
-                    ✦ Générer avec l&apos;IA
-                  </button>
-                </MagneticButton>
-                <MagneticButton strength={0.2} padding={10}>
-                  <button
-                    className="btn-gradient"
-                    style={{
-                      borderRadius: "0.75rem",
-                      padding: "0.5rem 1rem",
-                      fontSize: "0.875rem",
-                      opacity: isCreating ? 0.7 : 1,
-                    }}
-                    onClick={handleCreateCoverLetter}
-                    disabled={isCreating}
-                  >
-                    {isCreating ? "Création..." : "Nouvelle lettre"}
-                  </button>
-                </MagneticButton>
+                <button
+                  className="btn-chip"
+                  style={{
+                    color: hasKey ? "var(--ink)" : "var(--fg-muted)",
+                    opacity: hasKey ? 1 : 0.45,
+                    cursor: hasKey ? "pointer" : "not-allowed",
+                  }}
+                  title={hasKey ? undefined : "Clé API IA non configurée"}
+                  onClick={() => {
+                    if (!hasKey) {
+                      toast.warning("Fonctionnalité IA non configurée", {
+                        description:
+                          "Ajoutez une clé API dans vos paramètres pour générer une lettre de motivation.",
+                        action: {
+                          label: "Configurer",
+                          onClick: () => setShowAISettings(true),
+                        },
+                      });
+                      return;
+                    }
+                    setShowAICoverLetter(true);
+                  }}
+                >
+                  ✦ Générer avec l&apos;IA
+                </button>
+                <button
+                  className="btn-gradient"
+                  style={{
+                    padding: "0.5rem 1rem",
+                    fontSize: "0.875rem",
+                    opacity: isCreating ? 0.7 : 1,
+                  }}
+                  onClick={handleCreateCoverLetter}
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Création..." : "Nouvelle lettre"}
+                </button>
               </div>
             </div>
 
@@ -347,20 +311,17 @@ export default function DashboardPage() {
                 >
                   Créez votre première lettre de motivation
                 </p>
-                <MagneticButton>
-                  <button
-                    className="btn-gradient"
-                    style={{
-                      borderRadius: "1rem",
-                      padding: "0.875rem 2rem",
-                      opacity: isCreating ? 0.7 : 1,
-                    }}
-                    onClick={handleCreateCoverLetter}
-                    disabled={isCreating}
-                  >
-                    {isCreating ? "Création..." : "Créer une lettre"}
-                  </button>
-                </MagneticButton>
+                <button
+                  className="btn-gradient"
+                  style={{
+                    padding: "0.875rem 2rem",
+                    opacity: isCreating ? 0.7 : 1,
+                  }}
+                  onClick={handleCreateCoverLetter}
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Création..." : "Créer une lettre"}
+                </button>
               </FadeUp>
             ) : (
               <StaggerList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

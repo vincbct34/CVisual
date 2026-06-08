@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { MagneticButton } from "@/components/ui/magnetic-button";
 import { AnimatedCard } from "@/components/ui/motion";
 import {
   DropdownMenu,
@@ -11,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { triggerBlobDownload } from "@/lib/utils";
+import { downloadExport } from "@/lib/export-download";
 
 interface CoverLetterCardProps {
   coverLetter: {
@@ -59,17 +58,13 @@ export function CoverLetterCard({
 
   async function handleExport(format: string) {
     try {
-      const res = await authFetch(
-        `/api/cover-letters/${coverLetter.id}/export?format=${format}`,
+      await downloadExport(
+        authFetch,
+        `/api/cover-letters/${coverLetter.id}/export`,
+        format,
+        coverLetter.title,
+        "lettre",
       );
-      if (!res.ok) {
-        toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
-        return;
-      }
-      const blob = await res.blob();
-      const ext =
-        format === "pdf" ? "pdf" : format === "docx" ? "docx" : "html";
-      triggerBlobDownload(blob, `${coverLetter.title}.${ext}`);
       toast.success(`${format.toUpperCase()} téléchargé !`);
     } catch {
       toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
@@ -100,21 +95,13 @@ export function CoverLetterCard({
           className="text-base font-bold line-clamp-1 flex-1 mr-2"
           style={{
             color: "var(--fg)",
-            fontFamily: "var(--font-outfit), Outfit, sans-serif",
+            fontFamily: "var(--serif)",
           }}
         >
           {coverLetter.title}
         </h3>
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="h-8 w-8 p-0 inline-flex items-center justify-center rounded-xl transition-all hover:scale-105 cursor-pointer"
-            style={{
-              background: "var(--input-bg)",
-              border: "1px solid var(--input-border)",
-              color: "var(--fg-muted)",
-            }}
-            aria-label="Actions"
-          >
+          <DropdownMenuTrigger className="icon-btn" aria-label="Actions">
             ···
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -146,14 +133,7 @@ export function CoverLetterCard({
       </div>
 
       <div>
-        <span
-          className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-          style={{
-            background: "rgba(116, 185, 255, 0.12)",
-            color: "var(--accent-blue)",
-            border: "1px solid rgba(116, 185, 255, 0.2)",
-          }}
-        >
+        <span className="ed-tag ed-tag-accent">
           {coverLetter.language.toUpperCase()}
         </span>
       </div>
@@ -163,15 +143,13 @@ export function CoverLetterCard({
           Modifié le{" "}
           {new Date(coverLetter.updatedAt).toLocaleDateString("fr-FR")}
         </span>
-        <MagneticButton strength={0.25} padding={12}>
-          <button
-            className="btn-gradient text-xs"
-            style={{ borderRadius: "0.75rem", padding: "0.5rem 1rem" }}
-            onClick={() => router.push(`/cover-letter/${coverLetter.id}`)}
-          >
-            Éditer
-          </button>
-        </MagneticButton>
+        <button
+          className="btn-gradient text-xs"
+          style={{ padding: "0.5rem 1rem" }}
+          onClick={() => router.push(`/cover-letter/${coverLetter.id}`)}
+        >
+          Éditer
+        </button>
       </div>
     </AnimatedCard>
   );

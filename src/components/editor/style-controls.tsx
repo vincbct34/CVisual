@@ -43,7 +43,7 @@ export function ColorPresetPicker<T extends { primaryColor: string }>({
             style={{
               backgroundColor: preset.primary,
               borderColor:
-                style.primaryColor === preset.primary ? "#000" : "transparent",
+                style.primaryColor === preset.primary ? "var(--ink)" : "transparent",
             }}
           />
           <span className="text-[10px] text-muted-foreground">
@@ -60,7 +60,7 @@ export function ColorPresetPicker<T extends { primaryColor: string }>({
             background: isCustom
               ? style.primaryColor
               : "conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
-            borderColor: isCustom ? "#000" : "transparent",
+            borderColor: isCustom ? "var(--ink)" : "transparent",
           }}
         />
         <span className="text-[10px] text-muted-foreground">Perso</span>

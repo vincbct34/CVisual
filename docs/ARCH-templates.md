@@ -47,7 +47,9 @@ Templates read sections, filter by `visible`, sort by `order`, and render.
   for the render/export target.
 - **`page-background.ts`** — sidebar page-background + top-margin helpers
   (`sidebarPageBackground`, `pageTopMarginMm`, `PAGE_TOP_MARGIN_MM`).
-- **`ui/safe-html.tsx`** (`SafeHtml`) — renders sanitized Tiptap HTML.
+
+Sanitized Tiptap HTML is rendered through `RichText` (in `template-shared.tsx`),
+which wraps the isomorphic `sanitize` helper from `template-utils.ts`.
 
 ## Template Conventions
 
@@ -57,7 +59,7 @@ Each template:
   `headingScale`/`metaScale`/`photoShape`/`photoSize`/`sidebarSections`).
 - Uses `template-shared` + `template-utils` for content + helpers (no per-template
   duplication of section rendering).
-- Renders sanitized rich text via `RichText` / `SafeHtml`.
+- Renders sanitized rich text via `RichText`.
 - Renders at A4 proportions for PDF accuracy. Print CSS via Tailwind + inline styles.
 
 ## Cover Letter Template (`src/components/templates/cover-letter-template.tsx`)

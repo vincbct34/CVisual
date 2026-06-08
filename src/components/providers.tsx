@@ -5,12 +5,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange={false}
-    >
+    <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false}>
       <AuthProvider>{children}</AuthProvider>
     </ThemeProvider>
   );

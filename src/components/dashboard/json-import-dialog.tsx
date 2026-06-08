@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MagneticButton } from "@/components/ui/magnetic-button";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 
 interface Props {
   open: boolean;
@@ -84,8 +84,6 @@ const SECTION_TYPES = [
 export function JsonImportDialog({ open, onOpenChange }: Props) {
   const { authFetch } = useAuth();
   const router = useRouter();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showSchema, setShowSchema] = useState(false);
 
@@ -115,20 +113,7 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
       toast.error("Fichier JSON invalide ou mal formaté");
     } finally {
       setIsImporting(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) processFile(file);
   }
 
   return (
@@ -140,97 +125,25 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
 
         <div className="space-y-4 py-2">
           {/* Zone drag & drop */}
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-            onClick={() => fileRef.current?.click()}
-            className="cursor-pointer rounded-xl p-8 text-center transition-all"
-            style={{
-              border: `2px dashed ${isDragging ? "var(--accent-violet)" : "var(--input-border)"}`,
-              background: isDragging
-                ? "rgba(162,155,254,0.06)"
-                : "var(--input-bg)",
-            }}
-          >
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            {isImporting ? (
-              <div className="flex flex-col items-center gap-2">
-                <svg
-                  className="animate-spin w-6 h-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ color: "var(--accent-violet)" }}
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8z"
-                  />
-                </svg>
-                <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
-                  Import en cours…
-                </p>
-              </div>
-            ) : (
-              <>
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  className="mx-auto mb-3"
-                  style={{ color: "var(--fg-muted)" }}
-                >
-                  <path
-                    d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <p
-                  className="text-sm font-semibold mb-1"
-                  style={{ color: "var(--fg)" }}
-                >
-                  Déposez votre fichier .json ici
-                </p>
-                <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-                  ou cliquez pour choisir un fichier
-                </p>
-              </>
-            )}
-          </div>
+          <FileDropzone
+            accept=".json"
+            onFile={processFile}
+            loading={isImporting}
+            loadingTitle="Import en cours…"
+            idleTitle="Déposez votre fichier .json ici"
+          />
 
           {/* Info sur la source */}
           <div
-            className="rounded-xl p-3 text-sm"
+            className="rounded p-3 text-sm"
             style={{
-              background: "rgba(162,155,254,0.07)",
-              border: "1px solid rgba(162,155,254,0.18)",
+              background: "var(--accent-soft)",
+              border: "1px solid var(--accent)",
             }}
           >
             <p
               className="font-semibold mb-0.5"
-              style={{ color: "var(--accent-violet)" }}
+              style={{ color: "var(--accent-strong)" }}
             >
               Format attendu
             </p>
@@ -278,12 +191,12 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
               <div className="space-y-3">
                 {/* Exemple JSON */}
                 <pre
-                  className="rounded-xl p-3 text-xs overflow-auto"
+                  className="rounded p-3 text-xs overflow-auto"
                   style={{
                     background: "var(--input-bg)",
                     border: "1px solid var(--input-border)",
                     color: "var(--fg)",
-                    fontFamily: "var(--font-geist-mono), monospace",
+                    fontFamily: "var(--mono)",
                     maxHeight: "200px",
                     whiteSpace: "pre",
                   }}
@@ -293,7 +206,7 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
 
                 {/* Tableau des types de sections */}
                 <div
-                  className="rounded-xl overflow-hidden"
+                  className="rounded overflow-hidden"
                   style={{ border: "1px solid var(--input-border)" }}
                 >
                   <div
@@ -341,25 +254,13 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-1">
-            <MagneticButton strength={0.2} padding={8}>
-              <button
-                className="btn-ghost"
-                style={{ padding: "0.5rem 1.1rem", fontSize: "0.875rem" }}
-                onClick={() => onOpenChange(false)}
-              >
-                Annuler
-              </button>
-            </MagneticButton>
-            <MagneticButton strength={0.2} padding={8}>
-              <button
-                className="btn-gradient"
-                style={{ padding: "0.5rem 1.1rem", fontSize: "0.875rem" }}
-                onClick={() => fileRef.current?.click()}
-                disabled={isImporting}
-              >
-                Choisir un fichier
-              </button>
-            </MagneticButton>
+            <button
+              className="btn-ghost"
+              style={{ padding: "0.5rem 1.1rem", fontSize: "0.875rem" }}
+              onClick={() => onOpenChange(false)}
+            >
+              Fermer
+            </button>
           </div>
         </div>
       </DialogContent>

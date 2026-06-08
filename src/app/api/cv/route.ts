@@ -3,6 +3,7 @@ import { validationError } from "@/lib/api-response";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { createResumeSchema } from "@/lib/validations";
+import { DEFAULT_STYLE } from "@/types/resume";
 
 // GET /api/cv — List all resumes for the authenticated user
 export async function GET(request: Request) {
@@ -32,11 +33,7 @@ export async function POST(request: Request) {
     data: {
       ...parsed.data,
       userId: auth.userId,
-      style: {
-        primaryColor: "#2563eb",
-        fontFamily: "Inter",
-        fontSize: 14,
-      },
+      style: { ...DEFAULT_STYLE },
       sections: {
         create: [
           {

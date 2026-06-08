@@ -14,7 +14,7 @@ function ResetPasswordForm({ token }: { token: string }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
@@ -94,11 +94,11 @@ function ResetPasswordContent({
     return (
       <div className="space-y-4">
         <p
-          className="text-sm text-center rounded-xl p-4"
+          className="text-sm text-center rounded p-4"
           style={{
-            background: "rgba(239, 68, 68, 0.1)",
+            background: "var(--destructive-soft)",
             color: "var(--destructive)",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
+            border: "1px solid var(--destructive)",
           }}
         >
           Lien de réinitialisation invalide ou manquant.

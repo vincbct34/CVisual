@@ -18,10 +18,11 @@ export function AISetupBanner() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full text-left rounded-xl px-3 py-2.5 flex items-center gap-2.5 transition-opacity hover:opacity-80 cursor-pointer"
+        className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-opacity hover:opacity-80 cursor-pointer"
         style={{
-          background: "rgba(162,155,254,0.08)",
-          border: "1px solid rgba(162,155,254,0.2)",
+          background: "var(--accent-soft)",
+          border: "1px solid var(--accent)",
+          borderRadius: "var(--radius)",
         }}
       >
         <span style={{ fontSize: "15px", flexShrink: 0 }}>✦</span>

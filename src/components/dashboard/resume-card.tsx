@@ -6,8 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
 import { translateSections } from "@/lib/ai/translate";
 import { AISettingsDialog } from "@/components/ai/ai-settings-dialog";
-import { MagneticButton } from "@/components/ui/magnetic-button";
 import { AnimatedCard } from "@/components/ui/motion";
+import { TEMPLATES } from "@/components/templates";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,14 +48,6 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationProgress, setTranslationProgress] = useState("");
   const [showSettings, setShowSettings] = useState(false);
-
-  const templateLabels: Record<string, string> = {
-    classic: "Classique",
-    modern: "Moderne",
-    minimal: "Minimal",
-    creative: "Créatif",
-    professional: "Professionnel",
-  };
 
   async function handleDuplicate() {
     try {
@@ -171,22 +163,13 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
             className="text-base font-bold line-clamp-1 flex-1 mr-2"
             style={{
               color: "var(--fg)",
-              fontFamily: "var(--font-outfit), Outfit, sans-serif",
+              fontFamily: "var(--serif)",
             }}
           >
             {resume.title}
           </h3>
           <DropdownMenu>
-            <DropdownMenuTrigger
-              className="h-8 w-8 p-0 inline-flex items-center justify-center rounded-xl transition-all hover:scale-105 cursor-pointer"
-              style={{
-                background: "var(--input-bg)",
-                border: "1px solid var(--input-border)",
-                color: "var(--fg-muted)",
-              }}
-            >
-              ···
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger className="icon-btn">···</DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => router.push(`/editor/${resume.id}`)}
@@ -228,26 +211,10 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
         </div>
 
         <div className="flex gap-2 flex-wrap">
-          <span
-            className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-            style={{
-              background: "rgba(162, 155, 254, 0.12)",
-              color: "var(--accent-violet)",
-              border: "1px solid rgba(162, 155, 254, 0.2)",
-            }}
-          >
-            {templateLabels[resume.template] || resume.template}
+          <span className="ed-tag ed-tag-accent">
+            {TEMPLATES[resume.template]?.name ?? resume.template}
           </span>
-          <span
-            className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-            style={{
-              background: "var(--input-bg)",
-              color: "var(--fg-muted)",
-              border: "1px solid var(--input-border)",
-            }}
-          >
-            {resume.language.toUpperCase()}
-          </span>
+          <span className="ed-tag">{resume.language.toUpperCase()}</span>
         </div>
 
         {isTranslating && (
@@ -263,15 +230,13 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
           <span className="text-xs" style={{ color: "var(--fg-muted)" }}>
             Modifié le {new Date(resume.updatedAt).toLocaleDateString("fr-FR")}
           </span>
-          <MagneticButton strength={0.25} padding={12}>
-            <button
-              className="btn-gradient text-xs"
-              style={{ borderRadius: "0.75rem", padding: "0.5rem 1rem" }}
-              onClick={() => router.push(`/editor/${resume.id}`)}
-            >
-              Éditer
-            </button>
-          </MagneticButton>
+          <button
+            className="btn-gradient text-xs"
+            style={{ padding: "0.5rem 1rem" }}
+            onClick={() => router.push(`/editor/${resume.id}`)}
+          >
+            Éditer
+          </button>
         </div>
       </AnimatedCard>
 

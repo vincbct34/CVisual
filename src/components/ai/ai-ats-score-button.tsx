@@ -105,14 +105,12 @@ export function AIAtsScoreButton({ resume }: Props) {
             ? "Analyser la compatibilité ATS"
             : "Clé API IA non configurée"
         }
-        className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 transition-all"
         style={{
-          background: isConfigured
-            ? "rgba(162,155,254,0.1)"
-            : "var(--input-bg)",
-          border: `1px solid ${isConfigured ? "rgba(162,155,254,0.25)" : "var(--card-border)"}`,
-          color: isConfigured ? "var(--accent-violet)" : "var(--fg-muted)",
-          backdropFilter: "blur(8px)",
+          background: isConfigured ? "var(--accent-soft)" : "var(--input-bg)",
+          border: `1px solid ${isConfigured ? "var(--accent)" : "var(--card-border)"}`,
+          borderRadius: "var(--radius)",
+          color: isConfigured ? "var(--accent-strong)" : "var(--fg-muted)",
           opacity: isConfigured ? 1 : 0.45,
           cursor: isConfigured ? "pointer" : "not-allowed",
         }}
@@ -182,7 +180,7 @@ export function AIAtsScoreButton({ resume }: Props) {
                 <div>
                   <p
                     className="text-sm font-semibold mb-1"
-                    style={{ color: "#22c55e" }}
+                    style={{ color: "var(--success)" }}
                   >
                     Points forts
                   </p>
@@ -204,7 +202,7 @@ export function AIAtsScoreButton({ resume }: Props) {
                 <div>
                   <p
                     className="text-sm font-semibold mb-1"
-                    style={{ color: "#ca8a04" }}
+                    style={{ color: "var(--warning)" }}
                   >
                     Améliorations
                   </p>

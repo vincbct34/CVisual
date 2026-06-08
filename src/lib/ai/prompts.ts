@@ -131,64 +131,6 @@ Retourne UNIQUEMENT ce JSON (pas de backticks, pas d'explication) :
 }
 
 /**
- * Prompt to parse pasted LinkedIn profile text into structured CV sections.
- * Returns JSON matching the resume section format.
- */
-export function linkedinImportPrompt(text: string): ChatMessage[] {
-  return [
-    {
-      role: "system",
-      content: `Tu es un expert en CV. À partir du texte d'un profil LinkedIn (extrait d'un PDF ou copié), extrait les informations et retourne UNIQUEMENT ce JSON valide (sans backticks, sans commentaire, sans explication) :
-
-{
-  "profile": {
-    "fullName": "",
-    "jobTitle": "",
-    "summary": "",
-    "email": "",
-    "phone": "",
-    "location": "",
-    "website": ""
-  },
-  "experience": [{
-    "id": "1",
-    "company": "",
-    "position": "",
-    "startDate": "",
-    "endDate": "",
-    "current": false,
-    "description": ""
-  }],
-  "education": [{
-    "id": "1",
-    "institution": "",
-    "degree": "",
-    "field": "",
-    "startDate": "",
-    "endDate": "",
-    "description": ""
-  }],
-  "skills": [{ "id": "1", "name": "", "level": 3 }],
-  "languages": [{ "id": "1", "name": "", "level": "Courant" }]
-}
-
-Règles strictes :
-- IDs : chaînes incrémentales ("1", "2", "3"…)
-- Dates : format "YYYY-MM" (ex: "2024-07"). Si seul l'année est connue, utilise "YYYY-01". Jamais de texte libre dans les dates.
-- current : true si le poste est encore en cours (endDate vide ou "Present")
-- description : convertis les listes à tirets en HTML <ul><li>…</li></ul>. Un paragraphe devient <p>…</p>. Ne laisse jamais de tirets en début de ligne.
-- Niveaux de compétence : entier 1 (débutant) à 5 (expert) — estime d'après le contexte
-- Niveaux de langue : "Natif" | "Courant" | "Intermédiaire" | "Débutant"
-  Mapping LinkedIn → CVisual : "Native or Bilingual" → "Natif", "Full Professional" | "Professional Working" → "Courant", "Limited Working" → "Intermédiaire", "Elementary" → "Débutant"
-- website : privilégie le portfolio personnel plutôt que LinkedIn
-- Si une section est absente du profil, retourne un tableau vide []
-- Champs inconnus : chaîne vide ""`,
-    },
-    { role: "user", content: text },
-  ];
-}
-
-/**
  * Prompt to generate a cover letter.
  */
 export function generateCoverLetterPrompt(resumeData: {

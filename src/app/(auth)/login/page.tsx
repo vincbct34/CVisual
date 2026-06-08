@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { MagneticButton } from "@/components/ui/magnetic-button";
+import { Logo } from "@/components/ui/logo";
 import { AuthCard } from "../auth-card";
 
 export default function LoginPage() {
@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -36,13 +36,9 @@ export default function LoginPage() {
     <AuthCard animated>
       {/* Logo */}
       <div className="text-center mb-8">
-        <h1
-          className="text-3xl font-extrabold tracking-tight mb-1"
-          style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}
-        >
-          <span className="text-gradient">CV</span>
-          <span style={{ color: "var(--fg)" }}>Visual</span>
-        </h1>
+        <div className="mb-1 flex justify-center">
+          <Logo href={null} size={32} />
+        </div>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           Connectez-vous à votre compte
         </p>
@@ -117,41 +113,39 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <MagneticButton className="w-full" strength={0.15} padding={8}>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full btn-gradient mt-2"
-            style={{ opacity: isSubmitting ? 0.7 : 1 }}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg
-                  className="animate-spin w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8z"
-                  />
-                </svg>
-                Connexion...
-              </span>
-            ) : (
-              "Se connecter"
-            )}
-          </button>
-        </MagneticButton>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full btn-gradient mt-2"
+          style={{ opacity: isSubmitting ? 0.7 : 1 }}
+        >
+          {isSubmitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg
+                className="animate-spin w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"
+                />
+              </svg>
+              Connexion...
+            </span>
+          ) : (
+            "Se connecter"
+          )}
+        </button>
       </form>
 
       <p

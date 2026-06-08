@@ -62,7 +62,7 @@ export function InstallPrompt() {
           className="btn-gradient mt-2 text-xs"
           style={{
             padding: "0.4rem 0.85rem",
-            borderRadius: "0.5rem",
+            borderRadius: "var(--radius)",
             gap: "0.35rem",
           }}
         >

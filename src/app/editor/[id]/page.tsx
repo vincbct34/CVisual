@@ -45,7 +45,8 @@ import { SECTION_TYPES } from "@/types/resume";
 import { useCompletenessScore } from "@/hooks/use-completeness";
 import { useResizablePanels } from "@/hooks/use-resizable-panels";
 import { useDebouncedAutosave } from "@/hooks/use-debounced-autosave";
-import { triggerBlobDownload } from "@/lib/utils";
+import { downloadExport } from "@/lib/export-download";
+import { PageLoading } from "@/components/ui/page-loading";
 
 const AIAtsScoreButton = dynamic(
   () =>
@@ -335,22 +336,13 @@ export default function EditorPage({
 
   async function handleExport(format: string) {
     try {
-      const res = await authFetch(`/api/cv/${id}/export?format=${format}`);
-      if (!res.ok) {
-        toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
-        return;
-      }
-
-      const blob = await res.blob();
-      const ext =
-        format === "json"
-          ? "json"
-          : format === "html"
-            ? "html"
-            : format === "docx"
-              ? "docx"
-              : "pdf";
-      triggerBlobDownload(blob, `${resume?.title ?? "cv"}.${ext}`);
+      await downloadExport(
+        authFetch,
+        `/api/cv/${id}/export`,
+        format,
+        resume?.title ?? "",
+        "cv",
+      );
       toast.success(`${format.toUpperCase()} téléchargé !`);
     } catch {
       toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
@@ -358,14 +350,7 @@ export default function EditorPage({
   }
 
   if (authLoading || isLoading || !resume) {
-    return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{ background: "var(--bg)" }}
-      >
-        <p style={{ color: "var(--fg-muted)" }}>Chargement...</p>
-      </div>
-    );
+    return <PageLoading />;
   }
 
   const sortedSections = [...resume.sections].sort((a, b) => a.order - b.order);
@@ -559,10 +544,11 @@ export default function EditorPage({
 
               {/* Completeness indicator */}
               <div
-                className="rounded-xl p-3 space-y-2"
+                className="p-3 space-y-2"
                 style={{
                   background: "var(--card-bg)",
                   border: "1px solid var(--card-border)",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 <div className="flex items-center justify-between">

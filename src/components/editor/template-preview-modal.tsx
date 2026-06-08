@@ -100,7 +100,7 @@ export function TemplatePreviewModal({
             ([key, { component: TemplateComponent }]) => (
               <div
                 key={key}
-                className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 ${
+                className={`relative rounded overflow-hidden cursor-pointer transition-all border-2 ${
                   currentTemplate === key
                     ? "template-card-active"
                     : hovered === key
