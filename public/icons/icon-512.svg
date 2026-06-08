@@ -1,42 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff6b6b"/>
-      <stop offset="50%" stop-color="#a29bfe"/>
-      <stop offset="100%" stop-color="#74b9ff"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="115.2" fill="url(#bg)"/>
-  <!-- Document shape with folded corner -->
-  <path d="M148.48 89.6
-    H327.68
-    L384 145.92
-    V401.92
-    Q384 422.4 363.52 422.4
-    H148.48
-    Q128 422.4 128 401.92
-    V110.08
-    Q128 89.6 148.48 89.6Z"
-    fill="white" fill-opacity="0.97"/>
-  <!-- Fold triangle -->
-  <path d="M327.68 89.6
-    V145.92
-    H384Z"
-    fill="white" fill-opacity="0.6"/>
-  <!-- CV mark -->
-  <text x="256" y="262.4"
-    font-family="system-ui, -apple-system, sans-serif"
-    font-weight="800"
-    font-size="112"
-    letter-spacing="-6.4"
-    fill="#6c5ce7"
-    text-anchor="middle"
-    dominant-baseline="middle">CV</text>
-  <!-- Lines representing text -->
-  <line x1="166.4" y1="349.184"
-        x2="345.6" y2="349.184"
-        stroke="#6c5ce7" stroke-opacity="0.3" stroke-width="7.68" stroke-linecap="round"/>
-  <line x1="166.4" y1="375.808"
-        x2="294.4" y2="375.808"
-        stroke="#6c5ce7" stroke-opacity="0.2" stroke-width="7.68" stroke-linecap="round"/>
+  <!-- Editorial serif-C tile: paper, ink hairline + offset shadow, brique C -->
+  <rect x="71.68" y="71.68" width="396.8" height="396.8" rx="39.68" fill="#3A312B"/>
+  <rect x="43.52" y="43.52" width="396.8" height="396.8" rx="39.68" fill="#F7F4EE" stroke="#3A312B" stroke-width="3"/>
+  <g transform="translate(83.41 69.63) scale(3.4458)" fill="#A54A24">
+    <path d="M79.95 26.6 A38 38 0 1 0 79.95 73.4 L76.35 62.72 A24 24 0 1 1 76.35 37.28 Z"/>
+  </g>
 </svg>

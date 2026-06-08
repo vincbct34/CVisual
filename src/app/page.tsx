@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
+import { LogoMark } from "@/components/ui/logo";
 import type { Resume, Section } from "@/types/resume";
 import "./landing.css";
 
@@ -169,8 +170,11 @@ function Arrow({ size = 15 }: { size?: number }) {
 
 function Logo() {
   return (
-    <Link className="logo" href="/">
-      CVisual<span className="reg">®</span>
+    <Link className="logo" href="/" style={{ alignItems: "center", gap: 9 }}>
+      <LogoMark size={27} />
+      <span style={{ display: "inline-flex", alignItems: "baseline", gap: 3 }}>
+        CVisual<span className="reg">®</span>
+      </span>
     </Link>
   );
 }

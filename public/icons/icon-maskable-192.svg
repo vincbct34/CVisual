@@ -1,42 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff6b6b"/>
-      <stop offset="50%" stop-color="#a29bfe"/>
-      <stop offset="100%" stop-color="#74b9ff"/>
-    </linearGradient>
-  </defs>
-  <rect width="192" height="192" fill="url(#bg)"/>
-  <!-- Document shape with folded corner (within maskable safe zone) -->
-  <path d="M63.66 45.95
-    H117.56
-    L134.5 62.89
-    V139.89
-    Q134.5 146.05 128.34 146.05
-    H63.66
-    Q57.5 146.05 57.5 139.89
-    V52.11
-    Q57.5 45.95 63.66 45.95Z"
-    fill="white" fill-opacity="0.97"/>
-  <!-- Fold triangle -->
-  <path d="M117.56 45.95
-    V62.89
-    H134.5Z"
-    fill="white" fill-opacity="0.6"/>
-  <!-- CV mark -->
-  <text x="96" y="98.08"
-    font-family="system-ui, -apple-system, sans-serif"
-    font-weight="800"
-    font-size="34"
-    letter-spacing="-1.9"
-    fill="#6c5ce7"
-    text-anchor="middle"
-    dominant-baseline="middle">CV</text>
-  <!-- Lines representing text -->
-  <line x1="69.05" y1="124.028"
-        x2="122.95" y2="124.028"
-        stroke="#6c5ce7" stroke-opacity="0.3" stroke-width="2.31" stroke-linecap="round"/>
-  <line x1="69.05" y1="132.036"
-        x2="107.55" y2="132.036"
-        stroke="#6c5ce7" stroke-opacity="0.2" stroke-width="2.31" stroke-linecap="round"/>
+  <!-- Maskable: full-bleed paper, brique serif C + ink keyline inside the safe zone -->
+  <rect width="192" height="192" fill="#F7F4EE"/>
+  <rect x="24.75" y="24.75" width="142.5" height="142.5" rx="9" fill="none" stroke="#3A312B" stroke-width="1.2"/>
+  <g transform="translate(37.9 32.84) scale(1.263)" fill="#A54A24">
+    <path d="M79.95 26.6 A38 38 0 1 0 79.95 73.4 L76.35 62.72 A24 24 0 1 1 76.35 37.28 Z"/>
+  </g>
 </svg>
