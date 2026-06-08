@@ -123,7 +123,10 @@ export function AIGenerateSummaryButton({
           <div className="flex gap-2">
             <button
               className="btn-gradient text-xs"
-              style={{ padding: "0.3rem 0.75rem", borderRadius: "var(--radius)" }}
+              style={{
+                padding: "0.3rem 0.75rem",
+                borderRadius: "var(--radius)",
+              }}
               onClick={() => {
                 onAccept(result);
                 setResult(null);
@@ -134,7 +137,10 @@ export function AIGenerateSummaryButton({
             </button>
             <button
               className="btn-ghost text-xs"
-              style={{ padding: "0.3rem 0.75rem", borderRadius: "var(--radius)" }}
+              style={{
+                padding: "0.3rem 0.75rem",
+                borderRadius: "var(--radius)",
+              }}
               onClick={() => setResult(null)}
             >
               Annuler

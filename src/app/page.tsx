@@ -50,8 +50,7 @@ const SAMPLE_SECTIONS: Section[] = [
           startDate: "2021",
           endDate: "2023",
           current: false,
-          description:
-            "Suivi de 8 comptes clients et reporting hebdomadaire.",
+          description: "Suivi de 8 comptes clients et reporting hebdomadaire.",
         },
       ],
     },
@@ -250,7 +249,9 @@ export default function HomePage() {
       },
       { threshold: 0.12 },
     );
-    document.querySelectorAll(".landing .reveal").forEach((el) => io.observe(el));
+    document
+      .querySelectorAll(".landing .reveal")
+      .forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
 

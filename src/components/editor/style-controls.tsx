@@ -43,7 +43,9 @@ export function ColorPresetPicker<T extends { primaryColor: string }>({
             style={{
               backgroundColor: preset.primary,
               borderColor:
-                style.primaryColor === preset.primary ? "var(--ink)" : "transparent",
+                style.primaryColor === preset.primary
+                  ? "var(--ink)"
+                  : "transparent",
             }}
           />
           <span className="text-[10px] text-muted-foreground">

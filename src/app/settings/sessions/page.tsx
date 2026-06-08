@@ -123,7 +123,10 @@ export default function SessionsPage() {
               </div>
               <button
                 className="btn-danger text-xs"
-                style={{ padding: "0.4rem 0.9rem", borderRadius: "var(--radius)" }}
+                style={{
+                  padding: "0.4rem 0.9rem",
+                  borderRadius: "var(--radius)",
+                }}
                 disabled={revoking === s.id}
                 onClick={() => revokeSession(s.id)}
               >

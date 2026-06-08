@@ -151,7 +151,6 @@
   --sidebar-ring: var(--accent-strong);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    BASE STYLES
    ═══════════════════════════════════════════════════════════════ */
@@ -388,7 +387,9 @@ label {
 [data-slot="tabs-trigger"][data-active] {
   background: var(--paper) !important;
   color: var(--ink) !important;
-  box-shadow: 0 1px 0 0 var(--line), inset 0 0 0 1px var(--line) !important;
+  box-shadow:
+    0 1px 0 0 var(--line),
+    inset 0 0 0 1px var(--line) !important;
 }
 
 /* ── Select ── */
@@ -431,7 +432,9 @@ label {
 [data-slot="dialog-content"] {
   background: var(--popover) !important;
   border: 1px solid var(--ink) !important;
-  box-shadow: 10px 12px 0 -2px var(--paper), 10px 12px 0 0 var(--ink) !important;
+  box-shadow:
+    10px 12px 0 -2px var(--paper),
+    10px 12px 0 0 var(--ink) !important;
   border-radius: var(--radius) !important;
   color: var(--fg) !important;
 }
@@ -994,7 +997,9 @@ a.accent-link:hover {
   padding: 0.5rem 1.25rem !important;
   font-size: 0.875rem !important;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
+  transition:
+    background 0.18s,
+    border-color 0.18s;
 }
 .export-trigger:hover {
   background: var(--accent-strong) !important;

@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Schibsted_Grotesk, JetBrains_Mono } from "next/font/google";
+import {
+  Newsreader,
+  Schibsted_Grotesk,
+  JetBrains_Mono,
+} from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { InstallPrompt } from "@/components/pwa/install-prompt";

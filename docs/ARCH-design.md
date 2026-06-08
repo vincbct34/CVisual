@@ -10,11 +10,11 @@ Loaded via `next/font/google` in `src/app/layout.tsx`. The CSS variable names ar
 kept legacy on purpose so the whole app inherits the new fonts with no per-file
 churn:
 
-| Role           | Font              | CSS var (`globals.css` alias) |
-| -------------- | ----------------- | ----------------------------- |
-| Serif display  | Newsreader        | `--serif` (`--font-outfit`)   |
-| Grotesk body   | Schibsted Grotesk | `--sans` (`--font-inter`)     |
-| Mono / labels  | JetBrains Mono    | `--mono` (`--font-geist-mono`)|
+| Role          | Font              | CSS var (`globals.css` alias)  |
+| ------------- | ----------------- | ------------------------------ |
+| Serif display | Newsreader        | `--serif` (`--font-outfit`)    |
+| Grotesk body  | Schibsted Grotesk | `--sans` (`--font-inter`)      |
+| Mono / labels | JetBrains Mono    | `--mono` (`--font-geist-mono`) |
 
 Headings (`h1`–`h6`) default to `--serif` via base styles.
 

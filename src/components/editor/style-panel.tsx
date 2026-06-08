@@ -108,7 +108,9 @@ export function StylePanel({
                   onClick={() => toggleSidebar(s.id)}
                   className="flex w-full items-center justify-between rounded border px-2.5 py-1.5 text-xs transition-colors"
                   style={{
-                    background: active ? "var(--accent-soft)" : "var(--card-bg)",
+                    background: active
+                      ? "var(--accent-soft)"
+                      : "var(--card-bg)",
                     borderColor: active
                       ? "var(--accent-strong)"
                       : "var(--input-border)",

@@ -152,7 +152,9 @@ export function AISettingsDialog({
           <div className="flex items-center gap-2 text-sm">
             <span
               className="w-2 h-2 rounded-full"
-              style={{ background: hasKey ? "var(--accent-mint)" : "var(--fg-muted)" }}
+              style={{
+                background: hasKey ? "var(--accent-mint)" : "var(--fg-muted)",
+              }}
             />
             <span style={{ color: "var(--fg-muted)" }}>
               {hasKey ? "Clé configurée" : "Aucune clé configurée"}

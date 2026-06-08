@@ -4,18 +4,18 @@ Next.js 16 app (App Router). PostgreSQL via Prisma 7. No external auth provider 
 
 ## Stack
 
-| Layer     | Tech                                                                    |
-| --------- | ----------------------------------------------------------------------- |
-| Framework | Next.js 16.2 (App Router, React 19)                                     |
-| DB        | PostgreSQL + Prisma 7 (`@prisma/adapter-pg`)                            |
-| Auth      | Custom JWT (`jose`) — access 15m / refresh 7d; bcrypt (`bcryptjs`)      |
-| Email     | `nodemailer` (password-reset emails via SMTP)                           |
-| AI        | OpenAI / Gemini / Anthropic (user-supplied key, stored in localStorage) |
-| Export    | Puppeteer (PDF + HTML capture), `docx` lib (DOCX), JSON                 |
-| Editor    | Tiptap 3 (rich text), dnd-kit (drag-and-drop sections)                  |
-| UI        | shadcn/ui + Tailwind 4; editorial design system (see ARCH-design.md)    |
+| Layer     | Tech                                                                                               |
+| --------- | -------------------------------------------------------------------------------------------------- |
+| Framework | Next.js 16.2 (App Router, React 19)                                                                |
+| DB        | PostgreSQL + Prisma 7 (`@prisma/adapter-pg`)                                                       |
+| Auth      | Custom JWT (`jose`) — access 15m / refresh 7d; bcrypt (`bcryptjs`)                                 |
+| Email     | `nodemailer` (password-reset emails via SMTP)                                                      |
+| AI        | OpenAI / Gemini / Anthropic (user-supplied key, stored in localStorage)                            |
+| Export    | Puppeteer (PDF + HTML capture), `docx` lib (DOCX), JSON                                            |
+| Editor    | Tiptap 3 (rich text), dnd-kit (drag-and-drop sections)                                             |
+| UI        | shadcn/ui + Tailwind 4; editorial design system (see ARCH-design.md)                               |
 | Design    | Light-only "editorial" theme — OKLCH paper/ink tokens, Newsreader/Schibsted Grotesk/JetBrains Mono |
-| PWA       | Serwist 9 (service worker)                                              |
+| PWA       | Serwist 9 (service worker)                                                                         |
 
 ## Directory Layout
 

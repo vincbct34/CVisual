@@ -83,7 +83,7 @@ and `hasKey` / `isConfigured` flags.
 | `ai-generate-summary-button.tsx` | Generate profile summary from CV data                                                        |
 | `ai-cover-letter-dialog.tsx`     | Dialog: pick a CV + paste job description → full cover letter                                |
 | `ai-ats-score-button.tsx`        | Score the CV against a job description (returns JSON advice)                                 |
-| `ai-linkedin-import-dialog.tsx`  | Upload a LinkedIn PDF → structured sections (server-side parse, **no AI**)                    |
+| `ai-linkedin-import-dialog.tsx`  | Upload a LinkedIn PDF → structured sections (server-side parse, **no AI**)                   |
 | `ai-setup-banner.tsx`            | Banner shown when no key is configured                                                       |
 | `ai-shared.tsx`                  | Shared `SparklesIcon` + `notifyAINotConfigured` toast helper                                 |
 

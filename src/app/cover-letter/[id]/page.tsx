@@ -185,9 +185,7 @@ export default function CoverLetterEditorPage({
   }
 
   if (authLoading || isLoading || !letter) {
-    return (
-      <PageLoading />
-    );
+    return <PageLoading />;
   }
 
   const content =

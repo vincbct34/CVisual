@@ -30,10 +30,13 @@ export function DashboardHeader() {
     <header className="glass-toolbar sticky top-0 z-50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Logo href="/dashboard" size={22} className="hover:opacity-80 transition-opacity" />
+        <Logo
+          href="/dashboard"
+          size={22}
+          className="hover:opacity-80 transition-opacity"
+        />
 
         <div className="flex items-center gap-2">
-
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger className="btn-chip">
@@ -61,7 +64,9 @@ export function DashboardHeader() {
                 <span
                   className="w-2 h-2 rounded-full mr-2"
                   style={{
-                    background: hasKey ? "var(--accent-mint)" : "var(--fg-muted)",
+                    background: hasKey
+                      ? "var(--accent-mint)"
+                      : "var(--fg-muted)",
                   }}
                 />
                 Paramètres IA
