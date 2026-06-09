@@ -37,7 +37,7 @@ export default function LoginPage() {
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="mb-1 flex justify-center">
-          <Logo href={null} size={32} />
+          <Logo href={"/"} size={32} />
         </div>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           Connectez-vous à votre compte
@@ -76,6 +76,13 @@ export default function LoginPage() {
             >
               Mot de passe
             </Label>
+            <Link
+              href="/forgot-password"
+              className="text-sm hover:opacity-80 transition-opacity"
+              style={{ color: "var(--accent-violet)" }}
+            >
+              Mot de passe oublié ?
+            </Link>
           </div>
           <div className="relative">
             <Input

@@ -15,6 +15,25 @@ export const loginSchema = z.object({
     .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
 });
 
+export const updateProfileSchema = z
+  .object({
+    name: z.string().min(1, "Le nom est requis").max(100).optional(),
+    email: z
+      .string()
+      .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email invalide")
+      .optional(),
+  })
+  .refine((data) => data.name !== undefined || data.email !== undefined, {
+    message: "Aucune modification fournie",
+  });
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Mot de passe actuel requis"),
+  newPassword: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+});
+
 export const createResumeSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   language: z.string().min(2).max(5).optional(),
@@ -69,6 +88,8 @@ export const reorderSectionsSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type CreateResumeInput = z.infer<typeof createResumeSchema>;
 export type UpdateResumeInput = z.infer<typeof updateResumeSchema>;
 export type CreateSectionInput = z.infer<typeof createSectionSchema>;

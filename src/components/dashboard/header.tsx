@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
@@ -15,6 +16,7 @@ import { AISettingsDialog } from "@/components/ai/ai-settings-dialog";
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const { hasKey } = useAI();
+  const router = useRouter();
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
 
   const initials = user?.name
@@ -70,6 +72,11 @@ export function DashboardHeader() {
                   }}
                 />
                 Paramètres IA
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push("/settings/account")}
+              >
+                Mon compte
               </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>
                 Se déconnecter

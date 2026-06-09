@@ -22,6 +22,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: Partial<User>) => void;
   authFetch: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
@@ -165,6 +166,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [router],
   );
 
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : prev));
+  }, []);
+
   const logout = useCallback(async () => {
     // Block any in-flight or future refresh from reinstating the session
     isLoggedOutRef.current = true;
@@ -178,8 +183,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setAccessToken(null);
     clearAccessCookie();
-    router.push("/login");
-  }, [router]);
+    // Hard redirect (not router.push): logout is triggered from a portal menu
+    // that unmounts on click, which drops a soft navigation. A full reload also
+    // guarantees all in-memory session state is torn down.
+    window.location.href = "/login";
+  }, []);
 
   useEffect(() => {
     async function init() {
@@ -213,6 +221,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        updateUser,
         authFetch,
       }}
     >

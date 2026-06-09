@@ -94,6 +94,18 @@ function Footer() {
           <div>
             <Logo />
             <div className="foot-tag">Le CV, repensé.</div>
+            <a
+              className="foot-bmc"
+              href="https://www.buymeacoffee.com/404factory"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=404factory&button_colour=a54b24&font_colour=ffffff&outline_colour=ffffff&coffee_colour=FFDD00"
+                alt="Offrez-moi un café"
+                height={48}
+              />
+            </a>
           </div>
           <div className="foot-links">
             <Link href="/modeles">Modèles</Link>
@@ -105,7 +117,11 @@ function Footer() {
         </div>
         <div className="foot-copy">
           <span>© {new Date().getFullYear()} CVisual</span>
-          <span>Générateur de CV &amp; lettre de motivation</span>
+          <div className="foot-legal">
+            <Link href="/mentions-legales">Mentions légales</Link>
+            <Link href="/confidentialite">Confidentialité</Link>
+            <Link href="/cgu">CGU</Link>
+          </div>
         </div>
       </div>
     </footer>

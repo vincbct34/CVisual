@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -47,7 +50,7 @@ export default function RegisterPage() {
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="mb-1 flex justify-center">
-          <Logo href={null} size={32} />
+          <Logo href={"/"} size={32} />
         </div>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           Créez votre compte
@@ -105,21 +108,41 @@ export default function RegisterPage() {
           >
             Mot de passe
           </Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="8 caractères minimum"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            autoComplete="new-password"
-            style={{
-              background: "var(--input-bg)",
-              border: "1px solid var(--input-border)",
-              color: "var(--fg)",
-            }}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="8 caractères minimum"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="pr-9"
+              style={{
+                background: "var(--input-bg)",
+                border: "1px solid var(--input-border)",
+                color: "var(--fg)",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={
+                showPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+              className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-80 transition-opacity"
+              style={{ color: "var(--fg-muted)" }}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -129,21 +152,41 @@ export default function RegisterPage() {
           >
             Confirmer le mot de passe
           </Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={8}
-            autoComplete="new-password"
-            style={{
-              background: "var(--input-bg)",
-              border: "1px solid var(--input-border)",
-              color: "var(--fg)",
-            }}
-          />
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="pr-9"
+              style={{
+                background: "var(--input-bg)",
+                border: "1px solid var(--input-border)",
+                color: "var(--fg)",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={
+                showConfirmPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+              className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-80 transition-opacity"
+              style={{ color: "var(--fg-muted)" }}
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <button
@@ -179,6 +222,24 @@ export default function RegisterPage() {
             "Créer un compte"
           )}
         </button>
+
+        <p className="text-center text-xs" style={{ color: "var(--fg-muted)" }}>
+          En créant un compte, vous acceptez nos{" "}
+          <Link
+            href="/cgu"
+            className="underline hover:opacity-80 transition-opacity"
+          >
+            CGU
+          </Link>{" "}
+          et notre{" "}
+          <Link
+            href="/confidentialite"
+            className="underline hover:opacity-80 transition-opacity"
+          >
+            Politique de confidentialité
+          </Link>
+          .
+        </p>
       </form>
 
       <p

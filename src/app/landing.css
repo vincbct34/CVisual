@@ -592,6 +592,18 @@
   color: var(--ink-soft);
   margin-top: 6px;
 }
+.landing .foot-bmc {
+  display: inline-block;
+  margin-top: 18px;
+  transition: opacity 0.15s;
+}
+.landing .foot-bmc:hover {
+  opacity: 0.85;
+}
+.landing .foot-bmc img {
+  height: 48px;
+  width: auto;
+}
 .landing .foot-links {
   display: flex;
   gap: 26px;
@@ -615,8 +627,21 @@
   border-top: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+}
+.landing .foot-legal {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.landing .foot-legal a {
+  color: var(--ink-faint);
+  transition: color 0.15s;
+}
+.landing .foot-legal a:hover {
+  color: var(--ink);
 }
 
 /* ---------- reveal ---------- */
@@ -1033,4 +1058,70 @@
   .landing .ia-demos {
     position: static;
   }
+}
+
+/* ---------- legal pages ---------- */
+.landing .legal {
+  padding: 8px 0 96px;
+}
+.landing .legal-prose {
+  max-width: 760px;
+}
+.landing .legal-prose h2 {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--ink);
+  margin: 44px 0 14px;
+}
+.landing .legal-prose h2:first-child {
+  margin-top: 0;
+}
+.landing .legal-prose h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+  margin: 24px 0 8px;
+}
+.landing .legal-prose p,
+.landing .legal-prose li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.landing .legal-prose p {
+  margin: 0 0 14px;
+}
+.landing .legal-prose ul {
+  margin: 0 0 14px;
+  padding-left: 22px;
+  list-style: disc;
+}
+.landing .legal-prose li {
+  margin: 0 0 6px;
+}
+.landing .legal-prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.landing .legal-prose strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.landing .legal-fill {
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-size: 0.85em;
+  padding: 1px 6px;
+  border-radius: var(--radius);
+}
+.landing .legal-updated {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
