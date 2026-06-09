@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { LandingShell, Arrow } from "@/components/landing/landing-shell";
+import { LandingShell } from "@/components/landing/landing-shell";
+import { RegisterCta } from "@/components/landing/home-cta";
 import { getTemplate } from "@/components/templates";
 import { TEMPLATE_SHOWCASE, sampleForTemplate } from "@/lib/sample-resume";
 import "../landing.css";
@@ -72,9 +72,10 @@ export default function ModelesPage() {
                 tout moment sans rien reperdre.
               </p>
             </div>
-            <Link className="btn btn-paper" href="/register">
-              Commencer gratuitement <Arrow />
-            </Link>
+            <RegisterCta
+              className="btn btn-paper"
+              label="Commencer gratuitement"
+            />
           </div>
         </div>
       </section>

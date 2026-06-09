@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
-import { LandingShell, Arrow } from "@/components/landing/landing-shell";
+import { LandingShell } from "@/components/landing/landing-shell";
+import { RegisterCta } from "@/components/landing/home-cta";
 import { SAMPLE_RESUME } from "@/lib/sample-resume";
 import "../landing.css";
 
@@ -90,9 +90,7 @@ export default function ExportPage() {
                 </div>
               </div>
             ))}
-            <Link className="btn btn-ink" href="/register">
-              Créer mon CV <Arrow />
-            </Link>
+            <RegisterCta className="btn btn-ink" label="Créer mon CV" />
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
 import { LandingShell, Arrow } from "@/components/landing/landing-shell";
+import { HomeCta } from "@/components/landing/home-cta";
 import { SAMPLE_RESUME } from "@/lib/sample-resume";
 import "./landing.css";
 
@@ -92,12 +93,12 @@ export default function HomePage() {
             </h1>
             <p className="subtitle">{COPY.subtitle}</p>
             <div className="hero-cta">
-              <Link className="btn btn-ink" href="/register">
-                {COPY.ctaPrimary} <Arrow />
-              </Link>
-              <Link className="btn btn-line" href="/login">
-                {COPY.ctaSecondary}
-              </Link>
+              <HomeCta
+                primaryClass="btn btn-ink"
+                secondaryClass="btn btn-line"
+                primaryLabel={COPY.ctaPrimary}
+                secondaryLabel={COPY.ctaSecondary}
+              />
             </div>
             <div className="hero-meta">
               <span className="rule" />
@@ -150,12 +151,12 @@ export default function HomePage() {
               Votre prochain poste tient sur <em>une page</em>
             </h2>
             <div className="crow">
-              <Link className="btn btn-paper" href="/register">
-                {COPY.ctaPrimary} <Arrow />
-              </Link>
-              <Link className="btn btn-ghost-d" href="/login">
-                {COPY.ctaSecondary}
-              </Link>
+              <HomeCta
+                primaryClass="btn btn-paper"
+                secondaryClass="btn btn-ghost-d"
+                primaryLabel={COPY.ctaPrimary}
+                secondaryLabel={COPY.ctaSecondary}
+              />
             </div>
             <div className="cta-note">
               Totalement gratuit · Sans carte bancaire · Aucun spam

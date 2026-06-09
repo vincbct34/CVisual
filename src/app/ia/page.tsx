@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { LandingShell, Arrow } from "@/components/landing/landing-shell";
+import { LandingShell } from "@/components/landing/landing-shell";
+import { RegisterCta } from "@/components/landing/home-cta";
 import "../landing.css";
 
 export const metadata: Metadata = {
@@ -84,9 +84,7 @@ export default function IaPage() {
                 </div>
               </div>
             ))}
-            <Link className="btn btn-ink" href="/register">
-              Essayer l’assistant <Arrow />
-            </Link>
+            <RegisterCta className="btn btn-ink" label="Essayer l’assistant" />
           </div>
 
           <div className="ia-demos reveal">
