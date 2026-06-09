@@ -224,22 +224,25 @@ export default function CoverLetterEditorPage({
 
       {/* Toolbar */}
       <div className="glass-toolbar px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 z-40">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-none sm:gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/dashboard")}
           >
-            ← Retour
+            ← <span className="hidden sm:inline">Retour</span>
           </Button>
           <Input
             value={letter.title}
             onChange={(e) => updateLetter({ title: e.target.value })}
-            className="w-40 sm:w-64 h-8 text-sm font-medium"
+            className="flex-1 min-w-0 sm:flex-none sm:w-64 h-8 text-sm font-medium"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs" style={{ color: "var(--fg-muted)" }}>
+        <div className="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
+          <span
+            className="hidden sm:inline text-xs"
+            style={{ color: "var(--fg-muted)" }}
+          >
             {isSaving
               ? "Enregistrement..."
               : isDirty
