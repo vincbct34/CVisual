@@ -12,20 +12,20 @@ validated with Zod (`src/lib/validations.ts`); failures return `validationError`
 
 ## Auth Routes
 
-| Method | Path                        | Body                        | Returns                                                             |
-| ------ | --------------------------- | --------------------------- | ------------------------------------------------------------------- |
-| POST   | `/api/auth/register`        | `{ email, password, name }` | `{ user, accessToken }` + sets `refresh_token` cookie               |
-| POST   | `/api/auth/login`           | `{ email, password }`       | `{ user, accessToken }` + sets `refresh_token` cookie               |
-| POST   | `/api/auth/refresh`         | —                           | `{ accessToken }` (reads `refresh_token` cookie)                    |
-| POST   | `/api/auth/logout`          | —                           | clears cookie + revokes all user refresh tokens (all devices)       |
-| GET    | `/api/auth/me`              | —                           | `{ user }`                                                          |
-| PUT    | `/api/auth/me`              | `{ name?, email? }`         | `{ user }` — update profile; 409 if email already used              |
-| DELETE | `/api/auth/me`              | —                           | `{ message }` — delete account (cascades resumes/letters/tokens) + clears cookie |
+| Method | Path                        | Body                               | Returns                                                                                          |
+| ------ | --------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
+| POST   | `/api/auth/register`        | `{ email, password, name }`        | `{ user, accessToken }` + sets `refresh_token` cookie                                            |
+| POST   | `/api/auth/login`           | `{ email, password }`              | `{ user, accessToken }` + sets `refresh_token` cookie                                            |
+| POST   | `/api/auth/refresh`         | —                                  | `{ accessToken }` (reads `refresh_token` cookie)                                                 |
+| POST   | `/api/auth/logout`          | —                                  | clears cookie + revokes all user refresh tokens (all devices)                                    |
+| GET    | `/api/auth/me`              | —                                  | `{ user }`                                                                                       |
+| PUT    | `/api/auth/me`              | `{ name?, email? }`                | `{ user }` — update profile; 409 if email already used                                           |
+| DELETE | `/api/auth/me`              | —                                  | `{ message }` — delete account (cascades resumes/letters/tokens) + clears cookie                 |
 | POST   | `/api/auth/change-password` | `{ currentPassword, newPassword }` | `{ message }` — verifies current pw, rehashes, revokes other sessions; rate-limited 5/15min/user |
-| POST   | `/api/auth/forgot-password` | `{ email }`                 | 200 (always — no account enumeration); emails a reset link if found |
-| POST   | `/api/auth/reset-password`  | `{ token, password }`       | 200 — consumes `ResetToken`, updates password                       |
-| GET    | `/api/auth/sessions`        | —                           | `{ sessions[] }` — active refresh tokens                            |
-| DELETE | `/api/auth/sessions`        | `{ id }` / all              | revoke a session (or all)                                           |
+| POST   | `/api/auth/forgot-password` | `{ email }`                        | 200 (always — no account enumeration); emails a reset link if found                              |
+| POST   | `/api/auth/reset-password`  | `{ token, password }`              | 200 — consumes `ResetToken`, updates password                                                    |
+| GET    | `/api/auth/sessions`        | —                                  | `{ sessions[] }` — active refresh tokens                                                         |
+| DELETE | `/api/auth/sessions`        | `{ id }` / all                     | revoke a session (or all)                                                                        |
 
 ## AI Proxy
 
@@ -96,20 +96,20 @@ no Redis). `await rateLimitResponse(key, limit, windowMs)` returns a ready 429
 an outage can't lock everyone out. Authenticated routes key by `userId`;
 unauthenticated ones by client IP (`getClientIp`).
 
-| Route                          | Key  | Limit       |
-| ------------------------------ | ---- | ----------- |
-| `auth/login`                   | IP   | 10 / 15min  |
-| `auth/register`                | IP   | 5 / hour    |
-| `auth/forgot-password`         | IP   | 3 / 15min   |
-| `auth/reset-password`          | IP   | 10 / 15min  |
-| `auth/change-password`         | user | 5 / 15min   |
-| `auth/refresh`                 | IP   | 60 / min    |
-| `anthropic` proxy              | IP   | 30 / min    |
-| `PUT /api/cv/[id]` (save)      | user | 30 / min    |
-| `POST /api/cv` (create)        | user | 20 / min    |
-| `POST /api/cv/import`          | user | 10 / min    |
-| `POST /api/cv/[id]/duplicate`  | user | 10 / min    |
-| `POST /api/cover-letters`      | user | 20 / min    |
-| `cv/[id]/export` (non-JSON)    | user | 10 / min    |
-| `cover-letters/[id]/export`    | user | 10 / min    |
-| `cv/parse-linkedin-pdf`        | user | 10 / min    |
+| Route                         | Key  | Limit      |
+| ----------------------------- | ---- | ---------- |
+| `auth/login`                  | IP   | 10 / 15min |
+| `auth/register`               | IP   | 5 / hour   |
+| `auth/forgot-password`        | IP   | 3 / 15min  |
+| `auth/reset-password`         | IP   | 10 / 15min |
+| `auth/change-password`        | user | 5 / 15min  |
+| `auth/refresh`                | IP   | 60 / min   |
+| `anthropic` proxy             | IP   | 30 / min   |
+| `PUT /api/cv/[id]` (save)     | user | 30 / min   |
+| `POST /api/cv` (create)       | user | 20 / min   |
+| `POST /api/cv/import`         | user | 10 / min   |
+| `POST /api/cv/[id]/duplicate` | user | 10 / min   |
+| `POST /api/cover-letters`     | user | 20 / min   |
+| `cv/[id]/export` (non-JSON)   | user | 10 / min   |
+| `cover-letters/[id]/export`   | user | 10 / min   |
+| `cv/parse-linkedin-pdf`       | user | 10 / min   |

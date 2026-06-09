@@ -15,17 +15,17 @@ Access token is **not** httpOnly — client reads it to attach as `Authorization
 
 ## API Routes
 
-| Route                       | Method     | Purpose                                                                          |
-| --------------------------- | ---------- | -------------------------------------------------------------------------------- |
-| `/api/auth/register`        | POST       | Hash password (bcrypt), create User, `issueSession` (tokens + cookie)            |
-| `/api/auth/login`           | POST       | Verify password, `issueSession`                                                  |
-| `/api/auth/refresh`         | POST       | Read `refresh_token` cookie → verify JWT → check DB → issue new access token     |
-| `/api/auth/logout`          | POST       | Revoke **all** user refresh tokens from DB (all devices), clear cookie           |
-| `/api/auth/me`              | GET/PUT/DELETE | Return user / update profile (`name`,`email`; 409 if email taken) / delete account (cascade) |
-| `/api/auth/change-password` | POST       | Verify current password, rehash new one, revoke **other** sessions (keep current); rate-limited 5/15min/user |
-| `/api/auth/forgot-password` | POST       | Create a `ResetToken`, email a reset link (always 200 — no enumeration)          |
-| `/api/auth/reset-password`  | POST       | Verify + consume `ResetToken`, update `passwordHash`                             |
-| `/api/auth/sessions`        | GET/DELETE | List active refresh tokens / revoke one or all (managed at `/settings/sessions`) |
+| Route                       | Method         | Purpose                                                                                                      |
+| --------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/register`        | POST           | Hash password (bcrypt), create User, `issueSession` (tokens + cookie)                                        |
+| `/api/auth/login`           | POST           | Verify password, `issueSession`                                                                              |
+| `/api/auth/refresh`         | POST           | Read `refresh_token` cookie → verify JWT → check DB → issue new access token                                 |
+| `/api/auth/logout`          | POST           | Revoke **all** user refresh tokens from DB (all devices), clear cookie                                       |
+| `/api/auth/me`              | GET/PUT/DELETE | Return user / update profile (`name`,`email`; 409 if email taken) / delete account (cascade)                 |
+| `/api/auth/change-password` | POST           | Verify current password, rehash new one, revoke **other** sessions (keep current); rate-limited 5/15min/user |
+| `/api/auth/forgot-password` | POST           | Create a `ResetToken`, email a reset link (always 200 — no enumeration)                                      |
+| `/api/auth/reset-password`  | POST           | Verify + consume `ResetToken`, update `passwordHash`                                                         |
+| `/api/auth/sessions`        | GET/DELETE     | List active refresh tokens / revoke one or all (managed at `/settings/sessions`)                             |
 
 ## Password Reset Flow
 

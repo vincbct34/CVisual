@@ -4,10 +4,10 @@ Two editors: Resume editor (`/editor/[id]`) and Cover Letter editor (`/cover-let
 
 ## Shared Editor Hooks
 
-| Hook                                     | Role                                                                                                                                                               |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `useAutosave(save, interval=30000)`      | `schedule(value)` marks dirty + arms a **fixed** `interval` timer (max-wait, not a debounce): each tick saves the latest unsaved value, and the timer stops once clean. `flush()` saves now (Save button). Exposes `isSaving` + `isDirty`. The `save` callback owns its error toasts and should re-throw on failure to stay dirty. |
-| `useResizablePanels(storagePrefix)`      | Split-pane width drag + preview collapse, persisted to `localStorage` under `<prefix>_left_width` / `<prefix>_preview_collapsed` (`cvisual_editor`, `cvisual_cl`). |
+| Hook                                | Role                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useAutosave(save, interval=30000)` | `schedule(value)` marks dirty + arms a **fixed** `interval` timer (max-wait, not a debounce): each tick saves the latest unsaved value, and the timer stops once clean. `flush()` saves now (Save button). Exposes `isSaving` + `isDirty`. The `save` callback owns its error toasts and should re-throw on failure to stay dirty. |
+| `useResizablePanels(storagePrefix)` | Split-pane width drag + preview collapse, persisted to `localStorage` under `<prefix>_left_width` / `<prefix>_preview_collapsed` (`cvisual_editor`, `cvisual_cl`).                                                                                                                                                                 |
 
 ## Resume Editor (`src/app/editor/[id]/page.tsx`)
 
