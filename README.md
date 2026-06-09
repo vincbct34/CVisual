@@ -74,11 +74,6 @@ Per-area docs live in [`docs/`](docs/) and are loaded as context for AI agents
 - [API routes](docs/ARCH-api.md) · [AI](docs/ARCH-ai.md) · [Export](docs/ARCH-export.md)
 - [Templates](docs/ARCH-templates.md) · [Editor](docs/ARCH-editor.md) · [Design](docs/ARCH-design.md)
 
-## Deployment
-
-Targets Vercel (env-aware Puppeteer via `@sparticuz/chromium`). See
-[`docs/DEPLOY.md`](docs/DEPLOY.md).
-
 ## License
 
 Proprietary — see [`LICENSE`](LICENSE). The source is publicly viewable but **not**
