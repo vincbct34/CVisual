@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LogoMark } from "@/components/ui/logo";
+import { useAuth } from "@/hooks/use-auth";
 
 const BADGES = [
   "5 templates",
@@ -59,12 +60,22 @@ function TickerItem() {
 
 function Masthead() {
   const [scrolled, setScrolled] = useState(false);
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "?";
 
   return (
     <header className={`mast${scrolled ? " scrolled" : ""}`}>
@@ -74,12 +85,26 @@ function Masthead() {
           <Link className="mast-link hide-sm" href="/modeles">
             Modèles
           </Link>
-          <Link className="mast-link" href="/login">
-            Connexion
-          </Link>
-          <Link className="btn btn-ink btn-sm" href="/register">
-            Créer un compte
-          </Link>
+          {isLoading ? null : user ? (
+            <Link className="btn btn-ink btn-sm" href="/dashboard">
+              <span
+                className="w-5 h-5 rounded-full inline-flex items-center justify-center text-[10px] font-bold"
+                style={{ background: "var(--paper)", color: "var(--ink)" }}
+              >
+                {initials}
+              </span>
+              <span className="hide-sm">Mon espace</span>
+            </Link>
+          ) : (
+            <>
+              <Link className="mast-link" href="/login">
+                Connexion
+              </Link>
+              <Link className="btn btn-ink btn-sm" href="/register">
+                Créer un compte
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
