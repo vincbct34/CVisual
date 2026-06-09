@@ -20,8 +20,8 @@ function ResetPasswordForm({ token }: { token: string }) {
       toast.error("Les mots de passe ne correspondent pas");
       return;
     }
-    if (password.length < 6) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+    if (password.length < 8) {
+      toast.error("Le mot de passe doit contenir au moins 8 caractères");
       return;
     }
     setIsSubmitting(true);

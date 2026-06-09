@@ -21,7 +21,8 @@ Access token is **not** httpOnly — client reads it to attach as `Authorization
 | `/api/auth/login`           | POST       | Verify password, `issueSession`                                                  |
 | `/api/auth/refresh`         | POST       | Read `refresh_token` cookie → verify JWT → check DB → issue new access token     |
 | `/api/auth/logout`          | POST       | Revoke **all** user refresh tokens from DB (all devices), clear cookie           |
-| `/api/auth/me`              | GET        | Return user from valid access token                                              |
+| `/api/auth/me`              | GET/PUT/DELETE | Return user / update profile (`name`,`email`; 409 if email taken) / delete account (cascade) |
+| `/api/auth/change-password` | POST       | Verify current password, rehash new one, revoke **other** sessions (keep current); rate-limited 5/15min/user |
 | `/api/auth/forgot-password` | POST       | Create a `ResetToken`, email a reset link (always 200 — no enumeration)          |
 | `/api/auth/reset-password`  | POST       | Verify + consume `ResetToken`, update `passwordHash`                             |
 | `/api/auth/sessions`        | GET/DELETE | List active refresh tokens / revoke one or all (managed at `/settings/sessions`) |
@@ -31,6 +32,14 @@ Access token is **not** httpOnly — client reads it to attach as `Authorization
 1. `POST /api/auth/forgot-password` with an email — always returns 200 (no account enumeration).
 2. If the account exists, a `ResetToken` row is created and a reset link is emailed via `nodemailer` (SMTP env vars; see `.env.example`).
 3. `POST /api/auth/reset-password` with `{ token, password }` verifies and consumes the token, then updates the password.
+
+## Account Management (`/settings/account`)
+
+Logged-in account self-service page, all via `/api/auth/me` + `change-password`:
+
+- **Profile** — `PUT /api/auth/me` updates `name` / `email` (rejects an email already in use with 409).
+- **Password** — `POST /api/auth/change-password` checks the current password, rehashes the new one, and revokes every **other** refresh token (current session stays valid). Rate-limited 5/15min/user.
+- **Delete account** — `DELETE /api/auth/me` deletes the User (cascade removes resumes, cover letters, refresh + reset tokens) and clears the cookie.
 
 ## Client-Side Flow (`src/hooks/use-auth.tsx`)
 

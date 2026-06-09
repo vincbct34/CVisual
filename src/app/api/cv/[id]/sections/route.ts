@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validationError } from "@/lib/api-response";
+import { validationError, parseJsonBody } from "@/lib/api-response";
 import { requireResume } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { createSectionSchema } from "@/lib/validations";
@@ -13,7 +13,8 @@ export async function POST(
   const { response } = await requireResume(request, id);
   if (response) return response;
 
-  const body = await request.json();
+  const { body, response: badJson } = await parseJsonBody(request);
+  if (badJson) return badJson;
   const parsed = createSectionSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 

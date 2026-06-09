@@ -2,6 +2,10 @@ import { triggerBlobDownload, safeFilename } from "./utils";
 
 type AuthFetch = (url: string, options?: RequestInit) => Promise<Response>;
 
+/** Thrown when the export endpoint replies 429 — lets callers show the
+ *  server's throttle message instead of a generic export error. */
+export class RateLimitError extends Error {}
+
 const FORMAT_EXT: Record<string, string> = {
   pdf: "pdf",
   docx: "docx",
@@ -26,6 +30,12 @@ export async function downloadExport(
   fallback: string,
 ): Promise<void> {
   const res = await authFetch(`${basePath}?format=${format}`);
+  if (res.status === 429) {
+    const data = await res.json().catch(() => ({}));
+    throw new RateLimitError(
+      data.error ?? "Trop d'exports. Réessayez dans un instant.",
+    );
+  }
   if (!res.ok) throw new Error(`Export ${format} failed`);
   const blob = await res.blob();
   const ext = FORMAT_EXT[format] ?? "pdf";

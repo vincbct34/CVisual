@@ -40,7 +40,7 @@ export default function SessionsPage() {
       const res = await authFetch(`/api/auth/sessions?id=${id}`, {
         method: "DELETE",
       });
-      if (res.ok || res.status === 204) {
+      if (res.ok) {
         setSessions((prev) => prev.filter((s) => s.id !== id));
         toast.success("Session révoquée");
       } else {

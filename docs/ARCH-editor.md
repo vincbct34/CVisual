@@ -1,12 +1,12 @@
 # Editor Architecture
 
-Two editors: Resume editor (`/editor/[id]`) and Cover Letter editor (`/cover-letter/[id]`). Both are client components holding full state in React, auto-saved on debounce, with a resizable editor/preview split.
+Two editors: Resume editor (`/editor/[id]`) and Cover Letter editor (`/cover-letter/[id]`). Both are client components holding full state in React, with a resizable editor/preview split. Editing is **local** (the preview re-renders for free); persistence is a **manual Save** button plus a periodic autosave that saves at most every 30s while there are unsaved changes, so a save is one explicit request rather than a per-keystroke storm.
 
 ## Shared Editor Hooks
 
 | Hook                                     | Role                                                                                                                                                               |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `useDebouncedAutosave(save, delay=1000)` | Debounces `save` to **1000ms** after the last change; exposes `isSaving` and `schedule(value)`. The `save` callback owns its own error toasts.                     |
+| `useAutosave(save, interval=30000)`      | `schedule(value)` marks dirty + arms a **fixed** `interval` timer (max-wait, not a debounce): each tick saves the latest unsaved value, and the timer stops once clean. `flush()` saves now (Save button). Exposes `isSaving` + `isDirty`. The `save` callback owns its error toasts and should re-throw on failure to stay dirty. |
 | `useResizablePanels(storagePrefix)`      | Split-pane width drag + preview collapse, persisted to `localStorage` under `<prefix>_left_width` / `<prefix>_preview_collapsed` (`cvisual_editor`, `cvisual_cl`). |
 
 ## Resume Editor (`src/app/editor/[id]/page.tsx`)
@@ -15,15 +15,21 @@ Two editors: Resume editor (`/editor/[id]`) and Cover Letter editor (`/cover-let
 
 ```ts
 resume: Resume | null; // full resume with sections[]
-// isSaving comes from useDebouncedAutosave; panel state from useResizablePanels
+// isSaving / isDirty come from useAutosave; panel state from useResizablePanels
 ```
 
-### Auto-save
+### Save
 
-Any change calls `autoSave(updatedResume)` (the `schedule` from `useDebouncedAutosave`).
-After the 1000ms debounce it PUTs `/api/cv/[id]` (title/template/style/language)
-then PUTs each section; per-section failures are toast-reported. No optimistic UI —
-`isSaving` clears when the save settles. Reorder is persisted separately (not debounced).
+Any field/content/style change calls `autoSave(updatedResume)` (the `schedule`
+from `useAutosave`) — this updates local state, marks the editor dirty, and arms
+the periodic timer. The user persists explicitly via the **Save** button
+(`flush`), or the timer saves at most every 30s while dirty (stopping once
+clean — so nonstop typing still gets saved, not just on pause). Either way one
+PUT `/api/cv/[id]` carries title/template/style/language **and** the batched
+`sections[]`, updated server-side in a single transaction (rate-limited
+30/min/user; 429 → toast). On failure the callback re-throws so `isDirty` stays
+set. A `beforeunload` guard warns on unsaved changes. Add/delete section, reorder,
+and visibility toggle persist immediately via their own routes (not batched).
 
 ### Layout
 
@@ -87,7 +93,7 @@ A `SectionForm` dispatcher switches on `section.type`:
 - `custom`: mode selector → Tiptap text **or** a skills-style list
 
 Shared parts: `ItemHeader` (title + remove) and `RowDeleteButton`. Item mutation
-updates local `content.items[]` → debounced section PUT.
+updates local `content.items[]` → marks dirty → batched on the next save.
 
 ## Key Patterns
 

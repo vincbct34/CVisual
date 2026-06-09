@@ -25,7 +25,7 @@ src/
     (auth)/              # login / register / forgot-password / reset-password (+ auth-card.tsx shell)
     api/                 # REST API handlers
       anthropic/         # browser→Anthropic CORS proxy (key forwarded per request)
-      auth/              # login, register, logout, refresh, me, forgot/reset-password, sessions
+      auth/              # login, register, logout, refresh, me (GET/PUT/DELETE), change-password, forgot/reset-password, sessions
       cv/                # resume CRUD + sections + export + duplicate + import + public + share + parse-linkedin-pdf
       cover-letters/     # cover letter CRUD + export
     dashboard/           # resume/cover-letter list
@@ -35,11 +35,15 @@ src/
     render/cover-letter/[id]/  # headless cover-letter render target
     public/cv/[id]/      # public read-only CV (when isPublic)
     share/[token]/       # share-token read-only CV
+    settings/account/    # profile (name/email), password change, account deletion
     settings/sessions/   # active-session management
+    modeles/ ia/ export/ # SEO marketing pages (templates / AI / export) — LandingShell layout
+    cgu/ confidentialite/ mentions-legales/  # legal pages (CGU, privacy, legal mentions)
   components/
     ai/                  # AI action buttons, settings dialog, shared icon/toast helpers
     dashboard/           # cards, header, json-import dialog
     editor/              # section forms, preview, sortable, style panel + style-controls, signature pad, paged preview
+    landing/             # LandingShell (masthead + footer wrapper, optional ticker), Logo, Arrow — shared by landing + marketing pages
     templates/           # 5 CV templates + cover letter template + template-shared / template-utils
     pwa/                 # install prompt
     ui/                  # shadcn primitives + shared bits (logo, file-dropzone, page-loading, motion)
@@ -49,18 +53,19 @@ src/
     use-ai.ts              # AI state: provider, model, key, streaming
     use-completeness.ts    # CV completeness score
     use-resizable-panels.ts  # editor split-pane width + collapse (localStorage-persisted)
-    use-debounced-autosave.ts # generic debounced save + isSaving flag
+    use-autosave.ts          # periodic max-wait autosave + manual flush + isSaving/isDirty
   lib/
     auth.ts              # JWT sign/verify (access/refresh/share/render), refresh-token DB ops, cookies
     api-auth.ts          # requireAuth / requireResume / requireCoverLetter route guards
     api-response.ts      # validationError (Zod → 400)
     prisma.ts            # Prisma client singleton
     validations.ts       # Zod schemas for all API inputs
-    rate-limit.ts        # in-memory rate limiter (checkRateLimit / getClientIp)
+    rate-limit.ts        # rate limiter — Upstash Redis or in-memory fallback (checkRateLimit / rateLimitResponse / getClientIp)
     sanitize.ts          # client DOMPurify wrapper + allowed tags/attrs
     linkedin-parser.ts   # LinkedIn PDF text → structured sections
     utils.ts             # cn, safeFilename, triggerBlobDownload
     export-download.ts   # downloadExport — shared client export→blob→save (resume + cover letter)
+    sample-resume.ts     # SAMPLE_SECTIONS — demo CV data (landing mockup / template previews)
     ai/                  # AI client abstraction (see ARCH-ai.md)
     export/              # PDF + DOCX + HTML + JSON generators + puppeteer-render + strip-html
   types/

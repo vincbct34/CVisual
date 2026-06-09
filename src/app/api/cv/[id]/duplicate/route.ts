@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireResume } from "@/lib/api-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
@@ -15,6 +16,14 @@ export async function POST(
     include: { sections: { orderBy: { order: "asc" } } },
   });
   if (response) return response;
+
+  // Deep copy (all sections) — also the AI-translation path. Cap per user.
+  const limited = await rateLimitResponse(
+    `cv-duplicate:${auth.userId}`,
+    10,
+    60_000,
+  );
+  if (limited) return limited;
 
   let body: Record<string, unknown> = {};
   try {

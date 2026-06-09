@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
 import { parseLinkedInText } from "@/lib/linkedin-parser";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
-  const { response } = await requireAuth(request);
+  const { auth, response } = await requireAuth(request);
   if (response) return response;
+
+  // PDF parse is CPU-heavy — cap per user.
+  const limited = await rateLimitResponse(
+    `linkedin-parse:${auth.userId}`,
+    10,
+    60_000,
+  );
+  if (limited) return limited;
 
   let formData: FormData;
   try {

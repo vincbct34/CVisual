@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
+    // Throttle by IP to blunt brute-forcing of reset tokens.
+    const limited = await rateLimitResponse(
+      `reset-password:${getClientIp(request)}`,
+      10,
+      15 * 60_000,
+    );
+    if (limited) return limited;
+
     const { token, password } = await request.json();
 
     if (

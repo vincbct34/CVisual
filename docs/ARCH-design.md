@@ -55,7 +55,13 @@ Reusable, so components avoid bespoke inline styling:
 `src/app/page.tsx` (client) + scoped `src/app/landing.css` (everything under
 `.landing`). Reuses the global tokens; holds only page-specific layout
 (masthead, ticker, hero with a real scaled `ClassicTemplate` mockup, feature
-grid, CTA, footer).
+grid, CTA, footer with donation + legal links).
+
+`LandingShell` (`components/landing/landing-shell.tsx`) factors the shared
+masthead + footer (optional ticker; also exports `Logo` + `Arrow`) and wraps the
+SEO marketing pages — `/modeles` (templates), `/ia` (AI), `/export` — and the
+legal pages `/cgu`, `/confidentialite`, `/mentions-legales`. The hero mockup and
+template previews use `SAMPLE_SECTIONS` from `lib/sample-resume.ts`.
 
 ## Shared UI components
 

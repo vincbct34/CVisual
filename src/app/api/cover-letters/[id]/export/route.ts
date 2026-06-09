@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCoverLetter } from "@/lib/api-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { generateCoverLetterPDF } from "@/lib/export/cover-letter-pdf";
 import { generateCoverLetterDOCX } from "@/lib/export/cover-letter-docx";
 import { generateCoverLetterHTML } from "@/lib/export/cover-letter-html";
@@ -14,8 +15,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const { coverLetter, response } = await requireCoverLetter(request, id);
+  const { coverLetter, auth, response } = await requireCoverLetter(request, id);
   if (response) return response;
+
+  // All formats here are heavy (PDF/HTML → Puppeteer, DOCX → server build).
+  const limited = await rateLimitResponse(
+    `cl-export:${auth.userId}`,
+    10,
+    60_000,
+  );
+  if (limited) return limited;
 
   const url = new URL(request.url);
   const format = url.searchParams.get("format") || "pdf";

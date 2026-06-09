@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { createCoverLetterSchema } from "@/lib/validations";
 
@@ -20,6 +21,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const { auth, response } = await requireAuth(request);
   if (response) return response;
+
+  const limited = await rateLimitResponse(
+    `cl-create:${auth.userId}`,
+    20,
+    60_000,
+  );
+  if (limited) return limited;
 
   const body = await request.json().catch(() => ({}));
   const parsed = createCoverLetterSchema.safeParse(body);

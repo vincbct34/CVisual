@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { validationError } from "@/lib/api-response";
+import { validationError, parseJsonBody } from "@/lib/api-response";
 import { requireAuth } from "@/lib/api-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { createResumeSchema } from "@/lib/validations";
 import { DEFAULT_STYLE } from "@/types/resume";
@@ -24,7 +25,15 @@ export async function POST(request: Request) {
   const { auth, response } = await requireAuth(request);
   if (response) return response;
 
-  const body = await request.json();
+  const limited = await rateLimitResponse(
+    `cv-create:${auth.userId}`,
+    20,
+    60_000,
+  );
+  if (limited) return limited;
+
+  const { body, response: badJson } = await parseJsonBody(request);
+  if (badJson) return badJson;
   const parsed = createResumeSchema.safeParse(body);
 
   if (!parsed.success) return validationError(parsed.error);

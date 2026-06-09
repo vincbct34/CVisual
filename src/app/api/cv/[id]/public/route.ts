@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api-response";
 import { requireResume } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 
@@ -10,8 +11,9 @@ export async function PATCH(
   const { response } = await requireResume(request, id);
   if (response) return response;
 
-  const body = await request.json();
-  const { isPublic } = body;
+  const { body, response: badJson } = await parseJsonBody(request);
+  if (badJson) return badJson;
+  const { isPublic } = (body ?? {}) as { isPublic?: unknown };
 
   if (typeof isPublic !== "boolean") {
     return NextResponse.json(

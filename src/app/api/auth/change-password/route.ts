@@ -2,15 +2,26 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
-import { validationError } from "@/lib/api-response";
+import { validationError, parseJsonBody } from "@/lib/api-response";
 import { changePasswordSchema } from "@/lib/validations";
 import { getRefreshTokenFromCookie } from "@/lib/auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const { auth, response } = await requireAuth(request);
   if (response) return response;
 
-  const parsed = changePasswordSchema.safeParse(await request.json());
+  // Throttle to blunt online guessing of the current password.
+  const limited = await rateLimitResponse(
+    `change-password:${auth.userId}`,
+    5,
+    15 * 60_000,
+  );
+  if (limited) return limited;
+
+  const { body, response: badJson } = await parseJsonBody(request);
+  if (badJson) return badJson;
+  const parsed = changePasswordSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
   const { currentPassword, newPassword } = parsed.data;
 

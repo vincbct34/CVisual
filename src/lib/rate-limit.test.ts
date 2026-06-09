@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { checkRateLimit, getClientIp } from "./rate-limit";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "./rate-limit";
+
+// No Upstash env in tests → these exercise the in-memory fallback backend.
 
 describe("checkRateLimit", () => {
   beforeEach(() => {
@@ -9,30 +11,49 @@ describe("checkRateLimit", () => {
     vi.useRealTimers();
   });
 
-  it("allows up to the limit then blocks", () => {
+  it("allows up to the limit then blocks", async () => {
     const key = `t-${Math.random()}`;
-    expect(checkRateLimit(key, 3, 1000).allowed).toBe(true);
-    expect(checkRateLimit(key, 3, 1000).allowed).toBe(true);
-    expect(checkRateLimit(key, 3, 1000).allowed).toBe(true);
-    const blocked = checkRateLimit(key, 3, 1000);
+    expect((await checkRateLimit(key, 3, 1000)).allowed).toBe(true);
+    expect((await checkRateLimit(key, 3, 1000)).allowed).toBe(true);
+    expect((await checkRateLimit(key, 3, 1000)).allowed).toBe(true);
+    const blocked = await checkRateLimit(key, 3, 1000);
     expect(blocked.allowed).toBe(false);
     expect(blocked.retryAfter).toBeGreaterThan(0);
   });
 
-  it("tracks each key independently", () => {
+  it("tracks each key independently", async () => {
     const a = `a-${Math.random()}`;
     const b = `b-${Math.random()}`;
-    expect(checkRateLimit(a, 1, 1000).allowed).toBe(true);
-    expect(checkRateLimit(a, 1, 1000).allowed).toBe(false);
-    expect(checkRateLimit(b, 1, 1000).allowed).toBe(true);
+    expect((await checkRateLimit(a, 1, 1000)).allowed).toBe(true);
+    expect((await checkRateLimit(a, 1, 1000)).allowed).toBe(false);
+    expect((await checkRateLimit(b, 1, 1000)).allowed).toBe(true);
   });
 
-  it("resets after the window elapses", () => {
+  it("resets after the window elapses", async () => {
     const key = `w-${Math.random()}`;
-    expect(checkRateLimit(key, 1, 1000).allowed).toBe(true);
-    expect(checkRateLimit(key, 1, 1000).allowed).toBe(false);
+    expect((await checkRateLimit(key, 1, 1000)).allowed).toBe(true);
+    expect((await checkRateLimit(key, 1, 1000)).allowed).toBe(false);
     vi.advanceTimersByTime(1001);
-    expect(checkRateLimit(key, 1, 1000).allowed).toBe(true);
+    expect((await checkRateLimit(key, 1, 1000)).allowed).toBe(true);
+  });
+});
+
+describe("rateLimitResponse", () => {
+  it("returns null while under the limit", async () => {
+    const key = `r-${Math.random()}`;
+    expect(await rateLimitResponse(key, 1, 1000)).toBeNull();
+  });
+
+  it("returns a 429 with Retry-After once over the limit", async () => {
+    const key = `r-${Math.random()}`;
+    expect(await rateLimitResponse(key, 1, 1000)).toBeNull();
+    const res = await rateLimitResponse(key, 1, 1000);
+    expect(res).not.toBeNull();
+    expect(res!.status).toBe(429);
+    expect(Number(res!.headers.get("Retry-After"))).toBeGreaterThan(0);
+    await expect(res!.json()).resolves.toMatchObject({
+      error: expect.any(String),
+    });
   });
 });
 

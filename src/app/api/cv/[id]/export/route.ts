@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireResume } from "@/lib/api-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { generatePDF } from "@/lib/export/pdf";
 import { generateDOCX } from "@/lib/export/docx";
 import { generateHTML } from "@/lib/export/html";
@@ -15,7 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const { resume, response } = await requireResume(request, id, {
+  const { resume, auth, response } = await requireResume(request, id, {
     include: { sections: { orderBy: { order: "asc" } } },
   });
   if (response) return response;
@@ -23,6 +24,17 @@ export async function GET(
   const url = new URL(request.url);
   const format = url.searchParams.get("format") || "pdf";
   const safeTitle = safeFilename(resume.title);
+
+  // Throttle the heavy formats (PDF/HTML → Puppeteer, DOCX → server build).
+  // JSON is a cheap DB serialize, so it stays unthrottled.
+  if (format !== "json") {
+    const limited = await rateLimitResponse(
+      `cv-export:${auth.userId}`,
+      10,
+      60_000,
+    );
+    if (limited) return limited;
+  }
 
   if (format === "json") {
     // Return clean, reimportable JSON

@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Proxies to a paid upstream API — cap per IP to limit cost abuse. Keyed by
+    // IP (not user) since this proxy is unauthenticated; the caller's own key is
+    // what actually pays, so this is a coarse backstop against a runaway client.
+    const limited = await rateLimitResponse(
+      `anthropic:${getClientIp(req)}`,
+      30,
+      60_000,
+    );
+    if (limited) return limited;
+
     const apiKey = req.headers.get("x-api-key");
     if (!apiKey) {
-      return new NextResponse("Missing API Key", { status: 401 });
+      return new NextResponse("Clé API manquante", { status: 401 });
     }
 
     const body = await req.json();

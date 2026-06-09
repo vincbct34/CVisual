@@ -3,23 +3,18 @@ import { validationError } from "@/lib/api-response";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 import { issueSession } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
     // Throttle by IP: 5 signups / hour. Stops automated account-farming.
-    const rl = checkRateLimit(
+    const limited = await rateLimitResponse(
       `register:${getClientIp(request)}`,
       5,
       60 * 60_000,
     );
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { error: "Trop de tentatives. Réessayez plus tard." },
-        { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
-      );
-    }
+    if (limited) return limited;
 
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);

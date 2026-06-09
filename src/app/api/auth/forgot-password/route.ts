@@ -1,23 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
 export async function POST(request: Request) {
   try {
+    // Unauthenticated and triggers outbound email — throttle hard by IP to stop
+    // mail-spam and email-enumeration probing.
+    const limited = await rateLimitResponse(
+      `forgot-password:${getClientIp(request)}`,
+      3,
+      15 * 60_000,
+    );
+    if (limited) return limited;
+
     const { email } = await request.json();
 
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email invalide" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    // We always return 200 to prevent email enumeration
-    if (!user) {
-      return NextResponse.json({ success: true });
-    }
-
+    // Check SMTP config BEFORE the user lookup. Done after, a 503 only on
+    // existing accounts (vs 200 on unknown ones) would leak account existence.
     if (
       !process.env.SMTP_HOST ||
       !process.env.SMTP_PORT ||
@@ -30,6 +35,13 @@ export async function POST(request: Request) {
         { error: "Service indisponible" },
         { status: 503 },
       );
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // We always return 200 to prevent email enumeration
+    if (!user) {
+      return NextResponse.json({ success: true });
     }
 
     // Rate limiting: Check if user already has an unexpired token

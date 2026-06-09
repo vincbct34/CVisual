@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
-import { validationError } from "@/lib/api-response";
+import { validationError, parseJsonBody } from "@/lib/api-response";
 import { updateProfileSchema } from "@/lib/validations";
 import { clearRefreshTokenCookie } from "@/lib/auth";
 
@@ -28,7 +28,9 @@ export async function PUT(request: Request) {
   const { auth, response } = await requireAuth(request);
   if (response) return response;
 
-  const parsed = updateProfileSchema.safeParse(await request.json());
+  const { body, response: badJson } = await parseJsonBody(request);
+  if (badJson) return badJson;
+  const parsed = updateProfileSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
   const { name, email } = parsed.data;
 

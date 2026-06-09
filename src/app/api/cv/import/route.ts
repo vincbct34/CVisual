@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { importResumeSchema } from "@/lib/validations";
 import { TEMPLATES } from "@/components/templates";
@@ -8,6 +9,14 @@ import { Prisma } from "@/generated/prisma/client";
 export async function POST(request: Request) {
   const { auth, response } = await requireAuth(request);
   if (response) return response;
+
+  // Heavier write (resume + up to 30 sections) — cap per user.
+  const limited = await rateLimitResponse(
+    `cv-import:${auth.userId}`,
+    10,
+    60_000,
+  );
+  if (limited) return limited;
 
   let raw: unknown;
   try {

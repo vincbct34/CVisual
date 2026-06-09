@@ -9,9 +9,19 @@ import {
   storeRefreshToken,
   setRefreshTokenCookie,
 } from "@/lib/auth";
+import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    // Loose IP cap — legit clients refresh ~every 15min; this only stops a
+    // runaway loop hammering the endpoint.
+    const limited = await rateLimitResponse(
+      `refresh:${getClientIp(request)}`,
+      60,
+      60_000,
+    );
+    if (limited) return limited;
+
     const oldToken = await getRefreshTokenFromCookie();
     if (!oldToken) {
       return NextResponse.json(

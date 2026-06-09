@@ -21,7 +21,10 @@ export default function ForgotPasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      if (!res.ok) throw new Error("Une erreur est survenue.");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Une erreur est survenue.");
+      }
       setIsSuccess(true);
       toast.success("Email envoyé avec succès !");
     } catch (error) {

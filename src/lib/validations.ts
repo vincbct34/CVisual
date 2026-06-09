@@ -53,6 +53,16 @@ export const resumeStyleSchema = z.object({
   sidebarSections: z.array(z.string()).max(50).optional(),
 });
 
+// Section payload for a batch save (id required — only existing sections are
+// updated; creation/deletion/reorder keep their own routes).
+export const batchSectionSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1).max(200).optional(),
+  content: z.any().optional(),
+  order: z.number().int().min(0).optional(),
+  visible: z.boolean().optional(),
+});
+
 export const updateResumeSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   language: z.string().min(2).max(5).optional(),
@@ -60,6 +70,9 @@ export const updateResumeSchema = z.object({
     .enum(["classic", "modern", "minimal", "creative", "professional"])
     .optional(),
   style: resumeStyleSchema.optional(),
+  // Optional batched section updates — lets the editor persist metadata + every
+  // section in a single request instead of 1 + N PUTs.
+  sections: z.array(batchSectionSchema).max(30).optional(),
 });
 
 export const createSectionSchema = z.object({

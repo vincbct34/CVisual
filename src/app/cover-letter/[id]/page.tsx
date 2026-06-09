@@ -43,8 +43,8 @@ import {
   DEFAULT_COVER_LETTER_STYLE,
 } from "@/types/cover-letter";
 import { useResizablePanels } from "@/hooks/use-resizable-panels";
-import { useDebouncedAutosave } from "@/hooks/use-debounced-autosave";
-import { downloadExport } from "@/lib/export-download";
+import { useAutosave } from "@/hooks/use-autosave";
+import { downloadExport, RateLimitError } from "@/lib/export-download";
 import { PageLoading } from "@/components/ui/page-loading";
 
 /** Compose the French date line: "Paris, le 6 juin 2026" / "Le 6 juin 2026". */
@@ -105,7 +105,14 @@ export default function CoverLetterEditorPage({
     if (!authLoading) fetchLetter();
   }, [authLoading, fetchLetter]);
 
-  const { isSaving, schedule: autoSave } = useDebouncedAutosave<CoverLetter>(
+  // Manual save (button / flush) + slow 30s safety-net autosave; live editing
+  // stays local so saves are explicit single requests, not per-keystroke.
+  const {
+    isSaving,
+    isDirty,
+    schedule: autoSave,
+    flush: saveNow,
+  } = useAutosave<CoverLetter>(
     useCallback(
       async (updated) => {
         try {
@@ -122,11 +129,21 @@ export default function CoverLetterEditorPage({
           if (!res.ok) throw new Error();
         } catch {
           toast.error("Erreur lors de la sauvegarde");
+          throw new Error("Save failed"); // keep dirty so changes aren't lost
         }
       },
       [authFetch, id],
     ),
+    30_000,
   );
+
+  // Warn before leaving with unsaved changes.
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   function updateLetter(changes: Partial<CoverLetter>) {
     if (!letter) return;
@@ -179,8 +196,12 @@ export default function CoverLetterEditorPage({
         "lettre",
       );
       toast.success(`${format.toUpperCase()} téléchargé !`);
-    } catch {
-      toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
+    } catch (e) {
+      toast.error(
+        e instanceof RateLimitError
+          ? e.message
+          : `Erreur lors de l'export ${format.toUpperCase()}`,
+      );
     }
   }
 
@@ -219,8 +240,20 @@ export default function CoverLetterEditorPage({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs" style={{ color: "var(--fg-muted)" }}>
-            {isSaving ? "Sauvegarde..." : "Sauvegardé"}
+            {isSaving
+              ? "Enregistrement..."
+              : isDirty
+                ? "Modifications non enregistrées"
+                : "Enregistré"}
           </span>
+          <Button
+            size="sm"
+            onClick={saveNow}
+            disabled={isSaving || !isDirty}
+            title="Enregistrer les modifications"
+          >
+            Enregistrer
+          </Button>
           <Button
             variant="ghost"
             size="sm"

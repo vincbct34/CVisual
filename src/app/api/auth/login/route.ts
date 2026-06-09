@@ -3,20 +3,19 @@ import { validationError } from "@/lib/api-response";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 import { issueSession } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
     // Throttle by IP: 10 login attempts / 15 min. Blunts brute-force and
     // credential stuffing without locking out legitimate retries.
-    const rl = checkRateLimit(`login:${getClientIp(request)}`, 10, 15 * 60_000);
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { error: "Trop de tentatives. Réessayez plus tard." },
-        { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
-      );
-    }
+    const limited = await rateLimitResponse(
+      `login:${getClientIp(request)}`,
+      10,
+      15 * 60_000,
+    );
+    if (limited) return limited;
 
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);

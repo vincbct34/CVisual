@@ -44,8 +44,8 @@ import type { Resume, ResumeStyle } from "@/types/resume";
 import { SECTION_TYPES } from "@/types/resume";
 import { useCompletenessScore } from "@/hooks/use-completeness";
 import { useResizablePanels } from "@/hooks/use-resizable-panels";
-import { useDebouncedAutosave } from "@/hooks/use-debounced-autosave";
-import { downloadExport } from "@/lib/export-download";
+import { useAutosave } from "@/hooks/use-autosave";
+import { downloadExport, RateLimitError } from "@/lib/export-download";
 import { PageLoading } from "@/components/ui/page-loading";
 
 const AIAtsScoreButton = dynamic(
@@ -158,12 +158,21 @@ export default function EditorPage({
     if (!authLoading) fetchResume();
   }, [authLoading, fetchResume]);
 
-  // Debounced auto-save: resume fields + every section
-  const { isSaving, schedule: autoSave } = useDebouncedAutosave<Resume>(
+  // Manual save (button / flush) with a slow 30s safety-net autosave. Live
+  // editing stays local — the preview re-renders for free — so a save is an
+  // explicit, single batched request rather than a per-keystroke storm.
+  const {
+    isSaving,
+    isDirty,
+    schedule: autoSave,
+    flush: saveNow,
+  } = useAutosave<Resume>(
     useCallback(
       async (updatedResume) => {
+        let res: Response;
         try {
-          const res = await authFetch(`/api/cv/${id}`, {
+          // One request: resume metadata + every section, batched server-side.
+          res = await authFetch(`/api/cv/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -171,41 +180,42 @@ export default function EditorPage({
               template: updatedResume.template,
               style: updatedResume.style,
               language: updatedResume.language,
+              sections: updatedResume.sections.map((s) => ({
+                id: s.id,
+                title: s.title,
+                content: s.content,
+                order: s.order,
+                visible: s.visible,
+              })),
             }),
           });
-          if (!res.ok) throw new Error("Save failed");
-
-          const failures: string[] = [];
-          for (const section of updatedResume.sections) {
-            try {
-              const sRes = await authFetch(
-                `/api/cv/${id}/sections/${section.id}`,
-                {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    title: section.title,
-                    content: section.content,
-                    order: section.order,
-                    visible: section.visible,
-                  }),
-                },
-              );
-              if (!sRes.ok) failures.push(section.title);
-            } catch {
-              failures.push(section.title);
-            }
-          }
-          if (failures.length > 0) {
-            toast.error(`Erreur de sauvegarde pour : ${failures.join(", ")}`);
-          }
         } catch {
+          // Network failure — fetch threw before any response.
           toast.error("Erreur lors de la sauvegarde");
+          throw new Error("Save failed"); // keep dirty so changes aren't lost
         }
+        if (res.ok) return;
+        // Single toast per failure: 429 gets its own message, everything else
+        // the generic one. Re-throw either way to stay dirty.
+        toast.error(
+          res.status === 429
+            ? "Trop d'enregistrements. Réessayez dans un instant."
+            : "Erreur lors de la sauvegarde",
+        );
+        throw new Error("Save failed");
       },
       [authFetch, id],
     ),
+    30_000,
   );
+
+  // Warn before leaving with unsaved changes.
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   function updateResume(changes: Partial<Resume>) {
     if (!resume) return;
@@ -344,8 +354,12 @@ export default function EditorPage({
         "cv",
       );
       toast.success(`${format.toUpperCase()} téléchargé !`);
-    } catch {
-      toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
+    } catch (e) {
+      toast.error(
+        e instanceof RateLimitError
+          ? e.message
+          : `Erreur lors de l'export ${format.toUpperCase()}`,
+      );
     }
   }
 
@@ -393,8 +407,20 @@ export default function EditorPage({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs" style={{ color: "var(--fg-muted)" }}>
-            {isSaving ? "Sauvegarde..." : "Sauvegardé"}
+            {isSaving
+              ? "Enregistrement..."
+              : isDirty
+                ? "Modifications non enregistrées"
+                : "Enregistré"}
           </span>
+          <Button
+            size="sm"
+            onClick={saveNow}
+            disabled={isSaving || !isDirty}
+            title="Enregistrer les modifications"
+          >
+            Enregistrer
+          </Button>
           <Button
             variant="ghost"
             size="sm"

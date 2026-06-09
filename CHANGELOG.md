@@ -7,6 +7,32 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This file starts at the current pre-release state — there is no prior release
 history to reconstruct.
 
+## [0.2.0] - 2026-06-09
+
+### Added
+
+- **Account management** page (`/settings/account`): update profile (`PUT /api/auth/me`),
+  change password (`POST /api/auth/change-password` — revokes other sessions),
+  and delete account (`DELETE /api/auth/me`, cascade).
+- Password **visibility toggle** on the auth forms.
+- **Legal pages**: `/cgu`, `/confidentialite`, `/mentions-legales`; donation +
+  legal links in the landing footer.
+- **SEO marketing pages**: `/modeles`, `/ia`, `/export`, sharing a `LandingShell`
+  (`components/landing/landing-shell.tsx`) masthead/footer wrapper.
+- `lib/sample-resume.ts` (`SAMPLE_SECTIONS`) for the landing mockup / previews.
+- **Upstash Redis** rate-limit backend (shared across instances) with an
+  in-memory fallback; `rateLimitResponse` helper + per-route limits.
+
+### Changed
+
+- Refactored the UI to a **light-only editorial design system** (paper/ink OKLCH
+  tokens, Newsreader / Schibsted Grotesk / JetBrains Mono); legacy CSS var names
+  remapped (see `docs/ARCH-design.md`).
+- Replaced `useDebouncedAutosave` with **`useAutosave`** (`hooks/use-autosave.ts`):
+  manual Save (`flush`) + periodic max-wait autosave (≤30s while dirty), exposing
+  `isSaving` / `isDirty`. Resume saves now batch `sections[]` into one
+  transactional `PUT /api/cv/[id]`.
+
 ## [0.1.0] - 2026-06-07
 
 ### Added
@@ -40,4 +66,5 @@ history to reconstruct.
 - Deleted the separate `ai/openai-client.ts`, `gemini-client.ts`,
   `anthropic-client.ts` (folded into the adapter engine).
 
+[0.2.0]: https://github.com/vincbct34/CVisual/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vincbct34/CVisual/releases/tag/v0.1.0

@@ -37,5 +37,5 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Session introuvable" }, { status: 404 });
   }
 
-  return new Response(null, { status: 204 });
+  return NextResponse.json({ message: "Session révoquée" });
 }

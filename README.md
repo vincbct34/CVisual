@@ -40,6 +40,7 @@ npm run dev                 # http://localhost:3000
 | `JWT_REFRESH_SECRET`                            | Signs refresh tokens                                                 |
 | `NEXT_PUBLIC_APP_URL`                           | Base URL (used by Puppeteer export; default `http://localhost:3000`) |
 | `SMTP_HOST` / `PORT` / `USER` / `PASS` / `FROM` | Password-reset emails (optional in dev)                              |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN`             | Rate-limit backend (optional; in-memory fallback if unset — set both on serverless) |
 
 Use strong, unique secrets in production (e.g. `openssl rand -base64 32`). AI keys
 are **not** env vars — users enter them in-app; they live only in the browser's
