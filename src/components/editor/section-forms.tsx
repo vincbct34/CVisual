@@ -189,7 +189,7 @@ function ProfileForm({
     <div className="space-y-3">
       <div className="space-y-1">
         <Label className="text-xs">Photo de profil</Label>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {content.photoBase64 && (
             <img
               src={content.photoBase64}
@@ -201,7 +201,7 @@ function ProfileForm({
             type="file"
             accept="image/*"
             onChange={handlePhotoUpload}
-            className="text-xs file:mr-2 file:rounded-md file:border file:border-input file:bg-transparent file:px-2 file:py-1 file:text-xs file:font-medium file:text-foreground file:cursor-pointer"
+            className="min-w-0 flex-1 text-xs file:mr-2 file:rounded-md file:border file:border-input file:bg-transparent file:px-2 file:py-1 file:text-xs file:font-medium file:text-foreground file:cursor-pointer"
           />
           {content.photoBase64 && (
             <Button

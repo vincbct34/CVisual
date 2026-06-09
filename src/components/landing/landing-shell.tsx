@@ -86,48 +86,6 @@ function Masthead() {
   );
 }
 
-function Footer() {
-  return (
-    <footer>
-      <div className="wrap">
-        <div className="foot-grid">
-          <div>
-            <Logo />
-            <div className="foot-tag">Le CV, repensé.</div>
-            <a
-              className="foot-bmc"
-              href="https://www.buymeacoffee.com/404factory"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=404factory&button_colour=a54b24&font_colour=ffffff&outline_colour=ffffff&coffee_colour=FFDD00"
-                alt="Offrez-moi un café"
-                height={48}
-              />
-            </a>
-          </div>
-          <div className="foot-links">
-            <Link href="/modeles">Modèles</Link>
-            <Link href="/export">Export</Link>
-            <Link href="/ia">IA</Link>
-            <Link href="/login">Connexion</Link>
-            <Link href="/register">Créer un compte</Link>
-          </div>
-        </div>
-        <div className="foot-copy">
-          <span>© {new Date().getFullYear()} CVisual</span>
-          <div className="foot-legal">
-            <Link href="/mentions-legales">Mentions légales</Link>
-            <Link href="/confidentialite">Confidentialité</Link>
-            <Link href="/cgu">CGU</Link>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 interface LandingShellProps {
   children: React.ReactNode;
   /** Hide the scrolling badge ticker (kept on the home page only). */
@@ -136,8 +94,9 @@ interface LandingShellProps {
 
 /**
  * Shared chrome for the marketing pages (home, /modeles, /export, /ia):
- * sticky masthead, optional ticker, footer, and the reveal-on-scroll observer
- * that animates any `.reveal` element rendered by the page.
+ * sticky masthead, optional ticker, and the reveal-on-scroll observer that
+ * animates any `.reveal` element rendered by the page. The footer is global
+ * (mounted in the root layout via `SiteFooter`).
  */
 export function LandingShell({ children, ticker = false }: LandingShellProps) {
   useEffect(() => {
@@ -170,7 +129,6 @@ export function LandingShell({ children, ticker = false }: LandingShellProps) {
         </div>
       )}
       {children}
-      <Footer />
     </div>
   );
 }

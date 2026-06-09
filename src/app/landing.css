@@ -684,7 +684,7 @@
 }
 @media (max-width: 920px) {
   .landing .hero-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 48px;
   }
   .landing .hero-l {
@@ -708,6 +708,25 @@
   }
   .landing .cta-panel {
     padding: 60px 26px;
+  }
+  /* Shrink the hero CV mockup so it fits the padded column and stays centered
+     (a grid item's min-width:auto otherwise pins it to the fixed page width). */
+  .landing .doc-stage {
+    width: 300px;
+    max-width: 100%;
+    min-width: 0;
+    justify-self: center;
+  }
+  .landing .resume-window {
+    height: 380px;
+  }
+  .landing .resume-page {
+    zoom: 0.3947;
+  }
+  @supports not (zoom: 1) {
+    .landing .resume-page {
+      transform: scale(0.3947);
+    }
   }
 }
 

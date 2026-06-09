@@ -7,6 +7,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 // Editorial type system. CSS var names are kept legacy (--font-outfit = heading
@@ -91,6 +92,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           {children}
+          <SiteFooter />
           <Toaster />
           <InstallPrompt />
         </Providers>
