@@ -119,7 +119,7 @@
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  animation: lp-marquee 26s linear infinite;
+  animation: lp-marquee 72s linear infinite;
 }
 .landing .ticker:hover .ticker-track {
   animation-play-state: paused;
@@ -127,6 +127,7 @@
 .landing .ticker-item {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 16px;
   padding: 11px 0;
   font-family: var(--mono);
@@ -431,8 +432,21 @@
   grid-template-columns: repeat(3, 1fr);
 }
 .landing .feat-col {
+  display: block;
   padding: 38px 34px 30px;
   border-right: 1px solid var(--line);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+.landing a.feat-col:hover {
+  background: var(--paper-2);
+}
+.landing a.feat-col:hover .ln {
+  gap: 11px;
+}
+.landing .feat-col .ln {
+  transition: gap 0.2s ease;
 }
 .landing .feat-col:first-child {
   padding-left: 0;
@@ -669,5 +683,354 @@
   }
   .landing .cta-panel {
     padding: 60px 26px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SUB-PAGES (/modeles, /export, /ia) — shared sub-hero
+   ═══════════════════════════════════════════════════════════════ */
+.landing .subhero {
+  padding: 60px 0 30px;
+  border-bottom: 1px solid var(--line);
+}
+.landing .subhero-h {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(36px, 5.4vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-top: 22px;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+.landing .subhero-h em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent-strong);
+}
+.landing .subhero-p {
+  margin-top: 22px;
+  max-width: 60ch;
+  font-size: 18px;
+  line-height: 1.58;
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
+/* ---------- shared: full A4 mini-CV scaled to ~360×509 ----------
+   Fixed A4 height (760 × 1075 ≈ 1:√2) so each template's white `min-h-full`
+   body fills the whole sheet — the CV reaches the bottom of its frame like a
+   real page instead of stopping at content height. */
+.landing .cv-scale {
+  width: 760px;
+  height: 1075px;
+  flex: none;
+  zoom: 0.4737;
+}
+@supports not (zoom: 1) {
+  .landing .cv-scale {
+    transform: scale(0.4737);
+    transform-origin: top left;
+  }
+}
+
+/* ---------- /modeles — template gallery ---------- */
+.landing .tpl-section {
+  padding: 44px 0 80px;
+}
+.landing .tpl-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+}
+.landing .tpl-card {
+  width: 360px;
+  background: #fff;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow:
+    5px 6px 0 -1px var(--paper),
+    5px 6px 0 0 var(--line);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.landing .tpl-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    7px 9px 0 -1px var(--paper),
+    7px 9px 0 0 var(--accent);
+}
+.landing .tpl-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ink);
+}
+.landing .tpl-name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+.landing .tpl-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+.landing .tpl-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  flex: none;
+}
+.landing .tpl-frame {
+  height: 509px;
+  overflow: hidden;
+  background: #fff;
+}
+.landing .tpl-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 44px;
+  padding: 40px 44px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 8px;
+}
+.landing .tpl-band h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.landing .tpl-band h3 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.landing .tpl-band p {
+  margin-top: 10px;
+  max-width: 48ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: oklch(0.85 0.01 80);
+}
+
+/* ---------- /export — formats ---------- */
+.landing .exp-section {
+  padding: 50px 0 90px;
+}
+.landing .exp-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 56px;
+  align-items: center;
+}
+.landing .exp-stage {
+  position: relative;
+  width: 360px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+.landing .exp-doc {
+  background: #fff;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow:
+    8px 10px 0 -1px var(--paper),
+    8px 10px 0 0 var(--line),
+    0 30px 60px -28px oklch(0.3 0.03 60 / 0.4);
+}
+.landing .exp-doc-frame {
+  height: 430px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 82%, transparent);
+  mask-image: linear-gradient(#000 82%, transparent);
+}
+.landing .exp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+  justify-content: center;
+}
+.landing .exp-chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  background: var(--paper);
+}
+.landing .fmt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.landing .fmt-row {
+  display: flex;
+  gap: 18px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.landing .fmt-badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+  background: var(--ink);
+  padding: 5px 9px;
+  border-radius: 3px;
+  height: fit-content;
+  flex: none;
+  min-width: 52px;
+  text-align: center;
+}
+.landing .fmt-row h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+.landing .fmt-row p {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.58;
+  color: var(--ink-soft);
+}
+.landing .fmt-list .btn {
+  align-self: flex-start;
+  margin-top: 26px;
+}
+
+/* ---------- /ia — capabilities ---------- */
+.landing .ia-section {
+  padding: 50px 0 90px;
+}
+.landing .ia-trust {
+  margin-top: 22px;
+  max-width: 60ch;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink-faint);
+}
+.landing .ia-trust b {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+.landing .ia-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 56px;
+  align-items: start;
+}
+.landing .cap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.landing .cap-row {
+  display: flex;
+  gap: 20px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.landing .cap-num {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1;
+  flex: none;
+}
+.landing .cap-row h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+.landing .cap-row p {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.58;
+  color: var(--ink-soft);
+}
+.landing .cap-list .btn {
+  align-self: flex-start;
+  margin-top: 26px;
+}
+.landing .ia-demos {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 96px;
+}
+.landing .ia-demo {
+  background: #fff;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  box-shadow:
+    6px 7px 0 -1px var(--paper),
+    6px 7px 0 0 var(--ink);
+  padding: 16px;
+}
+.landing .ia-demo .ia-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.landing .ia-before {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+.landing .ats-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.landing .ats-num {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 52px;
+  line-height: 1;
+  color: var(--accent-strong);
+}
+.landing .ats-out {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+/* ---------- sub-page responsive ---------- */
+@media (max-width: 920px) {
+  .landing .tpl-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing .exp-grid,
+  .landing .ia-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .landing .ia-demos {
+    position: static;
   }
 }

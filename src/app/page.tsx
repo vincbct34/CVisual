@@ -1,115 +1,8 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
-import { LogoMark } from "@/components/ui/logo";
-import type { Resume, Section } from "@/types/resume";
+import { LandingShell, Arrow } from "@/components/landing/landing-shell";
+import { SAMPLE_RESUME } from "@/lib/sample-resume";
 import "./landing.css";
-
-// Sample CV rendered in the hero — the real ClassicTemplate component, so the
-// mockup always matches a template that actually ships in the app.
-const SAMPLE_SECTIONS: Section[] = [
-  {
-    id: "s-profile",
-    type: "profile",
-    title: "Profil",
-    order: 0,
-    visible: true,
-    content: {
-      fullName: "Camille Laurent",
-      jobTitle: "Cheffe de projet digital",
-      summary: "",
-      email: "camille.laurent@email.fr",
-      phone: "06 12 34 56 78",
-      location: "Lyon, FR",
-      website: "",
-    },
-  },
-  {
-    id: "s-exp",
-    type: "experience",
-    title: "Expérience",
-    order: 1,
-    visible: true,
-    content: {
-      items: [
-        {
-          id: "e1",
-          company: "Atelier Numérique",
-          position: "Cheffe de projet",
-          startDate: "2023",
-          endDate: "",
-          current: true,
-          description:
-            "Pilotage de 12 projets web livrés dans les délais et le budget.",
-        },
-        {
-          id: "e2",
-          company: "Studio Pixel",
-          position: "Chargée de projet",
-          startDate: "2021",
-          endDate: "2023",
-          current: false,
-          description: "Suivi de 8 comptes clients et reporting hebdomadaire.",
-        },
-      ],
-    },
-  },
-  {
-    id: "s-edu",
-    type: "education",
-    title: "Formation",
-    order: 2,
-    visible: true,
-    content: {
-      items: [
-        {
-          id: "ed1",
-          institution: "Université Lyon 3",
-          degree: "Master Management de projet",
-          field: "",
-          startDate: "",
-          endDate: "2021",
-          description: "",
-        },
-      ],
-    },
-  },
-  {
-    id: "s-skills",
-    type: "skills",
-    title: "Compétences",
-    order: 3,
-    visible: true,
-    content: {
-      display: "tags",
-      items: [
-        { id: "sk1", name: "Gestion de projet", level: 5 },
-        { id: "sk2", name: "Figma", level: 4 },
-        { id: "sk3", name: "Notion", level: 4 },
-        { id: "sk4", name: "Jira", level: 3 },
-        { id: "sk5", name: "Agile", level: 4 },
-      ],
-    },
-  },
-];
-
-const SAMPLE_RESUME: Resume = {
-  id: "sample",
-  title: "CV — Camille Laurent",
-  language: "fr",
-  template: "classic",
-  isPublic: false,
-  createdAt: "",
-  updatedAt: "",
-  style: {
-    primaryColor: "#9e4a2d",
-    fontFamily: "var(--sans)",
-    fontSize: 14,
-  },
-  sections: SAMPLE_SECTIONS,
-};
 
 const COPY = {
   eyebrow: "Générateur de CV — Gratuit",
@@ -117,17 +10,9 @@ const COPY = {
   headlineAccent: "ressemble",
   subtitle:
     "Des modèles pensés pour les recruteurs, optimisés ATS, entièrement personnalisables et assistés par IA. Un CV professionnel en quelques minutes.",
-  ctaPrimary: "Commencer gratuitement",
+  ctaPrimary: "Commencer dès maintenant",
   ctaSecondary: "Se connecter",
 };
-
-const BADGES = [
-  "5 templates",
-  "Export PDF / DOCX",
-  "Multi-langue",
-  "ATS-friendly",
-  "IA intégrée",
-];
 
 const FEATURES = [
   {
@@ -135,49 +20,23 @@ const FEATURES = [
     h: "Templates pro",
     p: "Cinq modèles dessinés avec des recruteurs. Une hiérarchie typographique nette, lisible par les machines comme par les humains.",
     l: "Voir les modèles",
+    href: "/modeles",
   },
   {
     n: "02",
     h: "Export multi-format",
     p: "PDF haute fidélité ou DOCX éditable, générés à la volée. Le fichier est prêt à partir, sans retouche.",
     l: "PDF · DOCX",
+    href: "/export",
   },
   {
     n: "03",
     h: "IA embarquée",
     p: "Un assistant qui reformule, traduit et resserre vos expériences — vos mots, en plus convaincants.",
     l: "Découvrir l’IA",
+    href: "/ia",
   },
 ];
-
-function Arrow({ size = 15 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
-function Logo() {
-  return (
-    <Link className="logo" href="/" style={{ alignItems: "center", gap: 9 }}>
-      <LogoMark size={27} />
-      <span style={{ display: "inline-flex", alignItems: "baseline", gap: 3 }}>
-        CVisual<span className="reg">®</span>
-      </span>
-    </Link>
-  );
-}
 
 function ResumeMockup() {
   return (
@@ -219,72 +78,9 @@ function ResumeMockup() {
   );
 }
 
-function TickerItem() {
-  return (
-    <div className="ticker-item">
-      {BADGES.map((b, i) => (
-        <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
-          <span className="sep">◆</span>
-          <span className="txt">{b}</span>
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export default function HomePage() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12 },
-    );
-    document
-      .querySelectorAll(".landing .reveal")
-      .forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-
   return (
-    <div className="landing">
-      <header className={`mast${scrolled ? " scrolled" : ""}`}>
-        <div className="wrap mast-inner">
-          <Logo />
-          <nav className="mast-right">
-            <a className="mast-link hide-sm" href="#feat">
-              Fonctionnalités
-            </a>
-            <Link className="mast-link" href="/login">
-              Connexion
-            </Link>
-            <Link className="btn btn-ink btn-sm" href="/register">
-              Créer un compte
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      <div className="ticker" aria-hidden="true">
-        <div className="ticker-track">
-          <TickerItem />
-          <TickerItem />
-        </div>
-      </div>
-
+    <LandingShell ticker>
       <section className="hero">
         <div className="wrap hero-grid">
           <div className="hero-l reveal in">
@@ -305,7 +101,7 @@ export default function HomePage() {
             </div>
             <div className="hero-meta">
               <span className="rule" />
-              Gratuit · Sans carte bancaire
+              Totalement gratuit
             </div>
           </div>
           <ResumeMockup />
@@ -325,9 +121,10 @@ export default function HomePage() {
           </div>
           <div className="feat-grid">
             {FEATURES.map((f, i) => (
-              <div
+              <Link
                 className="feat-col reveal"
                 key={f.n}
+                href={f.href}
                 style={{ transitionDelay: `${i * 90}ms` }}
               >
                 <div className="feat-num">{f.n}</div>
@@ -336,7 +133,7 @@ export default function HomePage() {
                 <span className="ln">
                   {f.l} <Arrow size={13} />
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -361,31 +158,11 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="cta-note">
-              Gratuit · Sans carte bancaire · Annulable à tout moment
+              Totalement gratuit · Sans carte bancaire · Aucun spam
             </div>
           </div>
         </div>
       </section>
-
-      <footer>
-        <div className="wrap">
-          <div className="foot-grid">
-            <div>
-              <Logo />
-              <div className="foot-tag">Le CV, repensé.</div>
-            </div>
-            <div className="foot-links">
-              <Link href="/login">Connexion</Link>
-              <Link href="/register">Créer un compte</Link>
-              <a href="#feat">Fonctionnalités</a>
-            </div>
-          </div>
-          <div className="foot-copy">
-            <span>© {new Date().getFullYear()} CVisual</span>
-            <span>Générateur de CV &amp; lettre de motivation</span>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </LandingShell>
   );
 }
