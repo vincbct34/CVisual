@@ -30,7 +30,7 @@ export function ModernTemplate({ resume }: TemplateProps) {
 
   return (
     <div
-      className="text-gray-800 w-full flex min-h-full"
+      className="cv-root text-gray-800 w-full flex min-h-full"
       style={getRootFontStyle(style)}
     >
       {/* Sidebar */}

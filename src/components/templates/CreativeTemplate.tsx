@@ -44,7 +44,7 @@ export function CreativeTemplate({ resume }: TemplateProps) {
 
   return (
     <div
-      className="text-gray-800 w-full flex flex-col min-h-full"
+      className="cv-root text-gray-800 w-full flex flex-col min-h-full"
       style={getRootFontStyle(style)}
     >
       {/* Header band */}

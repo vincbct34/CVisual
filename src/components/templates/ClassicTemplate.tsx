@@ -23,7 +23,7 @@ export function ClassicTemplate({ resume }: TemplateProps) {
 
   return (
     <div
-      className="bg-white text-gray-800 w-full min-h-full"
+      className="cv-root bg-white text-gray-800 w-full min-h-full"
       style={getRootFontStyle(style)}
     >
       <header

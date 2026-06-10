@@ -32,7 +32,7 @@ export function useAutosave<T>(
   // A flush/tick arrived while a save was in flight — re-run once it settles.
   const rerunPendingRef = useRef(false);
   // Stable self-reference so `run` can chain a follow-up save without a dep cycle.
-  const runRef = useRef<(value: T) => Promise<void>>(async () => {});
+  const runRef = useRef<(value: T) => Promise<boolean>>(async () => false);
 
   // Keep the latest save closure without resubscribing timers.
   const saveRef = useRef(save);
@@ -47,19 +47,22 @@ export function useAutosave<T>(
     }
   }, []);
 
-  const run = useCallback(async (value: T) => {
+  const run = useCallback(async (value: T): Promise<boolean> => {
     if (savingRef.current) {
       // A save is already running — don't overlap, but remember to save the
       // latest value as soon as the in-flight one settles (covers the manual
-      // flush firing mid-save).
+      // flush firing mid-save). Report not-saved so an awaiting caller (e.g. a
+      // save-before-export gate) doesn't treat the queued value as persisted.
       rerunPendingRef.current = true;
-      return;
+      return false;
     }
     savingRef.current = true;
     setIsSaving(true);
+    let ok = false;
     try {
       await saveRef.current(value);
       savedValueRef.current = value;
+      ok = true;
       // Only clear dirty if nothing newer was scheduled mid-save.
       if (latestValueRef.current === value) setIsDirty(false);
     } catch {
@@ -76,6 +79,7 @@ export function useAutosave<T>(
         void runRef.current(latestValueRef.current as T);
       }
     }
+    return ok;
   }, []);
   useEffect(() => {
     runRef.current = run;
@@ -102,10 +106,14 @@ export function useAutosave<T>(
 
   // Save the latest unsaved value right now (manual save button). If a save is
   // already in flight, `run` queues a follow-up so the click never no-ops.
-  const flush = useCallback(() => {
+  // Returns whether everything is persisted: `true` if already clean or the save
+  // succeeded, `false` if the save failed (stays dirty). Awaitable so callers can
+  // gate on a clean save — e.g. saving before a server-side export reads the DB.
+  const flush = useCallback((): Promise<boolean> => {
     if (latestValueRef.current !== savedValueRef.current) {
-      void run(latestValueRef.current as T);
+      return run(latestValueRef.current as T);
     }
+    return Promise.resolve(true);
   }, [run]);
 
   // On unmount: stop the timer and fire a best-effort final save. Client-side

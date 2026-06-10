@@ -24,6 +24,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -72,6 +80,10 @@ export default function CoverLetterEditorPage({
   const { authFetch, isLoading: authLoading } = useAuth();
   const [letter, setLetter] = useState<CoverLetter | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Set to the chosen format while the "save before export" dialog is open.
+  const [pendingExportFormat, setPendingExportFormat] = useState<string | null>(
+    null,
+  );
   const router = useRouter();
 
   const {
@@ -186,7 +198,7 @@ export default function CoverLetterEditorPage({
     reader.readAsDataURL(file);
   }
 
-  async function handleExport(format: string) {
+  async function runExport(format: string) {
     try {
       await downloadExport(
         authFetch,
@@ -203,6 +215,34 @@ export default function CoverLetterEditorPage({
           : `Erreur lors de l'export ${format.toUpperCase()}`,
       );
     }
+  }
+
+  // Export renders server-side from the DB, so unsaved local edits wouldn't
+  // appear in the file. With pending changes, open the dialog to let the user
+  // save first; otherwise export straight away.
+  function handleExport(format: string) {
+    if (isDirty) {
+      setPendingExportFormat(format);
+      return;
+    }
+    void runExport(format);
+  }
+
+  async function saveThenExport() {
+    const format = pendingExportFormat;
+    setPendingExportFormat(null);
+    if (!format) return;
+    if (!(await saveNow())) {
+      toast.error("Échec de la sauvegarde — export annulé.");
+      return;
+    }
+    await runExport(format);
+  }
+
+  function exportWithoutSaving() {
+    const format = pendingExportFormat;
+    setPendingExportFormat(null);
+    if (format) void runExport(format);
   }
 
   if (authLoading || isLoading || !letter) {
@@ -305,6 +345,46 @@ export default function CoverLetterEditorPage({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Dialog
+            open={pendingExportFormat !== null}
+            onOpenChange={(open) => {
+              if (!open) setPendingExportFormat(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Modifications non enregistrées</DialogTitle>
+                <DialogDescription>
+                  L&apos;export utilise la dernière version enregistrée.
+                  Enregistrez d&apos;abord pour inclure vos modifications
+                  récentes dans le fichier.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                  onClick={() => setPendingExportFormat(null)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={exportWithoutSaving}
+                >
+                  Exporter sans enregistrer
+                </Button>
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={saveThenExport}
+                  disabled={isSaving}
+                >
+                  Enregistrer et exporter
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

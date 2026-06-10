@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { fontStack } from "@/components/templates/template-utils";
 
 // Shared style controls used by both the resume StylePanel and the cover-letter
 // StylePanel. Each is generic over the style object so it can mutate just the
@@ -99,7 +100,11 @@ export function FontSelect<T extends { fontFamily: string }>({
       </SelectTrigger>
       <SelectContent>
         {fonts.map((font) => (
-          <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+          <SelectItem
+            key={font}
+            value={font}
+            style={{ fontFamily: fontStack(font) }}
+          >
             {font}
           </SelectItem>
         ))}

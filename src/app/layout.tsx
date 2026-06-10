@@ -3,6 +3,13 @@ import {
   Newsreader,
   Schibsted_Grotesk,
   JetBrains_Mono,
+  Inter,
+  Roboto,
+  Open_Sans,
+  Lato,
+  Montserrat,
+  Merriweather,
+  Playfair_Display,
 } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
@@ -31,6 +38,76 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
+
+// Document fonts offered in the CV / cover-letter style panels. next/font
+// self-hosts each face under a HASHED family name, exposed only via these CSS
+// variables (set on <html> below). fontStack() in template-utils leads each
+// stack with the matching var(--cv-*) so the editor preview, the /render
+// Puppeteer target (PDF/HTML export) and the share/public pages all resolve
+// them self-hosted (no flaky external Google Fonts fetch in headless Chromium).
+// `preload: false`: faces are declared but only fetched when a document
+// actually uses one. Fallback stacks live in FONT_STACKS / FONT_CSS_VARS
+// (components/templates/template-utils.ts).
+const docInter = Inter({
+  variable: "--cv-inter",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  preload: false,
+});
+const docRoboto = Roboto({
+  variable: "--cv-roboto",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "700"],
+  preload: false,
+});
+const docOpenSans = Open_Sans({
+  variable: "--cv-open-sans",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  preload: false,
+});
+const docLato = Lato({
+  variable: "--cv-lato",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "700"],
+  preload: false,
+});
+const docMontserrat = Montserrat({
+  variable: "--cv-montserrat",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  preload: false,
+});
+const docMerriweather = Merriweather({
+  variable: "--cv-merriweather",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "700"],
+  preload: false,
+});
+const docPlayfair = Playfair_Display({
+  variable: "--cv-playfair",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  preload: false,
+});
+const documentFontVariables = [
+  docInter,
+  docRoboto,
+  docOpenSans,
+  docLato,
+  docMontserrat,
+  docMerriweather,
+  docPlayfair,
+]
+  .map((f) => f.variable)
+  .join(" ");
 
 export const viewport: Viewport = {
   themeColor: "#f7f4ee",
@@ -86,7 +163,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${newsreader.variable} ${schibsted.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${schibsted.variable} ${jetbrainsMono.variable} ${documentFontVariables} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

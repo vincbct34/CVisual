@@ -34,6 +34,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -80,6 +82,10 @@ export default function EditorPage({
   const [resume, setResume] = useState<Resume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showTemplatePreview, setShowTemplatePreview] = useState(false);
+  // Set to the chosen format while the "save before export" dialog is open.
+  const [pendingExportFormat, setPendingExportFormat] = useState<string | null>(
+    null,
+  );
   const router = useRouter();
 
   const {
@@ -344,7 +350,7 @@ export default function EditorPage({
     }
   }
 
-  async function handleExport(format: string) {
+  async function runExport(format: string) {
     try {
       await downloadExport(
         authFetch,
@@ -361,6 +367,34 @@ export default function EditorPage({
           : `Erreur lors de l'export ${format.toUpperCase()}`,
       );
     }
+  }
+
+  // Export renders server-side from the DB, so unsaved local edits (style,
+  // sections…) wouldn't appear in the file. With pending changes, open the
+  // dialog to let the user save first; otherwise export straight away.
+  function handleExport(format: string) {
+    if (isDirty) {
+      setPendingExportFormat(format);
+      return;
+    }
+    void runExport(format);
+  }
+
+  async function saveThenExport() {
+    const format = pendingExportFormat;
+    setPendingExportFormat(null);
+    if (!format) return;
+    if (!(await saveNow())) {
+      toast.error("Échec de la sauvegarde — export annulé.");
+      return;
+    }
+    await runExport(format);
+  }
+
+  function exportWithoutSaving() {
+    const format = pendingExportFormat;
+    setPendingExportFormat(null);
+    if (format) void runExport(format);
   }
 
   if (authLoading || isLoading || !resume) {
@@ -497,6 +531,46 @@ export default function EditorPage({
                   Copier le lien de partage
                 </Button>
               </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog
+            open={pendingExportFormat !== null}
+            onOpenChange={(open) => {
+              if (!open) setPendingExportFormat(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Modifications non enregistrées</DialogTitle>
+                <DialogDescription>
+                  L&apos;export utilise la dernière version enregistrée.
+                  Enregistrez d&apos;abord pour inclure vos modifications
+                  récentes dans le fichier.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                  onClick={() => setPendingExportFormat(null)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={exportWithoutSaving}
+                >
+                  Exporter sans enregistrer
+                </Button>
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={saveThenExport}
+                  disabled={isSaving}
+                >
+                  Enregistrer et exporter
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
           <AIAtsScoreButton resume={resume} />

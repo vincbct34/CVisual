@@ -209,6 +209,19 @@
     letter-spacing: -0.02em;
   }
 
+  /* CV templates apply Resume.style.fontFamily to their .cv-root via inline
+     style — but that's inherited, and the bare h1–h6 rule above wins over
+     inheritance, so CV names + section titles would always render in the app
+     serif (Newsreader), ignoring the user's chosen font. Scope the editorial
+     heading style out of CV content so the chosen font/letter-spacing reaches
+     headings too — in the editor preview AND the Puppeteer PDF/HTML export.
+     `:where()` keeps specificity low so each template's own utility classes
+     (font-bold…) and inline font-size still win. */
+  .cv-root :where(h1, h2, h3, h4, h5, h6) {
+    font-family: inherit;
+    letter-spacing: normal;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;

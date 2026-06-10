@@ -1,4 +1,4 @@
-import { sanitize } from "./template-utils";
+import { fontStack, sanitize } from "./template-utils";
 import type {
   CoverLetterContent,
   CoverLetterStyle,
@@ -45,7 +45,7 @@ export function CoverLetterTemplate({
     <div
       className="bg-white text-gray-800 w-full min-h-[297mm]"
       style={{
-        fontFamily: style.fontFamily,
+        fontFamily: fontStack(style.fontFamily),
         fontSize: `${style.fontSize}px`,
         lineHeight,
       }}

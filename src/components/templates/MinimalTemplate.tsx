@@ -21,7 +21,7 @@ export function MinimalTemplate({ resume }: TemplateProps) {
 
   return (
     <div
-      className="bg-white text-gray-900 w-full min-h-full"
+      className="cv-root bg-white text-gray-900 w-full min-h-full"
       style={getRootFontStyle(style)}
     >
       <header className="px-12 pt-12 pb-8">

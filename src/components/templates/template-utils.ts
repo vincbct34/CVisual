@@ -136,6 +136,52 @@ export function getPhotoStyle(style: ResumeStyle): CSSProperties {
 }
 
 /**
+ * Full font-family stacks for the families offered in the style panels.
+ * `style.fontFamily` stores a bare name ("Inter"); applying it raw means an
+ * unavailable font drops the whole document to the browser default. OS families
+ * fall back along their classic stacks.
+ */
+export const FONT_STACKS: Record<string, string> = {
+  Inter: "Inter, system-ui, Arial, sans-serif",
+  Arial: "Arial, Helvetica, sans-serif",
+  Georgia: 'Georgia, "Times New Roman", serif',
+  "Times New Roman": '"Times New Roman", Times, serif',
+  Helvetica: "Helvetica, Arial, sans-serif",
+  Verdana: "Verdana, Geneva, sans-serif",
+  Roboto: "Roboto, Arial, sans-serif",
+  "Open Sans": '"Open Sans", Arial, sans-serif',
+  Lato: "Lato, Arial, sans-serif",
+  Montserrat: "Montserrat, Arial, sans-serif",
+  Merriweather: "Merriweather, Georgia, serif",
+  "Playfair Display": '"Playfair Display", Georgia, serif',
+};
+
+/**
+ * Google families self-hosted via `next/font/google` in `app/layout.tsx`.
+ * next/font emits each face under a HASHED family name, exposed only through a
+ * CSS variable (set on <html>) — NOT under the plain "Inter" name. So the stack
+ * must lead with `var(--cv-*)` to hit the self-hosted face; the literal name +
+ * OS fallbacks below back it up. This is what makes fonts resolve in the
+ * Puppeteer /render target (PDF/HTML export), not just the browser preview.
+ */
+const FONT_CSS_VARS: Record<string, string> = {
+  Inter: "--cv-inter",
+  Roboto: "--cv-roboto",
+  "Open Sans": "--cv-open-sans",
+  Lato: "--cv-lato",
+  Montserrat: "--cv-montserrat",
+  Merriweather: "--cv-merriweather",
+  "Playfair Display": "--cv-playfair",
+};
+
+/** Bare stored family name → full stack (unknown names get a sans fallback). */
+export function fontStack(family: string): string {
+  const base = FONT_STACKS[family] ?? `"${family}", system-ui, sans-serif`;
+  const cssVar = FONT_CSS_VARS[family];
+  return cssVar ? `var(${cssVar}), ${base}` : base;
+}
+
+/**
  * Root container font style for a template. Sets the body text size (px) plus
  * two CSS-variable multipliers that the size tokens in `FS` read:
  *   --cv-head → names + section titles (Titres slider)
@@ -145,7 +191,7 @@ export function getPhotoStyle(style: ResumeStyle): CSSProperties {
  */
 export function getRootFontStyle(style: ResumeStyle): CSSProperties {
   return {
-    fontFamily: style.fontFamily,
+    fontFamily: fontStack(style.fontFamily),
     fontSize: `${style.fontSize}px`,
     ["--cv-head" as string]: String(style.headingScale ?? 1),
     ["--cv-meta" as string]: String(style.metaScale ?? 1),
