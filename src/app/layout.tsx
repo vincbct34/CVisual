@@ -140,6 +140,8 @@ export const metadata: Metadata = {
   // Indexable by default; private/token routes opt out via robots.ts + per-page
   // metadata (see render/share/public pages).
   robots: { index: true, follow: true },
+  // og:image / twitter:image come from the opengraph-image.tsx + twitter-image.tsx
+  // convention files (no manual `images` needed).
   openGraph: {
     type: "website",
     siteName: "CVisual",
@@ -167,6 +169,33 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          // Structured data: surfaces CVisual as a (free) web application + its
+          // publisher to search engines for rich-result eligibility.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "SoftwareApplication",
+                name: "CVisual",
+                description: APP_DESCRIPTION,
+                url: APP_URL,
+                applicationCategory: "BusinessApplication",
+                operatingSystem: "Web",
+                inLanguage: "fr",
+                offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "CVisual",
+                url: APP_URL,
+                logo: `${APP_URL}/icons/icon-512.svg`,
+              },
+            ]),
+          }}
+        />
         <Providers>
           {children}
           <SiteFooter />

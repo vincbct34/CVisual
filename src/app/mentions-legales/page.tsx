@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Mentions légales",
   description:
     "Mentions légales de CVisual : éditeur, hébergeur et informations de contact.",
+  alternates: { canonical: "/mentions-legales" },
 };
 
 export default function MentionsLegalesPage() {

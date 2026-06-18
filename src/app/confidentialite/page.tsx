@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Politique de confidentialité",
   description:
     "Comment CVisual collecte, utilise et protège vos données personnelles, conformément au RGPD.",
+  alternates: { canonical: "/confidentialite" },
 };
 
 export default function ConfidentialitePage() {

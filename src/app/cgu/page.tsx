@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Conditions générales d’utilisation",
   description:
     "Conditions générales d’utilisation du service CVisual : accès, compte, responsabilités et propriété.",
+  alternates: { canonical: "/cgu" },
 };
 
 export default function CGUPage() {

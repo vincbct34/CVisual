@@ -5,10 +5,15 @@ import { RegisterCta } from "@/components/landing/home-cta";
 import { SAMPLE_RESUME } from "@/lib/sample-resume";
 import "../landing.css";
 
+const TITLE = "Export PDF, DOCX & HTML";
+const DESCRIPTION =
+  "Exportez votre CV en PDF haute fidélité, DOCX éditable, HTML autonome ou JSON réimportable. Le rendu est identique au pixel près à l’aperçu de l’éditeur.";
+
 export const metadata: Metadata = {
-  title: "Export PDF, DOCX & HTML",
-  description:
-    "Exportez votre CV en PDF haute fidélité, DOCX éditable, HTML autonome ou JSON réimportable. Le rendu est identique au pixel près à l’aperçu de l’éditeur.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/export" },
+  openGraph: { title: TITLE, description: DESCRIPTION },
 };
 
 const FORMATS = [

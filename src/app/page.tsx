@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
 import { LandingShell, Arrow } from "@/components/landing/landing-shell";
 import { HomeCta } from "@/components/landing/home-cta";
 import { SAMPLE_RESUME } from "@/lib/sample-resume";
 import "./landing.css";
+
+// Title/description/OpenGraph inherit the root layout; only the canonical is
+// page-specific (canonical is set per-page, never on the root layout).
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const COPY = {
   eyebrow: "Générateur de CV — Gratuit",

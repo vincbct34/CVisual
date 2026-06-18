@@ -3,10 +3,15 @@ import { LandingShell } from "@/components/landing/landing-shell";
 import { RegisterCta } from "@/components/landing/home-cta";
 import "../landing.css";
 
+const TITLE = "Assistant IA";
+const DESCRIPTION =
+  "Un assistant IA qui reformule, résume, traduit et score votre CV face à une offre. Compatible OpenAI, Gemini et Anthropic — votre clé reste sur votre appareil.";
+
 export const metadata: Metadata = {
-  title: "Assistant IA",
-  description:
-    "Un assistant IA qui reformule, résume, traduit et score votre CV face à une offre. Compatible OpenAI, Gemini et Anthropic — votre clé reste sur votre appareil.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/ia" },
+  openGraph: { title: TITLE, description: DESCRIPTION },
 };
 
 const CAPS = [

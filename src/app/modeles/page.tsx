@@ -5,10 +5,15 @@ import { getTemplate } from "@/components/templates";
 import { TEMPLATE_SHOWCASE, sampleForTemplate } from "@/lib/sample-resume";
 import "../landing.css";
 
+const TITLE = "Modèles de CV";
+const DESCRIPTION =
+  "Cinq modèles de CV professionnels et optimisés ATS : Classique, Moderne, Minimal, Créatif et Professionnel. Personnalisables et exportables en PDF / DOCX.";
+
 export const metadata: Metadata = {
-  title: "Modèles de CV",
-  description:
-    "Cinq modèles de CV professionnels et optimisés ATS : Classique, Moderne, Minimal, Créatif et Professionnel. Personnalisables et exportables en PDF / DOCX.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/modeles" },
+  openGraph: { title: TITLE, description: DESCRIPTION },
 };
 
 export default function ModelesPage() {
