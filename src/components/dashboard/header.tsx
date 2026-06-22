@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocalizedRouter } from "@/components/i18n/link";
 import { useT } from "@/components/i18n/language-provider";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
@@ -41,6 +42,8 @@ export function DashboardHeader() {
         />
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger className="btn-chip">
