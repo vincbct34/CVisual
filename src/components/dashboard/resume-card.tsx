@@ -102,6 +102,7 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
                 t("resumeCard.translatingProgress", { current, total }),
               ),
             provider,
+            locale,
           );
           const writes = await Promise.all(
             result.sections.map((section) =>

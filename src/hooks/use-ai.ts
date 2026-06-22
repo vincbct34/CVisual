@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useSyncExternalStore } from "react";
-import { useT } from "@/components/i18n/language-provider";
+import { useLocale, useT } from "@/components/i18n/language-provider";
 import { callAI, streamAI, stripCodeFence } from "@/lib/ai/ai-client";
 import {
   improveContentPrompt,
@@ -97,6 +97,7 @@ export function useAI() {
     getServerProviderSnapshot,
   );
   const t = useT();
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -135,7 +136,9 @@ export function useAI() {
           : "OpenAI";
     if (!apiKey) {
       throw new AIError(
-        `Veuillez configurer votre clé API ${providerName}`,
+        locale === "en"
+          ? `Please configure your ${providerName} API key`
+          : `Veuillez configurer votre clé API ${providerName}`,
         "no_key",
       );
     }
@@ -168,7 +171,12 @@ export function useAI() {
       setIsLoading(true);
       setError(null);
       try {
-        const messages = improveContentPrompt(content, context, instruction);
+        const messages = improveContentPrompt(
+          content,
+          context,
+          instruction,
+          locale,
+        );
         const result = await callAI(provider, {
           apiKey: key,
           messages,
@@ -187,7 +195,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider, t],
+    [apiKey, provider, t, locale],
   );
 
   /**
@@ -205,7 +213,7 @@ export function useAI() {
       setIsLoading(true);
       setError(null);
       try {
-        const messages = generateSummaryPrompt(resumeData);
+        const messages = generateSummaryPrompt(resumeData, locale);
         const result = await callAI(provider, {
           apiKey: key,
           messages,
@@ -222,7 +230,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider, t],
+    [apiKey, provider, t, locale],
   );
 
   /**
@@ -240,7 +248,7 @@ export function useAI() {
       setIsLoading(true);
       setError(null);
       try {
-        const messages = generateCoverLetterPrompt(resumeData);
+        const messages = generateCoverLetterPrompt(resumeData, locale);
         let full = "";
         for await (const chunk of streamAI(provider, {
           apiKey: key,
@@ -263,7 +271,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider, t],
+    [apiKey, provider, t, locale],
   );
 
   const generate = useCallback(

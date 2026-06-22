@@ -7,6 +7,16 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This file starts at the current pre-release state — there is no prior release
 history to reconstruct.
 
+## [0.3.1] - 2026-06-22
+
+### Changed
+
+- Localized AI prompt instructions for French and English app sessions while
+  preserving generated resume, cover-letter, ATS, and translation output in the
+  target CV language.
+- Localized AI translation language names and the missing API key error shown by
+  AI actions.
+
 ## [0.3.0] - 2026-06-22
 
 ### Added
@@ -80,6 +90,7 @@ history to reconstruct.
 - Deleted the separate `ai/openai-client.ts`, `gemini-client.ts`,
   `anthropic-client.ts` (folded into the adapter engine).
 
+[0.3.1]: https://github.com/vincbct34/CVisual/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/vincbct34/CVisual/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/vincbct34/CVisual/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vincbct34/CVisual/releases/tag/v0.1.0

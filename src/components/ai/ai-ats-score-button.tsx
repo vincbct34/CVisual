@@ -113,12 +113,15 @@ export function AIAtsScoreButton({ resume }: Props) {
         })
         .join("\n\n");
 
-      const messages = atsScorePrompt({
-        jobTitle,
-        sections: sectionText,
-        language: resume.language,
-        jobDescription: jobDescription.trim() || undefined,
-      });
+      const messages = atsScorePrompt(
+        {
+          jobTitle,
+          sections: sectionText,
+          language: resume.language,
+          jobDescription: jobDescription.trim() || undefined,
+        },
+        locale,
+      );
       const raw = await generate(messages);
       const parsed = parseJsonResponse<ATSScoreResult>(raw);
       setResult(parsed);

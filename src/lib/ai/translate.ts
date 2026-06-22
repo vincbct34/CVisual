@@ -2,19 +2,34 @@ import { callAI } from "./ai-client";
 import { translateContentPrompt } from "./prompts";
 import { parseJsonResponse } from "./json";
 import { PROVIDER_MODELS, type AIProvider } from "./types";
+import type { Locale } from "@/lib/i18n/config";
 import type { Section } from "@/types/resume";
 
-const LANG_NAMES: Record<string, string> = {
-  fr: "français",
-  en: "anglais",
-  es: "espagnol",
-  de: "allemand",
-  it: "italien",
-  pt: "portugais",
-  nl: "néerlandais",
-  ar: "arabe",
-  zh: "chinois",
-  ja: "japonais",
+const LANG_NAMES: Record<Locale, Record<string, string>> = {
+  fr: {
+    fr: "français",
+    en: "anglais",
+    es: "espagnol",
+    de: "allemand",
+    it: "italien",
+    pt: "portugais",
+    nl: "néerlandais",
+    ar: "arabe",
+    zh: "chinois",
+    ja: "japonais",
+  },
+  en: {
+    fr: "French",
+    en: "English",
+    es: "Spanish",
+    de: "German",
+    it: "Italian",
+    pt: "Portuguese",
+    nl: "Dutch",
+    ar: "Arabic",
+    zh: "Chinese",
+    ja: "Japanese",
+  },
 };
 
 // Static translation of standard section titles
@@ -135,9 +150,11 @@ export async function translateSections(
   apiKey: string,
   onProgress?: (current: number, total: number) => void,
   provider: AIProvider = "gemini",
+  locale: Locale = "fr",
 ): Promise<TranslateResult> {
-  const fromName = LANG_NAMES[fromLang] || fromLang;
-  const toName = LANG_NAMES[toLang] || toLang;
+  const names = LANG_NAMES[locale];
+  const fromName = names[fromLang] || fromLang;
+  const toName = names[toLang] || toLang;
   const failedSections: string[] = [];
   const fastModel = PROVIDER_MODELS[provider].fast;
   let completed = 0;
@@ -155,7 +172,12 @@ export async function translateSections(
         else toTranslate[key] = value;
       }
       const contentStr = JSON.stringify(toTranslate);
-      const messages = translateContentPrompt(contentStr, fromName, toName);
+      const messages = translateContentPrompt(
+        contentStr,
+        fromName,
+        toName,
+        locale,
+      );
 
       try {
         const response = await callAI(provider, {

@@ -49,16 +49,17 @@ cvmaker_openai_key / cvmaker_openai_model                  # original OpenAI-onl
 
 ## Prompt Factories (`src/lib/ai/prompts.ts`)
 
-All return `ChatMessage[]` (system + user messages). Language-aware (prompts in
-French, output in the resume's `language`).
+All return `ChatMessage[]` (system + user messages). Prompt text is localized
+from the active app locale (`fr` / `en`), while generated CV content still uses
+the resume's `language`.
 
-| Function                                                | Purpose                        | Output format         |
-| ------------------------------------------------------- | ------------------------------ | --------------------- |
-| `improveContentPrompt(content, context?, instruction?)` | Improve / rewrite section text | HTML (preserves tags) |
-| `generateSummaryPrompt(resumeData)`                     | Generate profile summary       | HTML `<p>`            |
-| `translateContentPrompt(json, from, to)`                | Translate section content      | JSON (same shape)     |
-| `atsScorePrompt(resumeData)`                            | Score CV vs a job description  | JSON (score + advice) |
-| `generateCoverLetterPrompt(resumeData)`                 | Generate cover letter body     | HTML `<p>` tags       |
+| Function                                                         | Purpose                        | Output format         |
+| ---------------------------------------------------------------- | ------------------------------ | --------------------- |
+| `improveContentPrompt(content, context?, instruction?, locale?)` | Improve / rewrite section text | HTML (preserves tags) |
+| `generateSummaryPrompt(resumeData, locale?)`                     | Generate profile summary       | HTML `<p>`            |
+| `translateContentPrompt(json, from, to, locale?)`                | Translate section content      | JSON (same shape)     |
+| `atsScorePrompt(resumeData, locale?)`                            | Score CV vs a job description  | JSON (score + advice) |
+| `generateCoverLetterPrompt(resumeData, locale?)`                 | Generate cover letter body     | HTML `<p>` tags       |
 
 > LinkedIn import does **not** use the AI: the PDF is parsed server-side
 > (`/api/cv/parse-linkedin-pdf` → `lib/linkedin-parser.ts`) into structured
