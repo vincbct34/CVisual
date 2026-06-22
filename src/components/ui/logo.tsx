@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
 
 /**
  * The CVisual serif-"C" tile — a hand-built vector glyph (no webfont

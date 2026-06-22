@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useAI } from "@/hooks/use-ai";
+import { useT } from "@/components/i18n/language-provider";
 import { AISettingsDialog } from "./ai-settings-dialog";
 import { SparklesIcon, notifyAINotConfigured } from "./ai-shared";
 import { AIError } from "@/lib/ai/types";
@@ -14,39 +15,23 @@ interface AIImproveButtonProps {
   onAccept: (improved: string) => void;
 }
 
-const PRESETS: { label: string; instruction: string }[] = [
-  {
-    label: "Corriger les fautes",
-    instruction:
-      "Corrige uniquement les fautes d'orthographe, de grammaire et de ponctuation, sans changer le style ni le sens.",
-  },
-  {
-    label: "Raccourcir",
-    instruction:
-      "Réduis la longueur du texte tout en gardant les informations essentielles.",
-  },
-  {
-    label: "Plus professionnel",
-    instruction: "Rends le ton plus professionnel et formel.",
-  },
-  {
-    label: "Plus percutant",
-    instruction:
-      "Rends le texte plus percutant avec des verbes d'action et des réalisations quantifiées.",
-  },
-  {
-    label: "Développer",
-    instruction:
-      "Développe et enrichis le texte avec plus de détails pertinents.",
-  },
-];
-
 export function AIImproveButton({
   content,
   context,
   onAccept,
 }: AIImproveButtonProps) {
   const { hasKey, improve } = useAI();
+  const t = useT();
+  const PRESETS: { label: string; instruction: string }[] = [
+    { label: t("ai.presetFix"), instruction: t("ai.presetFixInstr") },
+    { label: t("ai.presetShorten"), instruction: t("ai.presetShortenInstr") },
+    {
+      label: t("ai.presetProfessional"),
+      instruction: t("ai.presetProfessionalInstr"),
+    },
+    { label: t("ai.presetPunchy"), instruction: t("ai.presetPunchyInstr") },
+    { label: t("ai.presetExpand"), instruction: t("ai.presetExpandInstr") },
+  ];
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -57,7 +42,8 @@ export function AIImproveButton({
   function handleNoKey() {
     notifyAINotConfigured(
       () => setShowSettings(true),
-      "améliorer votre contenu",
+      t("ai.actionImprove"),
+      t,
     );
   }
 
@@ -67,7 +53,7 @@ export function AIImproveButton({
       return;
     }
     if (!content.trim() || content === "<p></p>") {
-      toast.error("Ajoutez du contenu avant d'améliorer");
+      toast.error(t("ai.addContentFirst"));
       return;
     }
     setResult(null);
@@ -95,9 +81,7 @@ export function AIImproveButton({
         handleNoKey();
       } else {
         toast.error(
-          err instanceof AIError
-            ? err.message
-            : "Erreur lors de l'amélioration",
+          err instanceof AIError ? err.message : t("ai.improveError"),
         );
       }
     } finally {
@@ -111,7 +95,7 @@ export function AIImproveButton({
         <button
           type="button"
           onClick={openPanel}
-          title={hasKey ? "Améliorer avec l'IA" : "Clé API IA non configurée"}
+          title={hasKey ? t("ai.improveTitle") : t("ai.notConfiguredShort")}
           className="rte-toolbar-btn ml-auto flex items-center gap-1"
           style={{
             color: hasKey ? "var(--accent-violet)" : "var(--fg-muted)",
@@ -136,7 +120,7 @@ export function AIImproveButton({
                 className="text-xs font-semibold"
                 style={{ color: "var(--fg-muted)" }}
               >
-                Suggestion IA :
+                {t("ai.suggestion")}
               </p>
               <div
                 className="text-sm prose prose-sm max-w-none overflow-x-auto"
@@ -152,10 +136,10 @@ export function AIImproveButton({
                   onClick={() => {
                     onAccept(result);
                     closePanel();
-                    toast.success("Contenu amélioré !");
+                    toast.success(t("ai.contentImproved"));
                   }}
                 >
-                  Accepter
+                  {t("ai.accept")}
                 </button>
                 <button
                   className="btn-ghost text-xs"
@@ -166,7 +150,7 @@ export function AIImproveButton({
                   onClick={() => setResult(null)}
                   disabled={isLoading}
                 >
-                  Réessayer
+                  {t("ai.retry")}
                 </button>
                 <button
                   className="btn-ghost text-xs"
@@ -176,7 +160,7 @@ export function AIImproveButton({
                   }}
                   onClick={closePanel}
                 >
-                  Fermer
+                  {t("common.close")}
                 </button>
               </div>
             </>
@@ -188,7 +172,7 @@ export function AIImproveButton({
                   style={{ color: "var(--accent-violet)" }}
                 >
                   <SparklesIcon />
-                  Améliorer avec l&apos;IA
+                  {t("ai.improveTitle")}
                 </p>
                 <button
                   type="button"
@@ -229,7 +213,7 @@ export function AIImproveButton({
                 onChange={(e) => setInstruction(e.target.value)}
                 disabled={isLoading}
                 rows={2}
-                placeholder="Ou décrivez ce que vous voulez (ex : « Mets l'accent sur le leadership »)…"
+                placeholder={t("ai.customPlaceholder")}
                 className="w-full text-sm rounded-md px-2 py-1.5 resize-y"
                 style={{
                   background: "var(--card-bg)",
@@ -254,7 +238,7 @@ export function AIImproveButton({
                   disabled={isLoading}
                   onClick={() => runImprove(instruction)}
                 >
-                  {isLoading ? "Amélioration…" : "Améliorer"}
+                  {isLoading ? t("ai.improving") : t("ai.improve")}
                 </button>
                 {!isLoading && (
                   <button
@@ -265,7 +249,7 @@ export function AIImproveButton({
                     }}
                     onClick={closePanel}
                   >
-                    Annuler
+                    {t("common.cancel")}
                   </button>
                 )}
               </div>

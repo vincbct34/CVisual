@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { apiMessage } from "@/lib/i18n/api-messages";
 
 /**
  * Standard 400 for a failed Zod `safeParse`, with the flattened field errors
- * under `details`. One shape for every route:
+ * under `details`. Pass the request to localize the top-level message:
  *
  *   const parsed = schema.safeParse(body);
- *   if (!parsed.success) return validationError(parsed.error);
+ *   if (!parsed.success) return validationError(parsed.error, request);
  */
-export function validationError(error: z.ZodError): NextResponse {
+export function validationError(
+  error: z.ZodError,
+  request?: { headers: Headers },
+): NextResponse {
   return NextResponse.json(
-    { error: "Données invalides", details: z.flattenError(error) },
+    {
+      error: request ? apiMessage(request, "invalidData") : "Données invalides",
+      details: z.flattenError(error),
+    },
     { status: 400 },
   );
 }
@@ -33,7 +40,10 @@ export async function parseJsonBody(
   } catch {
     return {
       body: null,
-      response: NextResponse.json({ error: "JSON invalide" }, { status: 400 }),
+      response: NextResponse.json(
+        { error: apiMessage(request, "invalidJson") },
+        { status: 400 },
+      ),
     };
   }
 }

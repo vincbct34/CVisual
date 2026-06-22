@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, use } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { AISetupBanner } from "@/components/ai/ai-setup-banner";
@@ -79,6 +80,7 @@ export default function EditorPage({
 }) {
   const { id } = use(params);
   const { authFetch, isLoading: authLoading } = useAuth();
+  const t = useT();
   const [resume, setResume] = useState<Resume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showTemplatePreview, setShowTemplatePreview] = useState(false);
@@ -86,7 +88,7 @@ export default function EditorPage({
   const [pendingExportFormat, setPendingExportFormat] = useState<string | null>(
     null,
   );
-  const router = useRouter();
+  const router = useLocalizedRouter();
 
   const {
     mainAreaRef,
@@ -110,17 +112,19 @@ export default function EditorPage({
       if (res.ok) {
         const data = await res.json();
         setResume({ ...resume, isPublic: data.isPublic });
-        toast.success(data.isPublic ? "CV rendu public" : "CV rendu privé");
+        toast.success(
+          data.isPublic ? t("editor.madePublic") : t("editor.madePrivate"),
+        );
       }
     } catch {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error(t("editor.updateError"));
     }
   }
 
   async function copyPublicLink() {
     const url = `${window.location.origin}/public/cv/${id}`;
     await navigator.clipboard.writeText(url);
-    toast.success("Lien copié dans le presse-papiers !");
+    toast.success(t("editor.linkCopied"));
   }
 
   async function copyShareLink() {
@@ -129,9 +133,9 @@ export default function EditorPage({
       if (!res.ok) throw new Error();
       const { url } = (await res.json()) as { url: string };
       await navigator.clipboard.writeText(url);
-      toast.success("Lien de partage copié !");
+      toast.success(t("editor.shareLinkCopied"));
     } catch {
-      toast.error("Erreur lors de la génération du lien");
+      toast.error(t("editor.shareLinkError"));
     }
   }
 
@@ -149,15 +153,15 @@ export default function EditorPage({
         const data = await res.json();
         setResume(data.resume);
       } else {
-        toast.error("CV non trouvé");
+        toast.error(t("editor.notFound"));
         router.push("/dashboard");
       }
     } catch {
-      toast.error("Erreur de chargement");
+      toast.error(t("editor.loadError"));
     } finally {
       setIsLoading(false);
     }
-  }, [authFetch, id, router]);
+  }, [authFetch, id, router, t]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -197,7 +201,7 @@ export default function EditorPage({
           });
         } catch {
           // Network failure — fetch threw before any response.
-          toast.error("Erreur lors de la sauvegarde");
+          toast.error(t("editor.saveError"));
           throw new Error("Save failed"); // keep dirty so changes aren't lost
         }
         if (res.ok) return;
@@ -205,12 +209,12 @@ export default function EditorPage({
         // the generic one. Re-throw either way to stay dirty.
         toast.error(
           res.status === 429
-            ? "Trop d'enregistrements. Réessayez dans un instant."
-            : "Erreur lors de la sauvegarde",
+            ? t("editor.saveRateLimit")
+            : t("editor.saveError"),
         );
         throw new Error("Save failed");
       },
-      [authFetch, id],
+      [authFetch, id, t],
     ),
     30_000,
   );
@@ -301,7 +305,7 @@ export default function EditorPage({
       });
       if (!res.ok) throw new Error();
     } catch {
-      toast.error("Erreur lors du réordonnancement");
+      toast.error(t("editor.reorderError"));
       setResume({ ...resume, sections: previousSections });
     }
   }
@@ -309,7 +313,7 @@ export default function EditorPage({
   async function addSection(type: string) {
     if (!resume) return;
     const sectionType = SECTION_TYPES.find((s) => s.type === type);
-    const title = sectionType?.label ?? "Nouvelle section";
+    const title = sectionType?.label ?? t("editor.newSection");
 
     try {
       const res = await authFetch(`/api/cv/${id}/sections`, {
@@ -327,10 +331,10 @@ export default function EditorPage({
           ...resume,
           sections: [...resume.sections, data.section],
         });
-        toast.success("Section ajoutée");
+        toast.success(t("editor.sectionAdded"));
       }
     } catch {
-      toast.error("Erreur lors de l'ajout");
+      toast.error(t("editor.addError"));
     }
   }
 
@@ -344,9 +348,9 @@ export default function EditorPage({
         ...resume,
         sections: resume.sections.filter((s) => s.id !== sectionId),
       });
-      toast.success("Section supprimée");
+      toast.success(t("editor.sectionDeleted"));
     } catch {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("editor.deleteError"));
     }
   }
 
@@ -359,12 +363,14 @@ export default function EditorPage({
         resume?.title ?? "",
         "cv",
       );
-      toast.success(`${format.toUpperCase()} téléchargé !`);
+      toast.success(
+        t("editor.exportSuccess", { format: format.toUpperCase() }),
+      );
     } catch (e) {
       toast.error(
         e instanceof RateLimitError
           ? e.message
-          : `Erreur lors de l'export ${format.toUpperCase()}`,
+          : t("editor.exportError", { format: format.toUpperCase() }),
       );
     }
   }
@@ -385,7 +391,7 @@ export default function EditorPage({
     setPendingExportFormat(null);
     if (!format) return;
     if (!(await saveNow())) {
-      toast.error("Échec de la sauvegarde — export annulé.");
+      toast.error(t("editor.saveFailedExportCancelled"));
       return;
     }
     await runExport(format);
@@ -431,7 +437,7 @@ export default function EditorPage({
             size="sm"
             onClick={() => router.push("/dashboard")}
           >
-            ← <span className="hidden sm:inline">Retour</span>
+            ← <span className="hidden sm:inline">{t("common.back")}</span>
           </Button>
           <Input
             value={resume.title}
@@ -445,18 +451,18 @@ export default function EditorPage({
             style={{ color: "var(--fg-muted)" }}
           >
             {isSaving
-              ? "Enregistrement..."
+              ? t("common.saving")
               : isDirty
-                ? "Modifications non enregistrées"
-                : "Enregistré"}
+                ? t("editor.unsaved")
+                : t("common.saved")}
           </span>
           <Button
             size="sm"
             onClick={saveNow}
             disabled={isSaving || !isDirty}
-            title="Enregistrer les modifications"
+            title={t("editor.saveTitle")}
           >
-            Enregistrer
+            {t("common.save")}
           </Button>
           <Button
             variant="ghost"
@@ -465,26 +471,28 @@ export default function EditorPage({
             onClick={togglePreview}
             title={
               previewCollapsed
-                ? "Afficher l'aperçu"
-                : "Agrandir l'éditeur (masquer l'aperçu)"
+                ? t("editor.showPreview")
+                : t("editor.expandEditorTitle")
             }
           >
-            {previewCollapsed ? "Afficher l'aperçu" : "Agrandir l'éditeur"}
+            {previewCollapsed
+              ? t("editor.showPreview")
+              : t("editor.expandEditor")}
           </Button>
           <Dialog>
             <DialogTrigger render={<Button variant="ghost" size="sm" />}>
-              Partager
+              {t("editor.share")}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md lg:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Partager ce CV</DialogTitle>
+                <DialogTitle>{t("editor.shareTitle")}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Lien public</Label>
+                    <Label>{t("editor.publicLink")}</Label>
                     <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
-                      Permet à quiconque ayant le lien de voir votre CV.
+                      {t("editor.publicLinkDesc")}
                     </p>
                   </div>
                   {/* Toggle switch */}
@@ -512,15 +520,14 @@ export default function EditorPage({
                       readOnly
                       value={`${typeof window !== "undefined" ? window.location.origin : ""}/public/cv/${id}`}
                     />
-                    <Button onClick={copyPublicLink}>Copier</Button>
+                    <Button onClick={copyPublicLink}>{t("editor.copy")}</Button>
                   </div>
                 )}
                 <Separator />
                 <div className="space-y-0.5">
-                  <Label>Lien de partage sécurisé</Label>
+                  <Label>{t("editor.secureShareLink")}</Label>
                   <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
-                    Générez un lien unique pour partager ce CV sans le rendre
-                    public.
+                    {t("editor.secureShareDesc")}
                   </p>
                 </div>
                 <Button
@@ -528,7 +535,7 @@ export default function EditorPage({
                   className="w-full"
                   onClick={copyShareLink}
                 >
-                  Copier le lien de partage
+                  {t("editor.copyShareLink")}
                 </Button>
               </div>
             </DialogContent>
@@ -541,11 +548,9 @@ export default function EditorPage({
           >
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Modifications non enregistrées</DialogTitle>
+                <DialogTitle>{t("editor.exportUnsavedTitle")}</DialogTitle>
                 <DialogDescription>
-                  L&apos;export utilise la dernière version enregistrée.
-                  Enregistrez d&apos;abord pour inclure vos modifications
-                  récentes dans le fichier.
+                  {t("editor.exportUnsavedDesc")}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2">
@@ -554,21 +559,21 @@ export default function EditorPage({
                   className="w-full sm:w-auto"
                   onClick={() => setPendingExportFormat(null)}
                 >
-                  Annuler
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full sm:w-auto"
                   onClick={exportWithoutSaving}
                 >
-                  Exporter sans enregistrer
+                  {t("editor.exportWithoutSaving")}
                 </Button>
                 <Button
                   className="w-full sm:w-auto"
                   onClick={saveThenExport}
                   disabled={isSaving}
                 >
-                  Enregistrer et exporter
+                  {t("editor.saveAndExport")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -576,7 +581,7 @@ export default function EditorPage({
           <AIAtsScoreButton resume={resume} />
           <DropdownMenu>
             <DropdownMenuTrigger className="export-trigger">
-              Exporter ▾
+              {t("editor.exportMenu")}
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
@@ -584,34 +589,32 @@ export default function EditorPage({
             >
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="text-xs font-normal whitespace-normal text-muted-foreground">
-                  Pour conserver la mise en page exacte de votre modèle,
-                  exportez en PDF. Les autres formats sont modifiables mais
-                  simplifiés.
+                  {t("editor.exportNote")}
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleExport("pdf")}>
                 PDF
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  mise en page exacte
+                  {t("editor.exportPdfHint")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("docx")}>
-                DOCX (Word)
+                {t("editor.exportDocxLabel")}
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  modifiable
+                  {t("editor.exportEditable")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("html")}>
                 HTML
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  modifiable
+                  {t("editor.exportEditable")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("json")}>
                 JSON
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  réimportable
+                  {t("editor.exportReimportable")}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -634,10 +637,10 @@ export default function EditorPage({
           <Tabs defaultValue="sections">
             <TabsList className="w-full">
               <TabsTrigger value="sections" className="flex-1">
-                Sections
+                {t("editor.tabSections")}
               </TabsTrigger>
               <TabsTrigger value="style" className="flex-1">
-                Style
+                {t("editor.tabStyle")}
               </TabsTrigger>
             </TabsList>
 
@@ -659,7 +662,7 @@ export default function EditorPage({
                     className="text-xs font-semibold"
                     style={{ color: "var(--fg)" }}
                   >
-                    Complétude du CV
+                    {t("editor.completeness")}
                   </span>
                   <span
                     className="text-xs font-bold"
@@ -676,7 +679,9 @@ export default function EditorPage({
                 </div>
                 {completeness.missing.length > 0 && (
                   <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-                    Manquant : {completeness.missing.slice(0, 3).join(", ")}
+                    {t("editor.missing", {
+                      items: completeness.missing.slice(0, 3).join(", "),
+                    })}
                     {completeness.missing.length > 3 &&
                       ` +${completeness.missing.length - 3}`}
                   </p>
@@ -690,12 +695,14 @@ export default function EditorPage({
                   onValueChange={(type) => type && addSection(String(type))}
                 >
                   <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ajouter une section..." />
+                    <SelectValue
+                      placeholder={t("editor.addSectionPlaceholder")}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {availableSections.map((s) => (
                       <SelectItem key={s.type} value={s.type}>
-                        {s.label}
+                        {t(`sectionTypes.${s.type}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -712,7 +719,7 @@ export default function EditorPage({
                     <div className="flex items-start gap-1">
                       <div
                         className="mt-2 p-1 text-muted-foreground/40"
-                        title="Toujours en en-tête du CV"
+                        title={t("editor.profileAlwaysHeader")}
                       >
                         <svg
                           width="16"
@@ -739,7 +746,9 @@ export default function EditorPage({
                             className="h-7 text-xs"
                             onClick={() => toggleSectionVisibility(section.id)}
                           >
-                            {section.visible ? "Masquer" : "Afficher"}
+                            {section.visible
+                              ? t("editor.hide")
+                              : t("editor.show")}
                           </Button>
                         </div>
                         {section.visible && (
@@ -823,7 +832,7 @@ export default function EditorPage({
                 className="w-full"
                 onClick={() => setShowTemplatePreview(true)}
               >
-                Prévisualiser tous les templates
+                {t("editor.previewAllTemplates")}
               </Button>
               <StylePanel
                 template={resume.template}
@@ -843,7 +852,7 @@ export default function EditorPage({
             onPointerDown={startResize}
             role="separator"
             aria-orientation="vertical"
-            aria-label="Redimensionner les panneaux"
+            aria-label={t("editor.resizePanels")}
           >
             <div className="editor-resizer-grip" />
           </div>

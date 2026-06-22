@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { parseJsonBody } from "@/lib/api-response";
 import { requireResume } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
@@ -17,7 +18,7 @@ export async function PATCH(
 
   if (typeof isPublic !== "boolean") {
     return NextResponse.json(
-      { error: "Le paramètre isPublic doit être un booléen" },
+      { error: apiMessage(request, "isPublicBool") },
       { status: 400 },
     );
   }

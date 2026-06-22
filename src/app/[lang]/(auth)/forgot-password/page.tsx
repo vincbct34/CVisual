@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AuthCard } from "../auth-card";
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -23,15 +25,13 @@ export default function ForgotPasswordPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Une erreur est survenue.");
+        throw new Error(data.error || t("auth.genericError"));
       }
       setIsSuccess(true);
-      toast.success("Email envoyé avec succès !");
+      toast.success(t("auth.forgotSentToast"));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Erreur lors de l'envoi de l'email",
+        error instanceof Error ? error.message : t("auth.forgotErrorToast"),
       );
     } finally {
       setIsSubmitting(false);
@@ -45,12 +45,12 @@ export default function ForgotPasswordPage() {
           className="font-heading text-3xl mb-1"
           style={{ color: "var(--fg)" }}
         >
-          Mot de passe oublié
+          {t("auth.forgotTitle")}
         </h1>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           {isSuccess
-            ? "Vérifiez votre boîte de réception"
-            : "Entrez votre email pour recevoir un lien de réinitialisation"}
+            ? t("auth.forgotSubtitleSuccess")
+            : t("auth.forgotSubtitle")}
         </p>
       </div>
 
@@ -64,23 +64,22 @@ export default function ForgotPasswordPage() {
               border: "1px solid var(--success)",
             }}
           >
-            Si un compte est associé à <strong>{email}</strong>, un email
-            contenant un lien de réinitialisation vient d&apos;être envoyé.
+            {t("auth.forgotSuccessMsg", { email })}
           </p>
           <Link href="/login">
             <button className="btn-gradient w-full mt-2">
-              Retour à la connexion
+              {t("auth.backToLogin")}
             </button>
           </Link>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="vous@exemple.com"
+              placeholder={t("auth.emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -93,7 +92,7 @@ export default function ForgotPasswordPage() {
             className="btn-gradient w-full"
             style={{ opacity: isSubmitting ? 0.7 : 1 }}
           >
-            {isSubmitting ? "Envoi..." : "Envoyer le lien"}
+            {isSubmitting ? t("auth.forgotSubmitting") : t("auth.forgotSubmit")}
           </button>
         </form>
       )}
@@ -107,7 +106,7 @@ export default function ForgotPasswordPage() {
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: "var(--accent-violet)" }}
         >
-          ← Retour à la connexion
+          ← {t("auth.backToLogin")}
         </Link>
       </p>
     </AuthCard>

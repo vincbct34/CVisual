@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
@@ -16,7 +17,8 @@ import { AISettingsDialog } from "@/components/ai/ai-settings-dialog";
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const { hasKey } = useAI();
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
 
   const initials = user?.name
@@ -71,15 +73,15 @@ export function DashboardHeader() {
                       : "var(--fg-muted)",
                   }}
                 />
-                Paramètres IA
+                {t("header.aiSettings")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push("/settings/account")}
               >
-                Mon compte
+                {t("header.myAccount")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>
-                Se déconnecter
+                {t("header.logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

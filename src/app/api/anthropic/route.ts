@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -10,12 +11,15 @@ export async function POST(req: NextRequest) {
       `anthropic:${getClientIp(req)}`,
       30,
       60_000,
+      req,
     );
     if (limited) return limited;
 
     const apiKey = req.headers.get("x-api-key");
     if (!apiKey) {
-      return new NextResponse("Clé API manquante", { status: 401 });
+      return new NextResponse(apiMessage(req, "apiKeyMissing"), {
+        status: 401,
+      });
     }
 
     const body = await req.json();

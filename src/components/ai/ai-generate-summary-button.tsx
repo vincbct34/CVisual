@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAI } from "@/hooks/use-ai";
+import { useT } from "@/components/i18n/language-provider";
 import { AISettingsDialog } from "./ai-settings-dialog";
 import { SparklesIcon, notifyAINotConfigured } from "./ai-shared";
 import { AIError } from "@/lib/ai/types";
@@ -25,6 +26,7 @@ export function AIGenerateSummaryButton({
   onAccept,
 }: AIGenerateSummaryButtonProps) {
   const { hasKey, generateSummary } = useAI();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -51,7 +53,11 @@ export function AIGenerateSummaryButton({
   }
 
   function handleNoKey() {
-    notifyAINotConfigured(() => setShowSettings(true), "générer un résumé");
+    notifyAINotConfigured(
+      () => setShowSettings(true),
+      t("ai.actionSummary"),
+      t,
+    );
   }
 
   async function handleGenerate() {
@@ -62,9 +68,7 @@ export function AIGenerateSummaryButton({
 
     const data = buildResumeData();
     if (!data.experiences && !data.skills && !data.education) {
-      toast.error(
-        "Ajoutez des expériences, compétences ou formations pour un meilleur résultat",
-      );
+      toast.error(t("ai.summaryNeedData"));
       return;
     }
 
@@ -78,7 +82,7 @@ export function AIGenerateSummaryButton({
         setShowSettings(true);
       } else {
         toast.error(
-          err instanceof AIError ? err.message : "Erreur lors de la génération",
+          err instanceof AIError ? err.message : t("ai.summaryError"),
         );
       }
     } finally {
@@ -93,11 +97,7 @@ export function AIGenerateSummaryButton({
           type="button"
           onClick={handleGenerate}
           disabled={isLoading}
-          title={
-            hasKey
-              ? "Génère un résumé à partir de vos expériences, compétences et formations (remplace le texte actuel). Pour retoucher le texte existant, utilisez « Améliorer »."
-              : "Clé API IA non configurée"
-          }
+          title={hasKey ? t("ai.summaryTooltip") : t("ai.notConfiguredShort")}
           className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 transition-all"
           style={{
             background: hasKey ? "var(--accent-soft)" : "var(--input-bg)",
@@ -109,12 +109,12 @@ export function AIGenerateSummaryButton({
           }}
         >
           <SparklesIcon size={11} dim={!hasKey} />
-          {isLoading ? "Génération…" : "Générer avec l'IA"}
+          {isLoading ? t("ai.generating") : t("ai.generateAI")}
         </button>
       ) : (
         <div className="w-full basis-full border rounded-md p-3 bg-muted/30 space-y-2 overflow-x-auto">
           <p className="text-xs font-medium text-muted-foreground">
-            Résumé généré :
+            {t("ai.summaryGenerated")}
           </p>
           <div
             className="text-sm prose prose-sm max-w-none"
@@ -130,10 +130,10 @@ export function AIGenerateSummaryButton({
               onClick={() => {
                 onAccept(result);
                 setResult(null);
-                toast.success("Résumé appliqué !");
+                toast.success(t("ai.summaryApplied"));
               }}
             >
-              Accepter
+              {t("ai.accept")}
             </button>
             <button
               className="btn-ghost text-xs"
@@ -143,7 +143,7 @@ export function AIGenerateSummaryButton({
               }}
               onClick={() => setResult(null)}
             >
-              Annuler
+              {t("common.cancel")}
             </button>
           </div>
         </div>

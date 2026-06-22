@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT, useLocale } from "@/components/i18n/language-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { AnimatedCard } from "@/components/ui/motion";
 import {
@@ -28,7 +29,9 @@ export function CoverLetterCard({
   onDelete,
   onDuplicate,
 }: CoverLetterCardProps) {
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
+  const locale = useLocale();
   const { authFetch } = useAuth();
 
   async function handleDuplicate() {
@@ -48,11 +51,11 @@ export function CoverLetterCard({
         }),
       });
       if (res.ok) {
-        toast.success("Lettre dupliquée !");
+        toast.success(t("coverLetterCard.duplicated"));
         onDuplicate?.();
       }
     } catch {
-      toast.error("Erreur lors de la duplication");
+      toast.error(t("coverLetterCard.duplicateError"));
     }
   }
 
@@ -65,9 +68,13 @@ export function CoverLetterCard({
         coverLetter.title,
         "lettre",
       );
-      toast.success(`${format.toUpperCase()} téléchargé !`);
+      toast.success(
+        t("coverLetterCard.exportSuccess", { format: format.toUpperCase() }),
+      );
     } catch {
-      toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
+      toast.error(
+        t("coverLetterCard.exportError", { format: format.toUpperCase() }),
+      );
     }
   }
 
@@ -77,11 +84,11 @@ export function CoverLetterCard({
         method: "DELETE",
       });
       if (res.ok) {
-        toast.success("Lettre supprimée");
+        toast.success(t("coverLetterCard.deleted"));
         onDelete(coverLetter.id);
       }
     } catch {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("coverLetterCard.deleteError"));
     }
   }
 
@@ -101,32 +108,35 @@ export function CoverLetterCard({
           {coverLetter.title}
         </h3>
         <DropdownMenu>
-          <DropdownMenuTrigger className="icon-btn" aria-label="Actions">
+          <DropdownMenuTrigger
+            className="icon-btn"
+            aria-label={t("coverLetterCard.actions")}
+          >
             ···
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() => router.push(`/cover-letter/${coverLetter.id}`)}
             >
-              Modifier
+              {t("common.edit")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDuplicate}>
-              Dupliquer
+              {t("common.duplicate")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport("pdf")}>
-              Exporter PDF
+              {t("coverLetterCard.exportPdf")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport("docx")}>
-              Exporter DOCX
+              {t("coverLetterCard.exportDocx")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport("html")}>
-              Exporter HTML
+              {t("coverLetterCard.exportHtml")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleDelete}
               className="text-destructive"
             >
-              Supprimer
+              {t("common.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -140,15 +150,18 @@ export function CoverLetterCard({
 
       <div className="flex items-center justify-between mt-auto pt-1">
         <span className="text-xs" style={{ color: "var(--fg-muted)" }}>
-          Modifié le{" "}
-          {new Date(coverLetter.updatedAt).toLocaleDateString("fr-FR")}
+          {t("coverLetterCard.modifiedOn", {
+            date: new Date(coverLetter.updatedAt).toLocaleDateString(
+              locale === "en" ? "en-US" : "fr-FR",
+            ),
+          })}
         </span>
         <button
           className="btn-gradient text-xs"
           style={{ padding: "0.5rem 1rem" }}
           onClick={() => router.push(`/cover-letter/${coverLetter.id}`)}
         >
-          Éditer
+          {t("coverLetterCard.editBtn")}
         </button>
       </div>
     </AnimatedCard>

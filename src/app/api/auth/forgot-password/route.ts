@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { prisma } from "@/lib/prisma";
 import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 import crypto from "crypto";
@@ -12,13 +13,17 @@ export async function POST(request: Request) {
       `forgot-password:${getClientIp(request)}`,
       3,
       15 * 60_000,
+      request,
     );
     if (limited) return limited;
 
     const { email } = await request.json();
 
     if (!email || typeof email !== "string") {
-      return NextResponse.json({ error: "Email invalide" }, { status: 400 });
+      return NextResponse.json(
+        { error: apiMessage(request, "emailInvalid") },
+        { status: 400 },
+      );
     }
 
     // Check email config BEFORE the user lookup. Done after, a 503 only on
@@ -69,7 +74,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Forgot password error:", error);
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { error: apiMessage(request, "serverError") },
       { status: 500 },
     );
   }

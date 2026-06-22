@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireResume } from "@/lib/api-auth";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { generatePDF } from "@/lib/export/pdf";
@@ -32,6 +33,7 @@ export async function GET(
       `cv-export:${auth.userId}`,
       10,
       60_000,
+      request,
     );
     if (limited) return limited;
   }
@@ -58,7 +60,7 @@ export async function GET(
     } catch (error) {
       console.error("PDF generation error:", error);
       return NextResponse.json(
-        { error: "Erreur lors de la génération du PDF" },
+        { error: apiMessage(request, "pdfError") },
         { status: 500 },
       );
     }
@@ -79,7 +81,7 @@ export async function GET(
     } catch (error) {
       console.error("DOCX generation error:", error);
       return NextResponse.json(
-        { error: "Erreur lors de la génération du DOCX" },
+        { error: apiMessage(request, "docxError") },
         { status: 500 },
       );
     }
@@ -97,11 +99,14 @@ export async function GET(
     } catch (error) {
       console.error("HTML generation error:", error);
       return NextResponse.json(
-        { error: "Erreur lors de la génération du HTML" },
+        { error: apiMessage(request, "htmlError") },
         { status: 500 },
       );
     }
   }
 
-  return NextResponse.json({ error: "Format non supporté" }, { status: 400 });
+  return NextResponse.json(
+    { error: apiMessage(request, "formatUnsupported") },
+    { status: 400 },
+  );
 }

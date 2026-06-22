@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
@@ -16,13 +17,14 @@ export async function POST(request: Request) {
     `change-password:${auth.userId}`,
     5,
     15 * 60_000,
+    request,
   );
   if (limited) return limited;
 
   const { body, response: badJson } = await parseJsonBody(request);
   if (badJson) return badJson;
   const parsed = changePasswordSchema.safeParse(body);
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
   const { currentPassword, newPassword } = parsed.data;
 
   const user = await prisma.user.findUnique({
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
   });
   if (!user) {
     return NextResponse.json(
-      { error: "Utilisateur non trouvé" },
+      { error: apiMessage(request, "userNotFound") },
       { status: 404 },
     );
   }
@@ -59,5 +61,5 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({ message: "Mot de passe modifié" });
+  return NextResponse.json({ message: apiMessage(request, "passwordChanged") });
 }

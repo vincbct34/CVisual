@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 
@@ -23,7 +24,7 @@ export async function DELETE(request: Request) {
   const sessionId = searchParams.get("id");
   if (!sessionId) {
     return NextResponse.json(
-      { error: "ID de session requis" },
+      { error: apiMessage(request, "sessionIdRequired") },
       { status: 400 },
     );
   }
@@ -37,5 +38,5 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Session introuvable" }, { status: 404 });
   }
 
-  return NextResponse.json({ message: "Session révoquée" });
+  return NextResponse.json({ message: apiMessage(request, "sessionRevoked") });
 }

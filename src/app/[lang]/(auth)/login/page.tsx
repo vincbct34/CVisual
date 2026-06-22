@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { AuthCard } from "../auth-card";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,10 +24,10 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      toast.success("Connexion réussie !");
+      toast.success(t("auth.loginSuccess"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Erreur de connexion",
+        error instanceof Error ? error.message : t("auth.loginError"),
       );
     } finally {
       setIsSubmitting(false);
@@ -40,7 +42,7 @@ export default function LoginPage() {
           <Logo href={"/"} size={32} />
         </div>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
-          Connectez-vous à votre compte
+          {t("auth.loginSubtitle")}
         </p>
       </div>
 
@@ -50,12 +52,12 @@ export default function LoginPage() {
             htmlFor="email"
             style={{ color: "var(--fg)", fontWeight: 600 }}
           >
-            Email
+            {t("auth.email")}
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="vous@exemple.com"
+            placeholder={t("auth.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -74,14 +76,14 @@ export default function LoginPage() {
               htmlFor="password"
               style={{ color: "var(--fg)", fontWeight: 600 }}
             >
-              Mot de passe
+              {t("auth.password")}
             </Label>
             <Link
               href="/forgot-password"
               className="text-sm hover:opacity-80 transition-opacity"
               style={{ color: "var(--accent-violet)" }}
             >
-              Mot de passe oublié ?
+              {t("auth.forgotPassword")}
             </Link>
           </div>
           <div className="relative">
@@ -104,9 +106,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={
-                showPassword
-                  ? "Masquer le mot de passe"
-                  : "Afficher le mot de passe"
+                showPassword ? t("auth.hidePassword") : t("auth.showPassword")
               }
               className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-80 transition-opacity"
               style={{ color: "var(--fg-muted)" }}
@@ -147,10 +147,10 @@ export default function LoginPage() {
                   d="M4 12a8 8 0 018-8v8z"
                 />
               </svg>
-              Connexion...
+              {t("auth.loginSubmitting")}
             </span>
           ) : (
-            "Se connecter"
+            t("auth.loginSubmit")
           )}
         </button>
       </form>
@@ -159,13 +159,13 @@ export default function LoginPage() {
         className="text-center mt-6 text-sm"
         style={{ color: "var(--fg-muted)" }}
       >
-        Pas encore de compte ?{" "}
+        {t("auth.noAccount")}{" "}
         <Link
           href="/register"
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: "var(--accent-violet)" }}
         >
-          Créer un compte
+          {t("auth.registerSubmit")}
         </Link>
       </p>
     </AuthCard>

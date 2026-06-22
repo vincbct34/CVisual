@@ -1,9 +1,8 @@
 import { ImageResponse } from "next/og";
+import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
 
 // Editorial OG card. Colors are literal hex (satori does not parse the OKLCH
 // design tokens in globals.css): paper / ink / brique accent.
-export const alt =
-  "CVisual — Créez des CV professionnels, ATS-friendly, avec IA et export PDF / DOCX";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const dynamic = "force-static";
@@ -13,7 +12,60 @@ const INK = "#2b2622";
 const INK_SOFT = "#6b6258";
 const BRIQUE = "#b65436";
 
-export default function Image() {
+const COPY: Record<
+  Locale,
+  {
+    alt: string;
+    kicker: string;
+    description: string;
+    features: string;
+  }
+> = {
+  fr: {
+    alt: "CVisual - Creez des CV professionnels, ATS-friendly, avec IA et export PDF / DOCX",
+    kicker: "Createur de CV",
+    description:
+      "CV professionnels, ATS-friendly et personnalisables - avec assistance IA et export PDF / DOCX.",
+    features: "IA · ATS · PDF · DOCX",
+  },
+  en: {
+    alt: "CVisual - Build professional, ATS-friendly resumes with AI and PDF / DOCX export",
+    kicker: "Resume builder",
+    description:
+      "Professional, ATS-friendly, customizable resumes - with AI assistance and PDF / DOCX export.",
+    features: "AI · ATS · PDF · DOCX",
+  },
+};
+
+function localeFrom(value: string): Locale {
+  return isLocale(value) ? value : defaultLocale;
+}
+
+export function generateImageMetadata({
+  params,
+}: {
+  params: { lang: string };
+}) {
+  const locale = localeFrom(params.lang);
+
+  return [
+    {
+      id: locale,
+      alt: COPY[locale].alt,
+      size,
+      contentType,
+    },
+  ];
+}
+
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const copy = COPY[localeFrom(lang)];
+
   return new ImageResponse(
     <div
       style={{
@@ -37,7 +89,7 @@ export default function Image() {
           color: INK_SOFT,
         }}
       >
-        Créateur de CV
+        {copy.kicker}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -71,8 +123,7 @@ export default function Image() {
             color: INK_SOFT,
           }}
         >
-          CV professionnels, ATS-friendly et personnalisables — avec assistance
-          IA et export PDF / DOCX.
+          {copy.description}
         </div>
       </div>
 
@@ -88,7 +139,7 @@ export default function Image() {
         }}
       >
         <span style={{ display: "flex" }}>cvisual</span>
-        <span style={{ display: "flex" }}>IA · ATS · PDF · DOCX</span>
+        <span style={{ display: "flex" }}>{copy.features}</span>
       </div>
     </div>,
     { ...size },

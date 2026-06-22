@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { validationError } from "@/lib/api-response";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -13,20 +14,21 @@ export async function POST(request: Request) {
       `register:${getClientIp(request)}`,
       5,
       60 * 60_000,
+      request,
     );
     if (limited) return limited;
 
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);
 
-    if (!parsed.success) return validationError(parsed.error);
+    if (!parsed.success) return validationError(parsed.error, request);
 
     const { email, password, name } = parsed.data;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return NextResponse.json(
-        { error: "Un compte avec cet email existe déjà" },
+        { error: apiMessage(request, "emailExists") },
         { status: 409 },
       );
     }
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     );
   } catch {
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { error: apiMessage(request, "serverError") },
       { status: 500 },
     );
   }

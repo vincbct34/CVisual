@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireResume } from "@/lib/api-auth";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
@@ -22,6 +23,7 @@ export async function POST(
     `cv-duplicate:${auth.userId}`,
     10,
     60_000,
+    request,
   );
   if (limited) return limited;
 
@@ -66,7 +68,7 @@ export async function POST(
   } catch (error) {
     console.error("Duplicate error:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la duplication" },
+      { error: apiMessage(request, "duplicateError") },
       { status: 500 },
     );
   }

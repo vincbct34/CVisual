@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthFromRequest, type JWTPayload } from "./auth";
 import { prisma } from "./prisma";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { Prisma } from "@/generated/prisma/client";
 
 /**
@@ -21,7 +22,7 @@ export async function requireAuth(
     return {
       auth: null,
       response: NextResponse.json(
-        { error: "Non authentifié" },
+        { error: apiMessage(request, "notAuthenticated") },
         { status: 401 },
       ),
     };
@@ -63,7 +64,10 @@ export async function requireResume<
     return {
       resume: null,
       auth: null,
-      response: NextResponse.json({ error: "CV non trouvé" }, { status: 404 }),
+      response: NextResponse.json(
+        { error: apiMessage(request, "cvNotFound") },
+        { status: 404 },
+      ),
     };
   }
   return { resume, auth, response: null };
@@ -97,7 +101,7 @@ export async function requireCoverLetter<
       coverLetter: null,
       auth: null,
       response: NextResponse.json(
-        { error: "Lettre non trouvée" },
+        { error: apiMessage(request, "letterNotFound") },
         { status: 404 },
       ),
     };

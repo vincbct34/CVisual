@@ -16,7 +16,7 @@ export async function PUT(
   const { body, response: badJson } = await parseJsonBody(request);
   if (badJson) return badJson;
   const parsed = reorderSectionsSchema.safeParse(body);
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
 
   // Update all section orders in a transaction
   await prisma.$transaction(

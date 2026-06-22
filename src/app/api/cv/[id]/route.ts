@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { validationError, parseJsonBody } from "@/lib/api-response";
 import { requireResume } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
@@ -32,13 +33,18 @@ export async function PUT(
 
   // Throttle saves per user: generous enough for the manual button + the slow
   // safety-net autosave, tight enough to block a runaway client.
-  const limited = await rateLimitResponse(`cv-save:${auth.userId}`, 30, 60_000);
+  const limited = await rateLimitResponse(
+    `cv-save:${auth.userId}`,
+    30,
+    60_000,
+    request,
+  );
   if (limited) return limited;
 
   const { body, response: badJson } = await parseJsonBody(request);
   if (badJson) return badJson;
   const parsed = updateResumeSchema.safeParse(body);
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
 
   const { style, sections, ...rest } = parsed.data;
 
@@ -95,5 +101,5 @@ export async function DELETE(
 
   await prisma.resume.delete({ where: { id } });
 
-  return NextResponse.json({ message: "CV supprimé" });
+  return NextResponse.json({ message: apiMessage(request, "cvDeleted") });
 }

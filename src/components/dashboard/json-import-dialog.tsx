@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -83,13 +84,14 @@ const SECTION_TYPES = [
 
 export function JsonImportDialog({ open, onOpenChange }: Props) {
   const { authFetch } = useAuth();
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
   const [isImporting, setIsImporting] = useState(false);
   const [showSchema, setShowSchema] = useState(false);
 
   async function processFile(file: File) {
     if (!file.name.endsWith(".json")) {
-      toast.error("Le fichier doit être un .json");
+      toast.error(t("jsonImport.mustBeJson"));
       return;
     }
     setIsImporting(true);
@@ -103,14 +105,14 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
       });
       const result = await res.json();
       if (!res.ok) {
-        toast.error(result.error ?? "Erreur lors de l'import");
+        toast.error(result.error ?? t("jsonImport.importError"));
         return;
       }
-      toast.success("CV importé !");
+      toast.success(t("jsonImport.imported"));
       onOpenChange(false);
       router.push(`/editor/${result.resume.id}`);
     } catch {
-      toast.error("Fichier JSON invalide ou mal formaté");
+      toast.error(t("jsonImport.invalidJson"));
     } finally {
       setIsImporting(false);
     }
@@ -120,7 +122,7 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl lg:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Importer un CV (JSON)</DialogTitle>
+          <DialogTitle>{t("jsonImport.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -129,8 +131,8 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
             accept=".json"
             onFile={processFile}
             loading={isImporting}
-            loadingTitle="Import en cours…"
-            idleTitle="Déposez votre fichier .json ici"
+            loadingTitle={t("jsonImport.loadingTitle")}
+            idleTitle={t("jsonImport.idleTitle")}
           />
 
           {/* Info sur la source */}
@@ -145,11 +147,10 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
               className="font-semibold mb-0.5"
               style={{ color: "var(--accent-strong)" }}
             >
-              Format attendu
+              {t("jsonImport.expectedFormat")}
             </p>
             <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem" }}>
-              Uniquement des exports CVisual (éditeur → Exporter → JSON). Un
-              JSON aléatoire sera rejeté s&apos;il ne respecte pas la structure.
+              {t("jsonImport.expectedFormatDesc")}
             </p>
           </div>
 
@@ -184,7 +185,7 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
                   strokeLinecap="round"
                 />
               </svg>
-              Voir la structure complète
+              {t("jsonImport.seeStructure")}
             </button>
 
             {showSchema && (
@@ -220,7 +221,7 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
                       className="text-xs font-semibold"
                       style={{ color: "var(--fg)" }}
                     >
-                      Types de sections disponibles
+                      {t("jsonImport.availableTypes")}
                     </p>
                   </div>
                   <div style={{ maxHeight: "180px", overflowY: "auto" }}>
@@ -259,7 +260,7 @@ export function JsonImportDialog({ open, onOpenChange }: Props) {
               style={{ padding: "0.5rem 1.1rem", fontSize: "0.875rem" }}
               onClick={() => onOpenChange(false)}
             >
-              Fermer
+              {t("common.close")}
             </button>
           </div>
         </div>

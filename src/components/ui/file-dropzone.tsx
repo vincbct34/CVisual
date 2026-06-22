@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useT } from "@/components/i18n/language-provider";
 
 interface FileDropzoneProps {
   /** Accept attribute, e.g. ".json" or "application/pdf,.pdf" */
@@ -76,11 +77,14 @@ export function FileDropzone({
   loading = false,
   error = false,
   disabled = false,
-  loadingTitle = "Chargement…",
+  loadingTitle,
   loadingSubtext,
   idleTitle,
-  idleHint = "ou cliquez pour choisir un fichier",
+  idleHint,
 }: FileDropzoneProps) {
+  const t = useT();
+  const resolvedLoadingTitle = loadingTitle ?? t("common.loading");
+  const resolvedIdleHint = idleHint ?? t("ui.dropzoneHint");
   const fileRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const blocked = loading || disabled;
@@ -126,7 +130,7 @@ export function FileDropzone({
           <Spinner />
           <div>
             <p className="text-sm font-semibold" style={{ color: "var(--fg)" }}>
-              {loadingTitle}
+              {resolvedLoadingTitle}
             </p>
             {loadingSubtext && (
               <p
@@ -148,7 +152,7 @@ export function FileDropzone({
             {idleTitle}
           </p>
           <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-            {idleHint}
+            {resolvedIdleHint}
           </p>
         </>
       )}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { validationError, parseJsonBody } from "@/lib/api-response";
 import { requireCoverLetter } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
@@ -29,7 +30,7 @@ export async function PUT(
   if (badJson) return badJson;
   const parsed = updateCoverLetterSchema.safeParse(body);
 
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
 
   const { content, style, ...rest } = parsed.data;
 
@@ -55,5 +56,5 @@ export async function DELETE(
   if (response) return response;
 
   await prisma.coverLetter.delete({ where: { id } });
-  return NextResponse.json({ message: "Lettre supprimée" });
+  return NextResponse.json({ message: apiMessage(request, "letterDeleted") });
 }

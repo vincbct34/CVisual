@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT, useLocale } from "@/components/i18n/language-provider";
 import { toast } from "sonner";
 import type { LinkedInParseResult } from "@/lib/linkedin-parser";
 
@@ -22,7 +23,9 @@ type Step = "upload" | "reading" | "done";
 
 export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
   const { authFetch } = useAuth();
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
+  const locale = useLocale();
 
   const [step, setStep] = useState<Step>("upload");
   const [fileName, setFileName] = useState("");
@@ -56,13 +59,13 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Erreur lors de la lecture du PDF");
+        setError(data.error ?? t("ai.liReadError"));
         setStep("upload");
         return;
       }
       parsed = data.parsed as LinkedInParseResult;
     } catch {
-      setError("Impossible de lire le PDF. Réessayez.");
+      setError(t("ai.liCantRead"));
       setStep("upload");
       return;
     }
@@ -73,14 +76,14 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
 
     sections.push({
       type: "profile",
-      title: "Profil",
+      title: t("sectionTypes.profile"),
       content: parsed.profile,
       order: order++,
     });
     if (parsed.experience.length > 0) {
       sections.push({
         type: "experience",
-        title: "Expérience",
+        title: t("sectionTypes.experience"),
         content: { items: parsed.experience },
         order: order++,
       });
@@ -88,7 +91,7 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
     if (parsed.education.length > 0) {
       sections.push({
         type: "education",
-        title: "Formation",
+        title: t("sectionTypes.education"),
         content: { items: parsed.education },
         order: order++,
       });
@@ -96,7 +99,7 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
     if (parsed.skills.length > 0) {
       sections.push({
         type: "skills",
-        title: "Compétences",
+        title: t("sectionTypes.skills"),
         content: { items: parsed.skills },
         order: order++,
       });
@@ -104,35 +107,35 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
     if (parsed.languages.length > 0) {
       sections.push({
         type: "languages",
-        title: "Langues",
+        title: t("sectionTypes.languages"),
         content: { items: parsed.languages },
         order: order++,
       });
     }
 
     const title = parsed.profile.fullName
-      ? `CV de ${parsed.profile.fullName}`
-      : "CV LinkedIn";
+      ? t("ai.liCvTitle", { name: parsed.profile.fullName })
+      : t("ai.liCvTitleDefault");
 
     // 3. Création du CV
     try {
       const res = await authFetch("/api/cv/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, sections, language: "fr" }),
+        body: JSON.stringify({ title, sections, language: locale }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Erreur lors de la création du CV");
+        setError(data.error ?? t("ai.liCreateError"));
         setStep("upload");
         return;
       }
       setStep("done");
-      toast.success("Profil LinkedIn importé !");
+      toast.success(t("ai.liImported"));
       onOpenChange(false);
       router.push(`/editor/${data.resume.id}`);
     } catch {
-      setError("Erreur lors de la création du CV");
+      setError(t("ai.liCreateError"));
       setStep("upload");
     }
   }
@@ -143,7 +146,7 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg lg:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Importer depuis LinkedIn</DialogTitle>
+          <DialogTitle>{t("ai.liTitle")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -160,24 +163,15 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
               className="text-xs font-semibold"
               style={{ color: "var(--accent-strong)" }}
             >
-              Comment exporter votre PDF LinkedIn
+              {t("ai.liHowTitle")}
             </p>
             <ol
               className="text-xs space-y-1 list-decimal list-inside"
               style={{ color: "var(--fg-muted)" }}
             >
-              <li>Allez sur votre profil LinkedIn</li>
-              <li>
-                Cliquez sur{" "}
-                <strong style={{ color: "var(--fg)" }}>
-                  «&nbsp;Plus&nbsp;»
-                </strong>{" "}
-                →{" "}
-                <strong style={{ color: "var(--fg)" }}>
-                  «&nbsp;Enregistrer en PDF&nbsp;»
-                </strong>
-              </li>
-              <li>Déposez le PDF téléchargé ci-dessous</li>
+              <li>{t("ai.liStep1")}</li>
+              <li>{t("ai.liStep2")}</li>
+              <li>{t("ai.liStep3")}</li>
             </ol>
             <p
               className="text-xs"
@@ -188,8 +182,7 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
                 marginTop: "4px",
               }}
             >
-              Aucune clé IA requise — l&apos;extraction est entièrement
-              automatique.
+              {t("ai.liNoKey")}
             </p>
           </div>
 
@@ -199,9 +192,9 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
             onFile={processFile}
             loading={isLoading}
             error={!!error}
-            loadingTitle="Lecture du profil…"
+            loadingTitle={t("ai.liLoadingTitle")}
             loadingSubtext={fileName}
-            idleTitle="Déposez votre PDF LinkedIn ici"
+            idleTitle={t("ai.liIdleTitle")}
           />
 
           {/* Erreur */}
@@ -227,7 +220,7 @@ export function AILinkedInImportDialog({ open, onOpenChange }: Props) {
               onClick={() => handleClose(false)}
               disabled={isLoading}
             >
-              Fermer
+              {t("common.close")}
             </button>
           </div>
         </div>

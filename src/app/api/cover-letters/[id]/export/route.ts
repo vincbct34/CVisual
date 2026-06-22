@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireCoverLetter } from "@/lib/api-auth";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { generateCoverLetterPDF } from "@/lib/export/cover-letter-pdf";
@@ -23,6 +24,7 @@ export async function GET(
     `cl-export:${auth.userId}`,
     10,
     60_000,
+    request,
   );
   if (limited) return limited;
 
@@ -62,14 +64,22 @@ export async function GET(
       });
     }
 
-    return NextResponse.json({ error: "Format non supporté" }, { status: 400 });
+    return NextResponse.json(
+      { error: apiMessage(request, "formatUnsupported") },
+      { status: 400 },
+    );
   } catch (error) {
     console.error(
       `Cover letter ${format.toUpperCase()} generation error:`,
       error,
     );
     return NextResponse.json(
-      { error: `Erreur lors de la génération du ${format.toUpperCase()}` },
+      {
+        error: apiMessage(request, "exportFailed").replace(
+          "{format}",
+          format.toUpperCase(),
+        ),
+      },
       { status: 500 },
     );
   }

@@ -3,6 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { TEMPLATES } from "@/components/templates";
 import { defaultSidebarTypes } from "@/components/templates/template-utils";
+import { useT } from "@/components/i18n/language-provider";
 import type { ResumeStyle, PhotoShape, Section } from "@/types/resume";
 import {
   ColorPresetPicker,
@@ -15,10 +16,10 @@ import {
 
 const DEFAULT_PHOTO_SIZE = 96;
 
-const PHOTO_SHAPES: { value: PhotoShape; label: string }[] = [
-  { value: "circle", label: "Rond" },
-  { value: "rounded", label: "Arrondi" },
-  { value: "square", label: "Carré" },
+const PHOTO_SHAPE_KEYS: { value: PhotoShape; key: string }[] = [
+  { value: "circle", key: "style.shapeCircle" },
+  { value: "rounded", key: "style.shapeRounded" },
+  { value: "square", key: "style.shapeSquare" },
 ];
 
 const FONTS = [
@@ -34,15 +35,15 @@ const FONTS = [
   "Montserrat",
 ];
 
-const COLOR_PRESETS: ColorPreset[] = [
-  { primary: "#2563eb", label: "Bleu" },
-  { primary: "#059669", label: "Vert" },
-  { primary: "#dc2626", label: "Rouge" },
-  { primary: "#7c3aed", label: "Violet" },
-  { primary: "#ea580c", label: "Orange" },
-  { primary: "#0891b2", label: "Cyan" },
-  { primary: "#374151", label: "Gris" },
-  { primary: "#000000", label: "Noir" },
+const COLOR_PRESET_DEFS: { primary: string; key: string }[] = [
+  { primary: "#2563eb", key: "colors.bleu" },
+  { primary: "#059669", key: "colors.vert" },
+  { primary: "#dc2626", key: "colors.rouge" },
+  { primary: "#7c3aed", key: "colors.violet" },
+  { primary: "#ea580c", key: "colors.orange" },
+  { primary: "#0891b2", key: "colors.cyan" },
+  { primary: "#374151", key: "colors.gris" },
+  { primary: "#000000", key: "colors.noir" },
 ];
 
 interface StylePanelProps {
@@ -60,6 +61,15 @@ export function StylePanel({
   onTemplateChange,
   onStyleChange,
 }: StylePanelProps) {
+  const t = useT();
+  const photoShapes = PHOTO_SHAPE_KEYS.map((s) => ({
+    value: s.value,
+    label: t(s.key),
+  }));
+  const colorPresets: ColorPreset[] = COLOR_PRESET_DEFS.map((c) => ({
+    primary: c.primary,
+    label: t(c.key),
+  }));
   const hasSidebar = template === "modern" || template === "creative";
   const layoutSections = (sections ?? []).filter((s) => s.type !== "profile");
   const sidebarDefaults = defaultSidebarTypes(template);
@@ -80,11 +90,11 @@ export function StylePanel({
     <div className="space-y-5">
       {/* Template selector */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Template</Label>
+        <Label className="text-sm font-medium">{t("style.template")}</Label>
         <OptionButtons
-          options={Object.entries(TEMPLATES).map(([key, t]) => ({
+          options={Object.keys(TEMPLATES).map((key) => ({
             value: key,
-            label: t.name,
+            label: t(`templateNames.${key}`),
           }))}
           value={template}
           onChange={onTemplateChange}
@@ -94,9 +104,9 @@ export function StylePanel({
       {/* Sidebar layout (modern / creative) */}
       {hasSidebar && layoutSections.length > 0 && (
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Colonne latérale</Label>
+          <Label className="text-sm font-medium">{t("style.sidebar")}</Label>
           <p className="text-[11px] text-muted-foreground -mt-1">
-            Choisissez les sections à placer dans la colonne latérale.
+            {t("style.sidebarHelp")}
           </p>
           <div className="space-y-1.5">
             {layoutSections.map((s) => {
@@ -126,7 +136,7 @@ export function StylePanel({
                         : "var(--fg-muted)",
                     }}
                   >
-                    {active ? "Latérale" : "Principale"}
+                    {active ? t("style.sidebarCol") : t("style.mainCol")}
                   </span>
                 </button>
               );
@@ -137,17 +147,17 @@ export function StylePanel({
 
       {/* Color presets */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Couleur</Label>
+        <Label className="text-sm font-medium">{t("style.color")}</Label>
         <ColorPresetPicker
           style={style}
-          presets={COLOR_PRESETS}
+          presets={colorPresets}
           onChange={onStyleChange}
         />
       </div>
 
       {/* Font */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Police</Label>
+        <Label className="text-sm font-medium">{t("style.font")}</Label>
         <FontSelect style={style} fonts={FONTS} onChange={onStyleChange} />
       </div>
 
@@ -156,16 +166,18 @@ export function StylePanel({
 
       {/* Profile photo */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Photo de profil</Label>
+        <Label className="text-sm font-medium">{t("style.photo")}</Label>
 
         <OptionButtons
-          options={PHOTO_SHAPES}
+          options={photoShapes}
           value={style.photoShape ?? "circle"}
           onChange={(v) => onStyleChange({ ...style, photoShape: v })}
         />
 
         <SliderField
-          label={`Taille (${style.photoSize ?? DEFAULT_PHOTO_SIZE}px)`}
+          label={t("style.photoSize", {
+            n: style.photoSize ?? DEFAULT_PHOTO_SIZE,
+          })}
           min={48}
           max={160}
           step={4}

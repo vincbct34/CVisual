@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { validationError, parseJsonBody } from "@/lib/api-response";
 import { requireAuth } from "@/lib/api-auth";
 import { rateLimitResponse } from "@/lib/rate-limit";
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
     `cv-create:${auth.userId}`,
     20,
     60_000,
+    request,
   );
   if (limited) return limited;
 
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
   if (badJson) return badJson;
   const parsed = createResumeSchema.safeParse(body);
 
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
 
   const resume = await prisma.resume.create({
     data: {
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
         create: [
           {
             type: "profile",
-            title: "Profil",
+            title: apiMessage(request, "defaultProfile"),
             content: {
               fullName: "",
               jobTitle: "",
@@ -61,25 +63,25 @@ export async function POST(request: Request) {
           },
           {
             type: "experience",
-            title: "Expériences professionnelles",
+            title: apiMessage(request, "defaultExperience"),
             content: { items: [] },
             order: 1,
           },
           {
             type: "education",
-            title: "Formation",
+            title: apiMessage(request, "defaultEducation"),
             content: { items: [] },
             order: 2,
           },
           {
             type: "skills",
-            title: "Compétences",
+            title: apiMessage(request, "defaultSkills"),
             content: { items: [] },
             order: 3,
           },
           {
             type: "languages",
-            title: "Langues",
+            title: apiMessage(request, "defaultLanguages"),
             content: { items: [] },
             order: 4,
           },

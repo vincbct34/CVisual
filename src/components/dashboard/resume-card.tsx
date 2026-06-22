@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT, useLocale } from "@/components/i18n/language-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
 import { translateSections } from "@/lib/ai/translate";
@@ -42,7 +43,9 @@ interface ResumeCardProps {
 }
 
 export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
+  const locale = useLocale();
   const { authFetch } = useAuth();
   const { apiKey, hasKey, provider } = useAI();
   const [isTranslating, setIsTranslating] = useState(false);
@@ -57,14 +60,14 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
         body: JSON.stringify({}),
       });
       if (res.ok) {
-        toast.success("CV dupliqué !");
+        toast.success(t("resumeCard.duplicated"));
         onDuplicate?.();
       } else {
         const data = await res.json().catch(() => null);
-        toast.error(data?.error || "Erreur lors de la duplication");
+        toast.error(data?.error || t("resumeCard.duplicateError"));
       }
     } catch {
-      toast.error("Erreur lors de la duplication");
+      toast.error(t("resumeCard.duplicateError"));
     }
   }
 
@@ -77,14 +80,14 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        toast.error(data?.error || "Erreur lors de la duplication");
+        toast.error(data?.error || t("resumeCard.duplicateError"));
         return;
       }
       const { resume: newResume } = await res.json();
 
       if (hasKey && apiKey) {
         setIsTranslating(true);
-        setTranslationProgress("Traduction en cours...");
+        setTranslationProgress(t("resumeCard.translating"));
         try {
           const fullRes = await authFetch(`/api/cv/${newResume.id}`);
           if (!fullRes.ok) throw new Error("Failed to fetch resume");
@@ -95,7 +98,9 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
             language,
             apiKey,
             (current, total) =>
-              setTranslationProgress(`Traduction... (${current}/${total})`),
+              setTranslationProgress(
+                t("resumeCard.translatingProgress", { current, total }),
+              ),
             provider,
           );
           const writes = await Promise.all(
@@ -116,27 +121,27 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
           const failures = result.failedSections.length + writeFailures;
           if (failures > 0) {
             toast.warning(
-              `CV traduit, mais ${failures} section(s) non enregistrées`,
+              t("resumeCard.translatePartial", { count: failures }),
             );
           } else {
-            toast.success(`CV traduit vers ${language.toUpperCase()} !`);
+            toast.success(
+              t("resumeCard.translatedTo", { lang: language.toUpperCase() }),
+            );
           }
         } catch {
-          toast.error(
-            "Erreur lors de la traduction IA — le CV a été dupliqué sans traduction",
-          );
+          toast.error(t("resumeCard.translateAiError"));
         } finally {
           setIsTranslating(false);
           setTranslationProgress("");
         }
       } else {
         toast.success(
-          `CV dupliqué vers ${language.toUpperCase()} — configurez l'IA pour traduire automatiquement`,
+          t("resumeCard.duplicatedTo", { lang: language.toUpperCase() }),
         );
       }
       router.push(`/editor/${newResume.id}`);
     } catch {
-      toast.error("Erreur lors de la traduction");
+      toast.error(t("resumeCard.translateError"));
     }
   }
 
@@ -144,11 +149,11 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
     try {
       const res = await authFetch(`/api/cv/${resume.id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("CV supprimé");
+        toast.success(t("resumeCard.deleted"));
         onDelete(resume.id);
       }
     } catch {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("resumeCard.deleteError"));
     }
   }
 
@@ -174,10 +179,10 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
               <DropdownMenuItem
                 onClick={() => router.push(`/editor/${resume.id}`)}
               >
-                Modifier
+                {t("common.edit")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDuplicate}>
-                Dupliquer
+                {t("common.duplicate")}
               </DropdownMenuItem>
               {!hasKey && (
                 <DropdownMenuItem
@@ -185,7 +190,7 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
                   className="text-xs"
                   style={{ color: "var(--fg-muted)", fontStyle: "italic" }}
                 >
-                  🔒 Traduction — clé IA requise
+                  {t("resumeCard.translateLocked")}
                 </DropdownMenuItem>
               )}
               {hasKey &&
@@ -196,7 +201,7 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
                       onClick={() => handleTranslate(lang.code)}
                       disabled={isTranslating}
                     >
-                      Traduire vers {lang.label}
+                      {t("resumeCard.translateTo", { lang: lang.label })}
                     </DropdownMenuItem>
                   ),
                 )}
@@ -204,7 +209,7 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
                 onClick={handleDelete}
                 className="text-destructive"
               >
-                Supprimer
+                {t("common.delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -212,7 +217,9 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
 
         <div className="flex gap-2 flex-wrap">
           <span className="ed-tag ed-tag-accent">
-            {TEMPLATES[resume.template]?.name ?? resume.template}
+            {TEMPLATES[resume.template]
+              ? t(`templateNames.${resume.template}`)
+              : resume.template}
           </span>
           <span className="ed-tag">{resume.language.toUpperCase()}</span>
         </div>
@@ -228,14 +235,18 @@ export function ResumeCard({ resume, onDelete, onDuplicate }: ResumeCardProps) {
 
         <div className="flex items-center justify-between mt-auto pt-1">
           <span className="text-xs" style={{ color: "var(--fg-muted)" }}>
-            Modifié le {new Date(resume.updatedAt).toLocaleDateString("fr-FR")}
+            {t("resumeCard.modifiedOn", {
+              date: new Date(resume.updatedAt).toLocaleDateString(
+                locale === "en" ? "en-US" : "fr-FR",
+              ),
+            })}
           </span>
           <button
             className="btn-gradient text-xs"
             style={{ padding: "0.5rem 1rem" }}
             onClick={() => router.push(`/editor/${resume.id}`)}
           >
-            Éditer
+            {t("resumeCard.editBtn")}
           </button>
         </div>
       </AnimatedCard>

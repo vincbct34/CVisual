@@ -1,4 +1,5 @@
 import type { Resume } from "@/types/resume";
+import { useT } from "@/components/i18n/language-provider";
 
 export interface CompletenessResult {
   score: number;
@@ -8,6 +9,7 @@ export interface CompletenessResult {
 export function useCompletenessScore(
   resume: Resume | null,
 ): CompletenessResult {
+  const t = useT();
   if (!resume) return { score: 0, missing: [] };
 
   const profile = resume.sections.find((s) => s.type === "profile")?.content as
@@ -23,20 +25,32 @@ export function useCompletenessScore(
     )?.items as unknown[]) ?? [];
 
   const checks: { label: string; done: boolean }[] = [
-    { label: "Nom complet", done: !!(profile?.fullName as string)?.trim() },
-    { label: "Titre de poste", done: !!(profile?.jobTitle as string)?.trim() },
-    { label: "Email", done: !!(profile?.email as string)?.trim() },
-    { label: "Téléphone", done: !!(profile?.phone as string)?.trim() },
     {
-      label: "Résumé professionnel",
+      label: t("completeness.fullName"),
+      done: !!(profile?.fullName as string)?.trim(),
+    },
+    {
+      label: t("completeness.jobTitle"),
+      done: !!(profile?.jobTitle as string)?.trim(),
+    },
+    {
+      label: t("completeness.email"),
+      done: !!(profile?.email as string)?.trim(),
+    },
+    {
+      label: t("completeness.phone"),
+      done: !!(profile?.phone as string)?.trim(),
+    },
+    {
+      label: t("completeness.summary"),
       done: !!(profile?.summary as string)?.trim(),
     },
     {
-      label: "Expérience professionnelle",
+      label: t("completeness.experience"),
       done: items("experience").length > 0,
     },
-    { label: "Formation", done: items("education").length > 0 },
-    { label: "Compétences (min. 3)", done: items("skills").length >= 3 },
+    { label: t("completeness.education"), done: items("education").length > 0 },
+    { label: t("completeness.skills"), done: items("skills").length >= 3 },
   ];
 
   const done = checks.filter((c) => c.done).length;

@@ -4,55 +4,29 @@ import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
 import { LandingShell, Arrow } from "@/components/landing/landing-shell";
 import { HomeCta } from "@/components/landing/home-cta";
 import { SAMPLE_RESUME } from "@/lib/sample-resume";
-import "./landing.css";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { makeT } from "@/lib/i18n/translate";
+import { withLocale, isLocale, defaultLocale } from "@/lib/i18n/config";
+import "@/app/landing.css";
 
-// Title/description/OpenGraph inherit the root layout; only the canonical is
+// Title/description/OpenGraph inherit the [lang] layout; only the canonical is
 // page-specific (canonical is set per-page, never on the root layout).
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return { alternates: { canonical: `/${lang}` } };
+}
 
-const COPY = {
-  eyebrow: "Générateur de CV — Gratuit",
-  headline: "Créez le CV qui vous",
-  headlineAccent: "ressemble",
-  subtitle:
-    "Des modèles pensés pour les recruteurs, optimisés ATS, entièrement personnalisables et assistés par IA. Un CV professionnel en quelques minutes.",
-  ctaPrimary: "Commencer dès maintenant",
-  ctaSecondary: "Se connecter",
-};
-
-const FEATURES = [
-  {
-    n: "01",
-    h: "Templates pro",
-    p: "Cinq modèles dessinés avec des recruteurs. Une hiérarchie typographique nette, lisible par les machines comme par les humains.",
-    l: "Voir les modèles",
-    href: "/modeles",
-  },
-  {
-    n: "02",
-    h: "Export multi-format",
-    p: "PDF haute fidélité ou DOCX éditable, générés à la volée. Le fichier est prêt à partir, sans retouche.",
-    l: "PDF · DOCX",
-    href: "/export",
-  },
-  {
-    n: "03",
-    h: "IA embarquée",
-    p: "Un assistant qui reformule, traduit et resserre vos expériences — vos mots, en plus convaincants.",
-    l: "Découvrir l’IA",
-    href: "/ia",
-  },
-];
-
-function ResumeMockup() {
+function ResumeMockup({ t }: { t: (k: string) => string }) {
   return (
     <div className="doc-stage reveal">
       <div className="resume">
         <div className="r-top">
-          <span>CV — 2026</span>
-          <span className="tab">Modèle Classique · Édition</span>
+          <span>{t("landing.mockupDoc")}</span>
+          <span className="tab">{t("landing.mockupTab")}</span>
         </div>
         <div className="resume-window">
           <div className="resume-page">
@@ -62,57 +36,91 @@ function ResumeMockup() {
       </div>
 
       <div className="cal cal-ats r">
-        Optimisé <b>ATS</b>
+        {t("landing.mockupAts")} <b>ATS</b>
       </div>
       <div className="cal cal-exp r">
-        Export <b>PDF · DOCX</b>
+        {t("landing.mockupExport")} <b>PDF · DOCX</b>
       </div>
 
       <div className="ia-card">
         <div className="ia-top">
-          <span className="ia-badge">IA</span>
-          <span className="ia-ttl">Suggestion</span>
+          <span className="ia-badge">{t("nav.ai")}</span>
+          <span className="ia-ttl">{t("landing.mockupIaTitle")}</span>
         </div>
         <div className="ia-text">
-          « 12 projets web » →{" "}
-          <b>« 12 projets web livrés dans les délais et le budget. »</b>
+          {t("landing.mockupIaBefore")} → <b>{t("landing.mockupIaAfter")}</b>
         </div>
         <div className="ia-actions">
-          <div className="ia-btn go">Appliquer</div>
-          <div className="ia-btn">Ignorer</div>
+          <div className="ia-btn go">{t("landing.mockupApply")}</div>
+          <div className="ia-btn">{t("landing.mockupIgnore")}</div>
         </div>
       </div>
     </div>
   );
 }
 
-export default function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : defaultLocale;
+  const dict = await getDictionary(locale);
+  const t = makeT(dict);
+  const ctaPrimary = t("landing.ctaPrimary");
+  const ctaSecondary = t("landing.ctaSecondary");
+
+  const features = [
+    {
+      n: "01",
+      h: t("landing.feat1Title"),
+      p: t("landing.feat1Body"),
+      l: t("landing.feat1Link"),
+      href: "/modeles",
+    },
+    {
+      n: "02",
+      h: t("landing.feat2Title"),
+      p: t("landing.feat2Body"),
+      l: t("landing.feat2Link"),
+      href: "/export",
+    },
+    {
+      n: "03",
+      h: t("landing.feat3Title"),
+      p: t("landing.feat3Body"),
+      l: t("landing.feat3Link"),
+      href: "/ia",
+    },
+  ];
+
   return (
     <LandingShell ticker>
       <section className="hero">
         <div className="wrap hero-grid">
           <div className="hero-l reveal in">
             <span className="kicker">
-              <span className="num">( 01 )</span> {COPY.eyebrow}
+              <span className="num">( 01 )</span> {t("landing.eyebrow")}
             </span>
             <h1 className="headline">
-              {COPY.headline} <em>{COPY.headlineAccent}</em>
+              {t("landing.headline")} <em>{t("landing.headlineAccent")}</em>
             </h1>
-            <p className="subtitle">{COPY.subtitle}</p>
+            <p className="subtitle">{t("landing.subtitle")}</p>
             <div className="hero-cta">
               <HomeCta
                 primaryClass="btn btn-ink"
                 secondaryClass="btn btn-line"
-                primaryLabel={COPY.ctaPrimary}
-                secondaryLabel={COPY.ctaSecondary}
+                primaryLabel={ctaPrimary}
+                secondaryLabel={ctaSecondary}
               />
             </div>
             <div className="hero-meta">
               <span className="rule" />
-              Totalement gratuit
+              {t("landing.heroMetaFree")}
             </div>
           </div>
-          <ResumeMockup />
+          <ResumeMockup t={t} />
         </div>
       </section>
 
@@ -120,19 +128,16 @@ export default function HomePage() {
         <div className="wrap">
           <div className="feat-head reveal">
             <h2 className="feat-title">
-              Un CV soigné, des candidatures qui se <em>démarquent</em>
+              {t("landing.featTitle")} <em>{t("landing.featTitleAccent")}</em>
             </h2>
-            <p className="sub">
-              ( 02 ) — Les bons modèles, les bons formats et un coup de main de
-              l’IA. Vous gardez l’essentiel : décrocher l’entretien.
-            </p>
+            <p className="sub">{t("landing.featSub")}</p>
           </div>
           <div className="feat-grid">
-            {FEATURES.map((f, i) => (
+            {features.map((f, i) => (
               <Link
                 className="feat-col reveal"
                 key={f.n}
-                href={f.href}
+                href={withLocale(f.href, locale)}
                 style={{ transitionDelay: `${i * 90}ms` }}
               >
                 <div className="feat-num">{f.n}</div>
@@ -152,22 +157,20 @@ export default function HomePage() {
           <div className="cta-panel reveal">
             <span className="watermark">CV</span>
             <span className="kicker">
-              <span className="num">( 03 )</span> Prêt à postuler
+              <span className="num">( 03 )</span> {t("landing.ctaKicker")}
             </span>
             <h2>
-              Votre prochain poste tient sur <em>une page</em>
+              {t("landing.ctaTitle")} <em>{t("landing.ctaTitleAccent")}</em>
             </h2>
             <div className="crow">
               <HomeCta
                 primaryClass="btn btn-paper"
                 secondaryClass="btn btn-ghost-d"
-                primaryLabel={COPY.ctaPrimary}
-                secondaryLabel={COPY.ctaSecondary}
+                primaryLabel={ctaPrimary}
+                secondaryLabel={ctaSecondary}
               />
             </div>
-            <div className="cta-note">
-              Totalement gratuit · Sans carte bancaire · Aucun spam
-            </div>
+            <div className="cta-note">{t("landing.ctaNote")}</div>
           </div>
         </div>
       </section>

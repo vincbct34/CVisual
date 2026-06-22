@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { ResumeCard } from "@/components/dashboard/resume-card";
@@ -54,6 +55,7 @@ interface CoverLetter {
 export default function DashboardPage() {
   const { authFetch, isLoading: authLoading } = useAuth();
   const { hasKey } = useAI();
+  const t = useT();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +64,7 @@ export default function DashboardPage() {
   const [showLinkedInImport, setShowLinkedInImport] = useState(false);
   const [showJsonImport, setShowJsonImport] = useState(false);
   const [showAISettings, setShowAISettings] = useState(false);
-  const router = useRouter();
+  const router = useLocalizedRouter();
 
   const fetchData = useCallback(async () => {
     try {
@@ -79,11 +81,11 @@ export default function DashboardPage() {
         setCoverLetters(data.coverLetters);
       }
     } catch {
-      toast.error("Erreur lors du chargement");
+      toast.error(t("dashboard.loadError"));
     } finally {
       setIsLoading(false);
     }
-  }, [authFetch]);
+  }, [authFetch, t]);
 
   useEffect(() => {
     if (!authLoading) {
@@ -106,7 +108,7 @@ export default function DashboardPage() {
         router.push(`/editor/${data.resume.id}`);
       }
     } catch {
-      toast.error("Erreur lors de la création du CV");
+      toast.error(t("dashboard.createResumeError"));
     } finally {
       setIsCreating(false);
     }
@@ -126,7 +128,7 @@ export default function DashboardPage() {
         router.push(`/cover-letter/${data.coverLetter.id}`);
       }
     } catch {
-      toast.error("Erreur lors de la création");
+      toast.error(t("dashboard.createError"));
     } finally {
       setIsCreating(false);
     }
@@ -155,10 +157,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-6">
             <TabsList>
               <TabsTrigger value="resumes">
-                Mes CV ({resumes.length})
+                {t("dashboard.tabResumes", { count: resumes.length })}
               </TabsTrigger>
               <TabsTrigger value="cover-letters">
-                Mes lettres ({coverLetters.length})
+                {t("dashboard.tabLetters", { count: coverLetters.length })}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -173,12 +175,17 @@ export default function DashboardPage() {
                     fontFamily: "var(--serif)",
                   }}
                 >
-                  Mes CV
+                  {t("dashboard.resumesTitle")}
                 </h2>
                 <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
                   {resumes.length === 0
-                    ? "Vous n'avez pas encore de CV"
-                    : `${resumes.length} CV`}
+                    ? t("dashboard.noResumes")
+                    : t(
+                        resumes.length === 1
+                          ? "dashboard.resumeCountOne"
+                          : "dashboard.resumeCountOther",
+                        { count: resumes.length },
+                      )}
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -186,13 +193,13 @@ export default function DashboardPage() {
                   className="btn-chip"
                   onClick={() => setShowLinkedInImport(true)}
                 >
-                  Importer LinkedIn
+                  {t("dashboard.importLinkedin")}
                 </button>
                 <button
                   className="btn-chip"
                   onClick={() => setShowJsonImport(true)}
                 >
-                  Importer JSON
+                  {t("dashboard.importJson")}
                 </button>
                 <button
                   className="btn-gradient"
@@ -204,7 +211,9 @@ export default function DashboardPage() {
                   onClick={handleCreateResume}
                   disabled={isCreating}
                 >
-                  {isCreating ? "Création..." : "Nouveau CV"}
+                  {isCreating
+                    ? t("dashboard.creating")
+                    : t("dashboard.newResume")}
                 </button>
               </div>
             </div>
@@ -215,7 +224,7 @@ export default function DashboardPage() {
                   className="text-lg mb-6"
                   style={{ color: "var(--fg-muted)" }}
                 >
-                  Créez votre premier CV professionnel
+                  {t("dashboard.firstResume")}
                 </p>
                 <button
                   className="btn-gradient"
@@ -226,7 +235,9 @@ export default function DashboardPage() {
                   onClick={handleCreateResume}
                   disabled={isCreating}
                 >
-                  {isCreating ? "Création..." : "Créer un CV"}
+                  {isCreating
+                    ? t("dashboard.creating")
+                    : t("dashboard.createResume")}
                 </button>
               </FadeUp>
             ) : (
@@ -254,12 +265,17 @@ export default function DashboardPage() {
                     fontFamily: "var(--serif)",
                   }}
                 >
-                  Mes lettres de motivation
+                  {t("dashboard.lettersTitle")}
                 </h2>
                 <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
                   {coverLetters.length === 0
-                    ? "Vous n'avez pas encore de lettre"
-                    : `${coverLetters.length} lettre${coverLetters.length > 1 ? "s" : ""}`}
+                    ? t("dashboard.noLetters")
+                    : t(
+                        coverLetters.length === 1
+                          ? "dashboard.letterCountOne"
+                          : "dashboard.letterCountOther",
+                        { count: coverLetters.length },
+                      )}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -270,14 +286,15 @@ export default function DashboardPage() {
                     opacity: hasKey ? 1 : 0.45,
                     cursor: hasKey ? "pointer" : "not-allowed",
                   }}
-                  title={hasKey ? undefined : "Clé API IA non configurée"}
+                  title={
+                    hasKey ? undefined : t("dashboard.aiNotConfiguredTitle")
+                  }
                   onClick={() => {
                     if (!hasKey) {
-                      toast.warning("Fonctionnalité IA non configurée", {
-                        description:
-                          "Ajoutez une clé API dans vos paramètres pour générer une lettre de motivation.",
+                      toast.warning(t("dashboard.aiWarnTitle"), {
+                        description: t("dashboard.aiWarnDesc"),
                         action: {
-                          label: "Configurer",
+                          label: t("dashboard.configure"),
                           onClick: () => setShowAISettings(true),
                         },
                       });
@@ -286,7 +303,7 @@ export default function DashboardPage() {
                     setShowAICoverLetter(true);
                   }}
                 >
-                  ✦ Générer avec l&apos;IA
+                  {t("dashboard.generateAI")}
                 </button>
                 <button
                   className="btn-gradient"
@@ -298,7 +315,9 @@ export default function DashboardPage() {
                   onClick={handleCreateCoverLetter}
                   disabled={isCreating}
                 >
-                  {isCreating ? "Création..." : "Nouvelle lettre"}
+                  {isCreating
+                    ? t("dashboard.creating")
+                    : t("dashboard.newLetter")}
                 </button>
               </div>
             </div>
@@ -309,7 +328,7 @@ export default function DashboardPage() {
                   className="text-lg mb-6"
                   style={{ color: "var(--fg-muted)" }}
                 >
-                  Créez votre première lettre de motivation
+                  {t("dashboard.firstLetter")}
                 </p>
                 <button
                   className="btn-gradient"
@@ -320,7 +339,9 @@ export default function DashboardPage() {
                   onClick={handleCreateCoverLetter}
                   disabled={isCreating}
                 >
-                  {isCreating ? "Création..." : "Créer une lettre"}
+                  {isCreating
+                    ? t("dashboard.creating")
+                    : t("dashboard.createLetter")}
                 </button>
               </FadeUp>
             ) : (

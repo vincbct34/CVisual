@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { validationError, parseJsonBody } from "@/lib/api-response";
 import { requireResume } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
@@ -17,13 +18,16 @@ export async function PUT(
     where: { id: sectionId, resumeId: id },
   });
   if (!existingSection) {
-    return NextResponse.json({ error: "Section non trouvée" }, { status: 404 });
+    return NextResponse.json(
+      { error: apiMessage(request, "sectionNotFound") },
+      { status: 404 },
+    );
   }
 
   const { body, response: badJson } = await parseJsonBody(request);
   if (badJson) return badJson;
   const parsed = updateSectionSchema.safeParse(body);
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
 
   const { content, ...rest } = parsed.data;
   const section = await prisma.section.update({
@@ -50,10 +54,13 @@ export async function DELETE(
     where: { id: sectionId, resumeId: id },
   });
   if (!existingSection) {
-    return NextResponse.json({ error: "Section non trouvée" }, { status: 404 });
+    return NextResponse.json(
+      { error: apiMessage(request, "sectionNotFound") },
+      { status: 404 },
+    );
   }
 
   await prisma.section.delete({ where: { id: sectionId } });
 
-  return NextResponse.json({ message: "Section supprimée" });
+  return NextResponse.json({ message: apiMessage(request, "sectionDeleted") });
 }

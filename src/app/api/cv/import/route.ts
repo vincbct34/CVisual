@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireAuth } from "@/lib/api-auth";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
@@ -15,6 +16,7 @@ export async function POST(request: Request) {
     `cv-import:${auth.userId}`,
     10,
     60_000,
+    request,
   );
   if (limited) return limited;
 
@@ -22,14 +24,22 @@ export async function POST(request: Request) {
   try {
     raw = await request.json();
   } catch {
-    return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
+    return NextResponse.json(
+      { error: apiMessage(request, "invalidJson") },
+      { status: 400 },
+    );
   }
 
   const parsed = importResumeSchema.safeParse(raw);
   if (!parsed.success) {
     const messages = parsed.error.issues.map((e) => e.message).join(", ");
     return NextResponse.json(
-      { error: `Structure invalide : ${messages}` },
+      {
+        error: apiMessage(request, "structureInvalid").replace(
+          "{messages}",
+          messages,
+        ),
+      },
       { status: 422 },
     );
   }

@@ -13,8 +13,6 @@ import {
 } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
-import { InstallPrompt } from "@/components/pwa/install-prompt";
-import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 // Editorial type system. CSS var names are kept legacy (--font-outfit = heading
@@ -140,8 +138,8 @@ export const metadata: Metadata = {
   // Indexable by default; private/token routes opt out via robots.ts + per-page
   // metadata (see render/share/public pages).
   robots: { index: true, follow: true },
-  // og:image / twitter:image come from the opengraph-image.tsx + twitter-image.tsx
-  // convention files (no manual `images` needed).
+  // og:image / twitter:image come from the per-locale convention files under
+  // app/[lang] (no manual `images` needed).
   openGraph: {
     type: "website",
     siteName: "CVisual",
@@ -198,9 +196,7 @@ export default function RootLayout({
         />
         <Providers>
           {children}
-          <SiteFooter />
           <Toaster />
-          <InstallPrompt />
         </Providers>
       </body>
     </html>

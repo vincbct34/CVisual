@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, use } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { AISetupBanner } from "@/components/ai/ai-setup-banner";
@@ -55,12 +56,17 @@ import { useAutosave } from "@/hooks/use-autosave";
 import { downloadExport, RateLimitError } from "@/lib/export-download";
 import { PageLoading } from "@/components/ui/page-loading";
 
-/** Compose the French date line: "Paris, le 6 juin 2026" / "Le 6 juin 2026". */
-function composeLetterDate(city: string, iso: string): string {
+/**
+ * Compose the date line in the letter's own language:
+ * FR "Paris, le 6 juin 2026" / "Le 6 juin 2026";
+ * EN "New York, June 6, 2026" / "June 6, 2026".
+ */
+function composeLetterDate(city: string, iso: string, lang: string): string {
   if (!iso) return city ? `${city},` : "";
+  const intlLocale = lang === "fr" ? "fr-FR" : "en-US";
   let day = "";
   try {
-    day = new Intl.DateTimeFormat("fr-FR", {
+    day = new Intl.DateTimeFormat(intlLocale, {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -68,7 +74,10 @@ function composeLetterDate(city: string, iso: string): string {
   } catch {
     return city;
   }
-  return city ? `${city}, le ${day}` : `Le ${day}`;
+  if (lang === "fr") {
+    return city ? `${city}, le ${day}` : `Le ${day}`;
+  }
+  return city ? `${city}, ${day}` : day;
 }
 
 export default function CoverLetterEditorPage({
@@ -78,13 +87,14 @@ export default function CoverLetterEditorPage({
 }) {
   const { id } = use(params);
   const { authFetch, isLoading: authLoading } = useAuth();
+  const t = useT();
   const [letter, setLetter] = useState<CoverLetter | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Set to the chosen format while the "save before export" dialog is open.
   const [pendingExportFormat, setPendingExportFormat] = useState<string | null>(
     null,
   );
-  const router = useRouter();
+  const router = useLocalizedRouter();
 
   const {
     mainAreaRef,
@@ -102,15 +112,15 @@ export default function CoverLetterEditorPage({
         const data = await res.json();
         setLetter(data.coverLetter);
       } else {
-        toast.error("Lettre non trouvée");
+        toast.error(t("cl.notFound"));
         router.push("/dashboard");
       }
     } catch {
-      toast.error("Erreur de chargement");
+      toast.error(t("cl.loadError"));
     } finally {
       setIsLoading(false);
     }
-  }, [authFetch, id, router]);
+  }, [authFetch, id, router, t]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -140,11 +150,11 @@ export default function CoverLetterEditorPage({
           });
           if (!res.ok) throw new Error();
         } catch {
-          toast.error("Erreur lors de la sauvegarde");
+          toast.error(t("cl.saveError"));
           throw new Error("Save failed"); // keep dirty so changes aren't lost
         }
       },
-      [authFetch, id],
+      [authFetch, id, t],
     ),
     30_000,
   );
@@ -185,11 +195,11 @@ export default function CoverLetterEditorPage({
   function handleSignatureUpload(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Veuillez choisir une image (PNG ou JPG)");
+      toast.error(t("cl.imageOnly"));
       return;
     }
     if (file.size > 2_000_000) {
-      toast.error("Image trop lourde (max 2 Mo)");
+      toast.error(t("cl.imageTooBig"));
       return;
     }
     const reader = new FileReader();
@@ -207,12 +217,12 @@ export default function CoverLetterEditorPage({
         letter?.title ?? "",
         "lettre",
       );
-      toast.success(`${format.toUpperCase()} téléchargé !`);
+      toast.success(t("cl.exportSuccess", { format: format.toUpperCase() }));
     } catch (e) {
       toast.error(
         e instanceof RateLimitError
           ? e.message
-          : `Erreur lors de l'export ${format.toUpperCase()}`,
+          : t("cl.exportError", { format: format.toUpperCase() }),
       );
     }
   }
@@ -233,7 +243,7 @@ export default function CoverLetterEditorPage({
     setPendingExportFormat(null);
     if (!format) return;
     if (!(await saveNow())) {
-      toast.error("Échec de la sauvegarde — export annulé.");
+      toast.error(t("cl.saveFailedExportCancelled"));
       return;
     }
     await runExport(format);
@@ -270,7 +280,7 @@ export default function CoverLetterEditorPage({
             size="sm"
             onClick={() => router.push("/dashboard")}
           >
-            ← <span className="hidden sm:inline">Retour</span>
+            ← <span className="hidden sm:inline">{t("common.back")}</span>
           </Button>
           <Input
             value={letter.title}
@@ -284,18 +294,18 @@ export default function CoverLetterEditorPage({
             style={{ color: "var(--fg-muted)" }}
           >
             {isSaving
-              ? "Enregistrement..."
+              ? t("common.saving")
               : isDirty
-                ? "Modifications non enregistrées"
-                : "Enregistré"}
+                ? t("editor.unsaved")
+                : t("common.saved")}
           </span>
           <Button
             size="sm"
             onClick={saveNow}
             disabled={isSaving || !isDirty}
-            title="Enregistrer les modifications"
+            title={t("editor.saveTitle")}
           >
-            Enregistrer
+            {t("common.save")}
           </Button>
           <Button
             variant="ghost"
@@ -304,15 +314,17 @@ export default function CoverLetterEditorPage({
             onClick={togglePreview}
             title={
               previewCollapsed
-                ? "Afficher l'aperçu"
-                : "Agrandir l'éditeur (masquer l'aperçu)"
+                ? t("editor.showPreview")
+                : t("editor.expandEditorTitle")
             }
           >
-            {previewCollapsed ? "Afficher l'aperçu" : "Agrandir l'éditeur"}
+            {previewCollapsed
+              ? t("editor.showPreview")
+              : t("editor.expandEditor")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger className="export-trigger">
-              Exporter ▾
+              {t("editor.exportMenu")}
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
@@ -320,27 +332,26 @@ export default function CoverLetterEditorPage({
             >
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="text-xs font-normal whitespace-normal text-muted-foreground">
-                  Pour conserver la mise en page exacte, exportez en PDF. Les
-                  autres formats sont modifiables mais simplifiés.
+                  {t("cl.exportNote")}
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleExport("pdf")}>
                 PDF
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  mise en page exacte
+                  {t("editor.exportPdfHint")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("docx")}>
-                DOCX (Word)
+                {t("editor.exportDocxLabel")}
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  modifiable
+                  {t("editor.exportEditable")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("html")}>
                 HTML
                 <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                  modifiable
+                  {t("editor.exportEditable")}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -353,11 +364,9 @@ export default function CoverLetterEditorPage({
           >
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Modifications non enregistrées</DialogTitle>
+                <DialogTitle>{t("editor.exportUnsavedTitle")}</DialogTitle>
                 <DialogDescription>
-                  L&apos;export utilise la dernière version enregistrée.
-                  Enregistrez d&apos;abord pour inclure vos modifications
-                  récentes dans le fichier.
+                  {t("editor.exportUnsavedDesc")}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2">
@@ -366,21 +375,21 @@ export default function CoverLetterEditorPage({
                   className="w-full sm:w-auto"
                   onClick={() => setPendingExportFormat(null)}
                 >
-                  Annuler
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full sm:w-auto"
                   onClick={exportWithoutSaving}
                 >
-                  Exporter sans enregistrer
+                  {t("editor.exportWithoutSaving")}
                 </Button>
                 <Button
                   className="w-full sm:w-auto"
                   onClick={saveThenExport}
                   disabled={isSaving}
                 >
-                  Enregistrer et exporter
+                  {t("editor.saveAndExport")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -403,10 +412,10 @@ export default function CoverLetterEditorPage({
           <Tabs defaultValue="content">
             <TabsList className="w-full">
               <TabsTrigger value="content" className="flex-1">
-                Contenu
+                {t("cl.tabContent")}
               </TabsTrigger>
               <TabsTrigger value="style" className="flex-1">
-                Style
+                {t("editor.tabStyle")}
               </TabsTrigger>
             </TabsList>
 
@@ -415,47 +424,47 @@ export default function CoverLetterEditorPage({
 
               {/* Expéditeur */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Expéditeur</Label>
+                <Label className="text-sm font-medium">{t("cl.sender")}</Label>
                 <div className="space-y-1">
-                  <Label className="text-xs">Nom</Label>
+                  <Label className="text-xs">{t("cl.name")}</Label>
                   <Input
                     value={content.senderName ?? ""}
                     onChange={(e) =>
                       updateContent("senderName", e.target.value)
                     }
-                    placeholder="Jean Martin"
+                    placeholder={t("cl.namePh")}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Email</Label>
+                    <Label className="text-xs">{t("forms.email")}</Label>
                     <Input
                       value={content.senderEmail ?? ""}
                       onChange={(e) =>
                         updateContent("senderEmail", e.target.value)
                       }
-                      placeholder="jean@mail.com"
+                      placeholder={t("cl.emailPh")}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Téléphone</Label>
+                    <Label className="text-xs">{t("forms.phone")}</Label>
                     <Input
                       value={content.senderPhone ?? ""}
                       onChange={(e) =>
                         updateContent("senderPhone", e.target.value)
                       }
-                      placeholder="06 12 34 56 78"
+                      placeholder={t("cl.phonePh")}
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">Lieu</Label>
+                  <Label className="text-xs">{t("cl.place")}</Label>
                   <Input
                     value={content.senderLocation ?? ""}
                     onChange={(e) =>
                       updateContent("senderLocation", e.target.value)
                     }
-                    placeholder="Paris, France"
+                    placeholder={t("cl.placePh")}
                   />
                 </div>
               </div>
@@ -464,38 +473,40 @@ export default function CoverLetterEditorPage({
 
               {/* Destinataire */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Destinataire</Label>
+                <Label className="text-sm font-medium">
+                  {t("cl.recipient")}
+                </Label>
                 <div className="space-y-1">
-                  <Label className="text-xs">Nom du destinataire</Label>
+                  <Label className="text-xs">{t("cl.recipientName")}</Label>
                   <Input
                     value={content.recipientName}
                     onChange={(e) =>
                       updateContent("recipientName", e.target.value)
                     }
-                    placeholder="Mme Dupont"
+                    placeholder={t("cl.recipientNamePh")}
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">Entreprise</Label>
+                  <Label className="text-xs">{t("cl.company")}</Label>
                   <Input
                     value={content.companyName}
                     onChange={(e) =>
                       updateContent("companyName", e.target.value)
                     }
-                    placeholder="Google"
+                    placeholder={t("cl.companyPh")}
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">Poste visé</Label>
+                  <Label className="text-xs">{t("cl.jobTitle")}</Label>
                   <Input
                     value={content.jobTitle}
                     onChange={(e) => updateContent("jobTitle", e.target.value)}
-                    placeholder="Développeur Full-Stack"
+                    placeholder={t("cl.jobTitlePh")}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Ville</Label>
+                    <Label className="text-xs">{t("cl.city")}</Label>
                     <Input
                       value={content.dateCity ?? ""}
                       onChange={(e) =>
@@ -504,14 +515,15 @@ export default function CoverLetterEditorPage({
                           date: composeLetterDate(
                             e.target.value,
                             content.dateValue ?? "",
+                            letter.language,
                           ),
                         })
                       }
-                      placeholder="Paris"
+                      placeholder={t("cl.cityPh")}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Date</Label>
+                    <Label className="text-xs">{t("cl.date")}</Label>
                     <Input
                       type="date"
                       value={content.dateValue ?? ""}
@@ -521,6 +533,7 @@ export default function CoverLetterEditorPage({
                           date: composeLetterDate(
                             content.dateCity ?? "",
                             e.target.value,
+                            letter.language,
                           ),
                         })
                       }
@@ -529,7 +542,7 @@ export default function CoverLetterEditorPage({
                 </div>
                 {content.date && (
                   <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-                    Aperçu : {content.date}
+                    {t("cl.datePreview", { date: content.date })}
                   </p>
                 )}
               </div>
@@ -538,12 +551,15 @@ export default function CoverLetterEditorPage({
 
               {/* Corps */}
               <div className="space-y-1">
-                <Label className="text-xs">Corps de la lettre</Label>
+                <Label className="text-xs">{t("cl.body")}</Label>
                 <RichTextEditor
                   content={content.body}
                   onChange={(html) => updateContent("body", html)}
-                  placeholder="Rédigez votre lettre de motivation..."
-                  aiContext={`Lettre de motivation pour ${content.jobTitle} chez ${content.companyName}`}
+                  placeholder={t("cl.bodyPh")}
+                  aiContext={t("cl.bodyAiContext", {
+                    job: content.jobTitle,
+                    company: content.companyName,
+                  })}
                 />
               </div>
 
@@ -551,15 +567,17 @@ export default function CoverLetterEditorPage({
 
               {/* Signature */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Signature</Label>
+                <Label className="text-sm font-medium">
+                  {t("cl.signature")}
+                </Label>
 
                 {/* Mode selector */}
                 <div className="grid grid-cols-3 gap-1 rounded-md border p-1">
                   {(
                     [
-                      ["typed", "Manuscrite"],
-                      ["draw", "Dessiner"],
-                      ["upload", "Importer"],
+                      ["typed", t("cl.sigTyped")],
+                      ["draw", t("cl.sigDraw")],
+                      ["upload", t("cl.sigUpload")],
                     ] as const
                   ).map(([mode, label]) => {
                     const active = (content.signatureMode ?? "typed") === mode;
@@ -583,11 +601,11 @@ export default function CoverLetterEditorPage({
                 {/* Name — used as the typed signature and the printed name below
                     a drawn/uploaded signature */}
                 <div className="space-y-1">
-                  <Label className="text-xs">Nom (signature)</Label>
+                  <Label className="text-xs">{t("cl.sigName")}</Label>
                   <Input
                     value={content.signature ?? ""}
                     onChange={(e) => updateContent("signature", e.target.value)}
-                    placeholder="Jean Martin"
+                    placeholder={t("cl.sigNamePh")}
                   />
                 </div>
 
@@ -612,7 +630,7 @@ export default function CoverLetterEditorPage({
                       <div className="flex items-center justify-between gap-2">
                         <img
                           src={content.signatureImage}
-                          alt="Signature"
+                          alt={t("cl.sigAlt")}
                           className="h-12 rounded border bg-white object-contain p-1"
                         />
                         <Button
@@ -621,7 +639,7 @@ export default function CoverLetterEditorPage({
                           size="sm"
                           onClick={() => updateContent("signatureImage", "")}
                         >
-                          Retirer
+                          {t("cl.sigRemove")}
                         </Button>
                       </div>
                     )}
@@ -646,7 +664,7 @@ export default function CoverLetterEditorPage({
             onPointerDown={startResize}
             role="separator"
             aria-orientation="vertical"
-            aria-label="Redimensionner les panneaux"
+            aria-label={t("editor.resizePanels")}
           >
             <div className="editor-resizer-grip" />
           </div>

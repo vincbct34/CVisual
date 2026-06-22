@@ -1,6 +1,7 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
+import { useT } from "@/components/i18n/language-provider";
 import type {
   CoverLetterStyle,
   CoverLetterAccent,
@@ -29,26 +30,26 @@ const FONTS = [
   "Playfair Display",
 ];
 
-const COLOR_PRESETS: ColorPreset[] = [
-  { primary: "#1a1a1a", label: "Noir" },
-  { primary: "#2563eb", label: "Bleu" },
-  { primary: "#059669", label: "Vert" },
-  { primary: "#dc2626", label: "Rouge" },
-  { primary: "#7c3aed", label: "Violet" },
-  { primary: "#ea580c", label: "Orange" },
-  { primary: "#0891b2", label: "Cyan" },
-  { primary: "#374151", label: "Gris" },
+const COLOR_PRESET_DEFS: { primary: string; key: string }[] = [
+  { primary: "#1a1a1a", key: "colors.noir" },
+  { primary: "#2563eb", key: "colors.bleu" },
+  { primary: "#059669", key: "colors.vert" },
+  { primary: "#dc2626", key: "colors.rouge" },
+  { primary: "#7c3aed", key: "colors.violet" },
+  { primary: "#ea580c", key: "colors.orange" },
+  { primary: "#0891b2", key: "colors.cyan" },
+  { primary: "#374151", key: "colors.gris" },
 ];
 
-const ACCENTS: { value: CoverLetterAccent; label: string }[] = [
-  { value: "minimal", label: "Minimal" },
-  { value: "line", label: "Trait" },
-  { value: "band", label: "Bandeau" },
+const ACCENT_KEYS: { value: CoverLetterAccent; key: string }[] = [
+  { value: "minimal", key: "style.accentMinimal" },
+  { value: "line", key: "style.accentLine" },
+  { value: "band", key: "style.accentBand" },
 ];
 
-const ALIGNS: { value: CoverLetterAlign; label: string }[] = [
-  { value: "left", label: "Gauche" },
-  { value: "justify", label: "Justifié" },
+const ALIGN_KEYS: { value: CoverLetterAlign; key: string }[] = [
+  { value: "left", key: "style.alignLeft" },
+  { value: "justify", key: "style.alignJustify" },
 ];
 
 interface CoverLetterStylePanelProps {
@@ -60,20 +61,27 @@ export function CoverLetterStylePanel({
   style,
   onStyleChange,
 }: CoverLetterStylePanelProps) {
+  const t = useT();
   const accent = style.accent ?? "minimal";
   const textAlign = style.textAlign ?? "left";
   const lineHeight = style.lineHeight ?? 1.5;
+  const accents = ACCENT_KEYS.map((a) => ({ value: a.value, label: t(a.key) }));
+  const aligns = ALIGN_KEYS.map((a) => ({ value: a.value, label: t(a.key) }));
+  const colorPresets: ColorPreset[] = COLOR_PRESET_DEFS.map((c) => ({
+    primary: c.primary,
+    label: t(c.key),
+  }));
 
   return (
     <div className="space-y-5">
       {/* En-tête / accent */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">En-tête</Label>
+        <Label className="text-sm font-medium">{t("style.clHeader")}</Label>
         <p className="text-[11px] text-muted-foreground -mt-1">
-          Style de l&apos;en-tête expéditeur.
+          {t("style.clHeaderHelp")}
         </p>
         <OptionButtons
-          options={ACCENTS}
+          options={accents}
           value={accent}
           onChange={(v) => onStyleChange({ ...style, accent: v })}
         />
@@ -81,17 +89,19 @@ export function CoverLetterStylePanel({
 
       {/* Couleur */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Couleur d&apos;accent</Label>
+        <Label className="text-sm font-medium">
+          {t("style.clAccentColor")}
+        </Label>
         <ColorPresetPicker
           style={style}
-          presets={COLOR_PRESETS}
+          presets={colorPresets}
           onChange={onStyleChange}
         />
       </div>
 
       {/* Police */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Police</Label>
+        <Label className="text-sm font-medium">{t("style.font")}</Label>
         <FontSelect style={style} fonts={FONTS} onChange={onStyleChange} />
       </div>
 
@@ -101,7 +111,7 @@ export function CoverLetterStylePanel({
       {/* Interligne */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">
-          Interligne ({lineHeight.toFixed(2)})
+          {t("style.lineHeight", { n: lineHeight.toFixed(2) })}
         </Label>
         <input
           type="range"
@@ -118,10 +128,10 @@ export function CoverLetterStylePanel({
 
       {/* Alignement du corps */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Alignement du texte</Label>
+        <Label className="text-sm font-medium">{t("style.textAlign")}</Label>
         <OptionButtons
           columns={2}
-          options={ALIGNS}
+          options={aligns}
           value={textAlign}
           onChange={(v) => onStyleChange({ ...style, textAlign: v })}
         />

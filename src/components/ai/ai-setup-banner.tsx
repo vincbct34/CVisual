@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAI } from "@/hooks/use-ai";
+import { useT } from "@/components/i18n/language-provider";
 import { AISettingsDialog } from "./ai-settings-dialog";
 
 /**
@@ -10,6 +11,7 @@ import { AISettingsDialog } from "./ai-settings-dialog";
  */
 export function AISetupBanner() {
   const { hasKey } = useAI();
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   if (hasKey) return null;
@@ -31,18 +33,17 @@ export function AISetupBanner() {
             className="text-xs font-semibold"
             style={{ color: "var(--accent-violet)" }}
           >
-            Fonctionnalités IA désactivées
+            {t("ai.bannerTitle")}
           </p>
           <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-            Configurez une clé API pour améliorer votre contenu, générer des
-            résumés et scorer votre ATS.{" "}
+            {t("ai.bannerDesc")}{" "}
             <span
               style={{
                 color: "var(--accent-violet)",
                 textDecoration: "underline",
               }}
             >
-              Configurer →
+              {t("ai.bannerCta")}
             </span>
           </p>
         </div>

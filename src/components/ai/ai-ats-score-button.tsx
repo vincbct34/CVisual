@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAI } from "@/hooks/use-ai";
+import { useT, useLocale } from "@/components/i18n/language-provider";
 import { AISettingsDialog } from "./ai-settings-dialog";
 import { SparklesIcon, notifyAINotConfigured } from "./ai-shared";
 import { atsScorePrompt } from "@/lib/ai/prompts";
@@ -62,6 +63,8 @@ interface Props {
 
 export function AIAtsScoreButton({ resume }: Props) {
   const { generate, isConfigured } = useAI();
+  const t = useT();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ATSScoreResult | null>(null);
@@ -76,7 +79,7 @@ export function AIAtsScoreButton({ resume }: Props) {
   }, [resume.id]);
 
   function handleNoKey() {
-    notifyAINotConfigured(() => setShowSettings(true), "scorer votre CV");
+    notifyAINotConfigured(() => setShowSettings(true), t("ai.actionScore"), t);
   }
 
   function handleOpen() {
@@ -133,7 +136,7 @@ export function AIAtsScoreButton({ resume }: Props) {
       setHistory(next);
       saveHistory(resume.id, next);
     } catch {
-      toast.error("Erreur lors de l'analyse ATS");
+      toast.error(t("ai.atsError"));
     } finally {
       setLoading(false);
     }
@@ -151,11 +154,7 @@ export function AIAtsScoreButton({ resume }: Props) {
     <>
       <button
         onClick={handleOpen}
-        title={
-          isConfigured
-            ? "Analyser la compatibilité ATS"
-            : "Clé API IA non configurée"
-        }
+        title={isConfigured ? t("ai.atsTooltip") : t("ai.notConfiguredShort")}
         className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 transition-all"
         style={{
           background: isConfigured ? "var(--accent-soft)" : "var(--input-bg)",
@@ -167,31 +166,31 @@ export function AIAtsScoreButton({ resume }: Props) {
         }}
       >
         <SparklesIcon size={11} />
-        Score ATS
+        {t("ai.scoreAts")}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg lg:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Analyse ATS</DialogTitle>
+            <DialogTitle>{t("ai.atsTitle")}</DialogTitle>
           </DialogHeader>
 
           {!result && !loading && (
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label htmlFor="jobDescription">
-                  Description de l&apos;offre (Optionnel)
+                  {t("ai.jobDescOptional")}
                 </Label>
                 <Textarea
                   id="jobDescription"
-                  placeholder="Collez ici la description du poste ciblé pour une analyse plus précise..."
+                  placeholder={t("ai.jobDescPlaceholderAts")}
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   className="h-32"
                 />
               </div>
               <Button onClick={handleScore} className="w-full">
-                Lancer l&apos;analyse
+                {t("ai.runAnalysis")}
               </Button>
 
               {history.length > 0 && (
@@ -201,14 +200,14 @@ export function AIAtsScoreButton({ resume }: Props) {
                       className="text-sm font-semibold"
                       style={{ color: "var(--fg)" }}
                     >
-                      Historique
+                      {t("ai.history")}
                     </p>
                     <button
                       onClick={clearHistory}
                       className="text-xs underline"
                       style={{ color: "var(--fg-muted)" }}
                     >
-                      Effacer
+                      {t("ai.clear")}
                     </button>
                   </div>
                   <ul className="space-y-1">
@@ -242,18 +241,21 @@ export function AIAtsScoreButton({ resume }: Props) {
                           >
                             {h.jobDescription
                               ? h.jobDescription
-                              : "Sans description d'offre"}
+                              : t("ai.noJobDesc")}
                           </span>
                           <span
                             className="text-xs whitespace-nowrap"
                             style={{ color: "var(--fg-muted)" }}
                           >
-                            {new Date(h.date).toLocaleDateString("fr-FR", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(h.date).toLocaleDateString(
+                              locale === "en" ? "en-US" : "fr-FR",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </span>
                         </button>
                       </li>
@@ -269,7 +271,7 @@ export function AIAtsScoreButton({ resume }: Props) {
               className="text-sm py-8 text-center"
               style={{ color: "var(--fg-muted)" }}
             >
-              Analyse en cours...
+              {t("ai.analyzing")}
             </p>
           )}
 
@@ -283,14 +285,14 @@ export function AIAtsScoreButton({ resume }: Props) {
                 </div>
                 <div>
                   <p className="font-semibold" style={{ color: "var(--fg)" }}>
-                    Score ATS
+                    {t("ai.scoreAts")}
                   </p>
                   <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
                     {result.score >= 75
-                      ? "Excellent"
+                      ? t("ai.excellent")
                       : result.score >= 50
-                        ? "Correct"
-                        : "À améliorer"}
+                        ? t("ai.correct")
+                        : t("ai.toImprove")}
                   </p>
                 </div>
               </div>
@@ -301,7 +303,7 @@ export function AIAtsScoreButton({ resume }: Props) {
                     className="text-sm font-semibold mb-1"
                     style={{ color: "var(--success)" }}
                   >
-                    Points forts
+                    {t("ai.strengths")}
                   </p>
                   <ul
                     className="text-sm space-y-1"
@@ -323,7 +325,7 @@ export function AIAtsScoreButton({ resume }: Props) {
                     className="text-sm font-semibold mb-1"
                     style={{ color: "var(--warning)" }}
                   >
-                    Améliorations
+                    {t("ai.improvements")}
                   </p>
                   <ul
                     className="text-sm space-y-1"
@@ -345,7 +347,7 @@ export function AIAtsScoreButton({ resume }: Props) {
                     className="text-sm font-semibold mb-1"
                     style={{ color: "var(--fg-muted)" }}
                   >
-                    Mots-clés manquants
+                    {t("ai.keywordsMissing")}
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {result.keywords_missing.map((k, i) => (
@@ -370,7 +372,7 @@ export function AIAtsScoreButton({ resume }: Props) {
                 className="w-full mt-4"
                 onClick={() => setResult(null)}
               >
-                Nouvelle analyse
+                {t("ai.newAnalysis")}
               </Button>
             </div>
           )}

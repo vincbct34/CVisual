@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/components/i18n/language-provider";
 
 interface SignaturePadProps {
   value?: string; // PNG data URL
@@ -14,6 +15,7 @@ interface SignaturePadProps {
  * canvas is serialised to a PNG data URL and pushed via onChange.
  */
 export function SignaturePad({ value, onChange, color }: SignaturePadProps) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const lastRef = useRef<{ x: number; y: number } | null>(null);
@@ -103,7 +105,7 @@ export function SignaturePad({ value, onChange, color }: SignaturePadProps) {
       />
       <div className="flex justify-end">
         <Button type="button" variant="ghost" size="sm" onClick={clear}>
-          Effacer
+          {t("signature.clear")}
         </Button>
       </div>
     </div>

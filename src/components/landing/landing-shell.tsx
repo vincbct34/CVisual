@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { LogoMark } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/use-auth";
 
-const BADGES = [
-  "5 templates",
-  "Export PDF / DOCX",
-  "Multi-langue",
-  "ATS-friendly",
-  "IA intégrée",
+const BADGE_KEYS = [
+  "masthead.badge1",
+  "masthead.badge2",
+  "masthead.badge3",
+  "masthead.badge4",
+  "masthead.badge5",
 ];
 
 export function Arrow({ size = 15 }: { size?: number }) {
@@ -43,9 +45,11 @@ export function Logo() {
 }
 
 function TickerItem() {
+  const t = useT();
+  const badges = BADGE_KEYS.map((k) => t(k));
   // Repeat badges so one copy comfortably exceeds the viewport width, keeping
   // gaps tight while min-width:100% still guarantees a seamless wrap.
-  const items = [...BADGES, ...BADGES, ...BADGES];
+  const items = [...badges, ...badges, ...badges];
   return (
     <div className="ticker-item">
       {items.map((b, i) => (
@@ -61,6 +65,7 @@ function TickerItem() {
 function Masthead() {
   const [scrolled, setScrolled] = useState(false);
   const { user, isLoading } = useAuth();
+  const t = useT();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -83,8 +88,9 @@ function Masthead() {
         <Logo />
         <nav className="mast-right">
           <Link className="mast-link hide-sm" href="/modeles">
-            Modèles
+            {t("nav.templates")}
           </Link>
+          <LanguageSwitcher />
           {isLoading ? null : user ? (
             <Link className="btn btn-ink btn-sm" href="/dashboard">
               <span
@@ -93,15 +99,15 @@ function Masthead() {
               >
                 {initials}
               </span>
-              <span className="hide-sm">Mon espace</span>
+              <span className="hide-sm">{t("masthead.mySpace")}</span>
             </Link>
           ) : (
             <>
               <Link className="mast-link" href="/login">
-                Connexion
+                {t("nav.login")}
               </Link>
               <Link className="btn btn-ink btn-sm" href="/register">
-                Créer un compte
+                {t("nav.register")}
               </Link>
             </>
           )}

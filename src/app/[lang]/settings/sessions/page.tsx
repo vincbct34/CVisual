@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocale, useT } from "@/components/i18n/language-provider";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { toast } from "sonner";
 
@@ -13,6 +14,8 @@ interface Session {
 
 export default function SessionsPage() {
   const { authFetch } = useAuth();
+  const t = useT();
+  const locale = useLocale();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -26,13 +29,13 @@ export default function SessionsPage() {
           setSessions(data.sessions);
         }
       } catch {
-        toast.error("Erreur de chargement des sessions");
+        toast.error(t("sessions.loadError"));
       } finally {
         setLoading(false);
       }
     }
     fetchSessions();
-  }, [authFetch]);
+  }, [authFetch, t]);
 
   async function revokeSession(id: string) {
     setRevoking(id);
@@ -42,19 +45,19 @@ export default function SessionsPage() {
       });
       if (res.ok) {
         setSessions((prev) => prev.filter((s) => s.id !== id));
-        toast.success("Session révoquée");
+        toast.success(t("sessions.revoked"));
       } else {
-        toast.error("Erreur lors de la révocation");
+        toast.error(t("sessions.revokeError"));
       }
     } catch {
-      toast.error("Erreur lors de la révocation");
+      toast.error(t("sessions.revokeError"));
     } finally {
       setRevoking(null);
     }
   }
 
   function fmt(date: string) {
-    return new Date(date).toLocaleString("fr-FR", {
+    return new Date(date).toLocaleString(locale === "en" ? "en-US" : "fr-FR", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -74,16 +77,17 @@ export default function SessionsPage() {
           className="font-heading text-2xl mb-1"
           style={{ color: "var(--fg)" }}
         >
-          Sessions actives
+          {t("sessions.title")}
         </h1>
         <p className="mb-8 text-sm" style={{ color: "var(--fg-muted)" }}>
-          Chaque session correspond à un appareil ou navigateur connecté.
-          Révoquez les sessions inconnues.
+          {t("sessions.subtitle")}
         </p>
 
-        {loading && <p style={{ color: "var(--fg-muted)" }}>Chargement...</p>}
+        {loading && (
+          <p style={{ color: "var(--fg-muted)" }}>{t("common.loading")}</p>
+        )}
         {!loading && sessions.length === 0 && (
-          <p style={{ color: "var(--fg-muted)" }}>Aucune session active.</p>
+          <p style={{ color: "var(--fg-muted)" }}>{t("sessions.empty")}</p>
         )}
 
         <div className="space-y-3">
@@ -98,7 +102,7 @@ export default function SessionsPage() {
                   className="text-sm font-semibold"
                   style={{ color: "var(--fg)" }}
                 >
-                  Session{" "}
+                  {t("sessions.session")}{" "}
                   {i === 0 && (
                     <span
                       className="ml-1 text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -107,7 +111,7 @@ export default function SessionsPage() {
                         color: "var(--accent-strong)",
                       }}
                     >
-                      actuelle
+                      {t("sessions.current")}
                     </span>
                   )}
                 </p>
@@ -115,10 +119,10 @@ export default function SessionsPage() {
                   className="text-xs mt-0.5"
                   style={{ color: "var(--fg-muted)" }}
                 >
-                  Créée le {fmt(s.createdAt)}
+                  {t("sessions.created", { date: fmt(s.createdAt) })}
                 </p>
                 <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-                  Expire le {fmt(s.expiresAt)}
+                  {t("sessions.expires", { date: fmt(s.expiresAt) })}
                 </p>
               </div>
               <button
@@ -130,7 +134,7 @@ export default function SessionsPage() {
                 disabled={revoking === s.id}
                 onClick={() => revokeSession(s.id)}
               >
-                {revoking === s.id ? "..." : "Révoquer"}
+                {revoking === s.id ? "..." : t("sessions.revoke")}
               </button>
             </div>
           ))}

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { fontStack } from "@/components/templates/template-utils";
+import { useT } from "@/components/i18n/language-provider";
 
 // Shared style controls used by both the resume StylePanel and the cover-letter
 // StylePanel. Each is generic over the style object so it can mutate just the
@@ -30,6 +31,7 @@ export function ColorPresetPicker<T extends { primaryColor: string }>({
   presets: ColorPreset[];
   onChange: (style: T) => void;
 }) {
+  const t = useT();
   const isCustom = !presets.some((p) => p.primary === style.primaryColor);
   return (
     <div className="grid grid-cols-4 gap-2">
@@ -66,7 +68,9 @@ export function ColorPresetPicker<T extends { primaryColor: string }>({
             borderColor: isCustom ? "var(--ink)" : "transparent",
           }}
         />
-        <span className="text-[10px] text-muted-foreground">Perso</span>
+        <span className="text-[10px] text-muted-foreground">
+          {t("colors.custom")}
+        </span>
         <input
           type="color"
           value={style.primaryColor}
@@ -117,19 +121,22 @@ export function FontSelect<T extends { fontFamily: string }>({
 export function FontSizeControls<
   T extends { fontSize: number; headingScale?: number; metaScale?: number },
 >({ style, onChange }: { style: T; onChange: (style: T) => void }) {
+  const t = useT();
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium">Tailles</Label>
+      <Label className="text-sm font-medium">{t("style.sizes")}</Label>
 
       <SliderField
-        label={`Texte (${style.fontSize}px)`}
+        label={t("style.sizeBody", { n: style.fontSize })}
         min={10}
         max={18}
         value={style.fontSize}
         onChange={(v) => onChange({ ...style, fontSize: v })}
       />
       <SliderField
-        label={`Titres (${Math.round((style.headingScale ?? 1) * 100)}%)`}
+        label={t("style.sizeHeadings", {
+          n: Math.round((style.headingScale ?? 1) * 100),
+        })}
         min={0.7}
         max={1.5}
         step={0.05}
@@ -137,7 +144,9 @@ export function FontSizeControls<
         onChange={(v) => onChange({ ...style, headingScale: v })}
       />
       <SliderField
-        label={`Dates & coordonnées (${Math.round((style.metaScale ?? 1) * 100)}%)`}
+        label={t("style.sizeMeta", {
+          n: Math.round((style.metaScale ?? 1) * 100),
+        })}
         min={0.7}
         max={1.4}
         step={0.05}

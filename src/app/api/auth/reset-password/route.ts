@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { prisma } from "@/lib/prisma";
 import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
@@ -10,6 +11,7 @@ export async function POST(request: Request) {
       `reset-password:${getClientIp(request)}`,
       10,
       15 * 60_000,
+      request,
     );
     if (limited) return limited;
 
@@ -22,7 +24,10 @@ export async function POST(request: Request) {
       typeof password !== "string" ||
       password.length < 8
     ) {
-      return NextResponse.json({ error: "Données invalides" }, { status: 400 });
+      return NextResponse.json(
+        { error: apiMessage(request, "invalidData") },
+        { status: 400 },
+      );
     }
 
     await prisma.resetToken.deleteMany({
@@ -35,7 +40,7 @@ export async function POST(request: Request) {
 
     if (!resetToken || resetToken.expiresAt < new Date()) {
       return NextResponse.json(
-        { error: "Token invalide ou expiré" },
+        { error: apiMessage(request, "tokenInvalidExpired") },
         { status: 400 },
       );
     }
@@ -55,7 +60,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Reset password error:", error);
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { error: apiMessage(request, "serverError") },
       { status: 500 },
     );
   }

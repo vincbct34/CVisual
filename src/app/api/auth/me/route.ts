@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { validationError, parseJsonBody } from "@/lib/api-response";
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
 
   if (!user) {
     return NextResponse.json(
-      { error: "Utilisateur non trouvé" },
+      { error: apiMessage(request, "userNotFound") },
       { status: 404 },
     );
   }
@@ -31,7 +32,7 @@ export async function PUT(request: Request) {
   const { body, response: badJson } = await parseJsonBody(request);
   if (badJson) return badJson;
   const parsed = updateProfileSchema.safeParse(body);
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
   const { name, email } = parsed.data;
 
   // Reject an email already used by another account
@@ -39,7 +40,7 @@ export async function PUT(request: Request) {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing && existing.id !== auth.userId) {
       return NextResponse.json(
-        { error: "Cet email est déjà utilisé" },
+        { error: apiMessage(request, "emailTaken") },
         { status: 409 },
       );
     }
@@ -62,5 +63,5 @@ export async function DELETE(request: Request) {
   await prisma.user.delete({ where: { id: auth.userId } });
   await clearRefreshTokenCookie();
 
-  return NextResponse.json({ message: "Compte supprimé" });
+  return NextResponse.json({ message: apiMessage(request, "accountDeleted") });
 }

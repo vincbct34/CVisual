@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { validationError } from "@/lib/api-response";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -14,13 +15,14 @@ export async function POST(request: Request) {
       `login:${getClientIp(request)}`,
       10,
       15 * 60_000,
+      request,
     );
     if (limited) return limited;
 
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
 
-    if (!parsed.success) return validationError(parsed.error);
+    if (!parsed.success) return validationError(parsed.error, request);
 
     const { email, password } = parsed.data;
 
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     });
   } catch {
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { error: apiMessage(request, "serverError") },
       { status: 500 },
     );
   }

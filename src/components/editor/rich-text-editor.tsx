@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useT } from "@/components/i18n/language-provider";
 
 const AIImproveButton = dynamic(
   () =>
@@ -27,6 +28,7 @@ export function RichTextEditor({
   placeholder,
   aiContext,
 }: RichTextEditorProps) {
+  const t = useT();
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -36,7 +38,9 @@ export function RichTextEditor({
         blockquote: false,
         horizontalRule: false,
       }),
-      Placeholder.configure({ placeholder: placeholder ?? "Écrivez ici..." }),
+      Placeholder.configure({
+        placeholder: placeholder ?? t("rte.placeholder"),
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -99,28 +103,28 @@ export function RichTextEditor({
         <ToolbarButton
           active={active.isBold}
           onClick={() => editor.chain().focus().toggleBold().run()}
-          title="Gras"
+          title={t("rte.bold")}
         >
           <strong>B</strong>
         </ToolbarButton>
         <ToolbarButton
           active={active.isItalic}
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          title="Italique"
+          title={t("rte.italic")}
         >
           <em>I</em>
         </ToolbarButton>
         <ToolbarButton
           active={active.isBulletList}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          title="Liste à puces"
+          title={t("rte.bulletList")}
         >
           •
         </ToolbarButton>
         <ToolbarButton
           active={active.isOrderedList}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          title="Liste numérotée"
+          title={t("rte.orderedList")}
         >
           1.
         </ToolbarButton>
@@ -129,7 +133,7 @@ export function RichTextEditor({
           active={false}
           disabled={!active.canUndo}
           onClick={() => editor.chain().focus().undo().run()}
-          title="Annuler (Ctrl+Z)"
+          title={t("rte.undo")}
         >
           ↩
         </ToolbarButton>
@@ -137,7 +141,7 @@ export function RichTextEditor({
           active={false}
           disabled={!active.canRedo}
           onClick={() => editor.chain().focus().redo().run()}
-          title="Rétablir (Ctrl+Y)"
+          title={t("rte.redo")}
         >
           ↪
         </ToolbarButton>

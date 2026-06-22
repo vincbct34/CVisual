@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { AuthCard } from "../auth-card";
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const t = useT();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,21 +26,21 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas");
+      toast.error(t("auth.pwMismatch"));
       return;
     }
     if (password.length < 8) {
-      toast.error("Le mot de passe doit contenir au moins 8 caractères");
+      toast.error(t("auth.pwTooShort"));
       return;
     }
 
     setIsSubmitting(true);
     try {
       await register(email, password, name);
-      toast.success("Compte créé avec succès !");
+      toast.success(t("auth.registerSuccess"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Erreur d'inscription",
+        error instanceof Error ? error.message : t("auth.registerError"),
       );
     } finally {
       setIsSubmitting(false);
@@ -53,19 +55,19 @@ export default function RegisterPage() {
           <Logo href={"/"} size={32} />
         </div>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
-          Créez votre compte
+          {t("auth.registerSubtitle")}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="name" style={{ color: "var(--fg)", fontWeight: 600 }}>
-            Nom complet
+            {t("auth.fullName")}
           </Label>
           <Input
             id="name"
             type="text"
-            placeholder="Jean Dupont"
+            placeholder={t("auth.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -83,12 +85,12 @@ export default function RegisterPage() {
             htmlFor="email"
             style={{ color: "var(--fg)", fontWeight: 600 }}
           >
-            Email
+            {t("auth.email")}
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="vous@exemple.com"
+            placeholder={t("auth.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -106,13 +108,13 @@ export default function RegisterPage() {
             htmlFor="password"
             style={{ color: "var(--fg)", fontWeight: 600 }}
           >
-            Mot de passe
+            {t("auth.password")}
           </Label>
           <div className="relative">
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="8 caractères minimum"
+              placeholder={t("auth.passwordMinPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -129,9 +131,7 @@ export default function RegisterPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={
-                showPassword
-                  ? "Masquer le mot de passe"
-                  : "Afficher le mot de passe"
+                showPassword ? t("auth.hidePassword") : t("auth.showPassword")
               }
               className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-80 transition-opacity"
               style={{ color: "var(--fg-muted)" }}
@@ -150,7 +150,7 @@ export default function RegisterPage() {
             htmlFor="confirmPassword"
             style={{ color: "var(--fg)", fontWeight: 600 }}
           >
-            Confirmer le mot de passe
+            {t("auth.confirmPassword")}
           </Label>
           <div className="relative">
             <Input
@@ -174,8 +174,8 @@ export default function RegisterPage() {
               onClick={() => setShowConfirmPassword((v) => !v)}
               aria-label={
                 showConfirmPassword
-                  ? "Masquer le mot de passe"
-                  : "Afficher le mot de passe"
+                  ? t("auth.hidePassword")
+                  : t("auth.showPassword")
               }
               className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-80 transition-opacity"
               style={{ color: "var(--fg-muted)" }}
@@ -216,27 +216,27 @@ export default function RegisterPage() {
                   d="M4 12a8 8 0 018-8v8z"
                 />
               </svg>
-              Création...
+              {t("auth.registerSubmitting")}
             </span>
           ) : (
-            "Créer un compte"
+            t("auth.registerSubmit")
           )}
         </button>
 
         <p className="text-center text-xs" style={{ color: "var(--fg-muted)" }}>
-          En créant un compte, vous acceptez nos{" "}
+          {t("auth.termsPrefix")}{" "}
           <Link
             href="/cgu"
             className="underline hover:opacity-80 transition-opacity"
           >
-            CGU
+            {t("auth.termsCgu")}
           </Link>{" "}
-          et notre{" "}
+          {t("auth.termsAnd")}{" "}
           <Link
             href="/confidentialite"
             className="underline hover:opacity-80 transition-opacity"
           >
-            Politique de confidentialité
+            {t("auth.termsPrivacy")}
           </Link>
           .
         </p>
@@ -246,13 +246,13 @@ export default function RegisterPage() {
         className="text-center mt-6 text-sm"
         style={{ color: "var(--fg-muted)" }}
       >
-        Déjà un compte ?{" "}
+        {t("auth.haveAccount")}{" "}
         <Link
           href="/login"
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: "var(--accent-violet)" }}
         >
-          Se connecter
+          {t("auth.loginSubmit")}
         </Link>
       </p>
     </AuthCard>

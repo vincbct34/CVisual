@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import type { TranslateFn } from "@/lib/i18n/translate";
 
 /** The shared "AI" sparkle glyph used on every AI action control. */
 export function SparklesIcon({
@@ -29,12 +30,15 @@ export function SparklesIcon({
 
 /**
  * Standard "no API key" warning toast with a shortcut to open AI settings.
- * `action` completes the sentence "…pour <action>." (e.g. "améliorer votre
- * contenu", "générer un résumé").
+ * `action` completes the localized sentence (e.g. "improve your content").
  */
-export function notifyAINotConfigured(onConfigure: () => void, action: string) {
-  toast.warning("Fonctionnalité IA non configurée", {
-    description: `Ajoutez une clé API dans vos paramètres pour ${action}.`,
-    action: { label: "Configurer", onClick: onConfigure },
+export function notifyAINotConfigured(
+  onConfigure: () => void,
+  action: string,
+  t: TranslateFn,
+) {
+  toast.warning(t("ai.notConfiguredTitle"), {
+    description: t("ai.notConfiguredDesc", { action }),
+    action: { label: t("ai.configure"), onClick: onConfigure },
   });
 }

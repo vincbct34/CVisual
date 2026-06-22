@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
+import { useT } from "@/components/i18n/language-provider";
+import type { TranslateFn } from "@/lib/i18n/translate";
 
 const RichTextEditor = dynamic(
   () =>
@@ -43,6 +45,7 @@ interface SectionFormProps {
 }
 
 export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
+  const t = useT();
   switch (section.type) {
     case "profile":
       return (
@@ -57,7 +60,9 @@ export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
         <ListForm<ExperienceItem>
           content={section.content}
           onUpdate={onUpdate}
-          renderItem={ExperienceItemForm}
+          renderItem={(item, onChange, onDelete) =>
+            ExperienceItemForm(item, onChange, onDelete, t)
+          }
           createItem={createExperience}
         />
       );
@@ -66,7 +71,9 @@ export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
         <ListForm<EducationItem>
           content={section.content}
           onUpdate={onUpdate}
-          renderItem={EducationItemForm}
+          renderItem={(item, onChange, onDelete) =>
+            EducationItemForm(item, onChange, onDelete, t)
+          }
           createItem={createEducation}
         />
       );
@@ -77,7 +84,9 @@ export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
         <ListForm<LanguageItem>
           content={section.content}
           onUpdate={onUpdate}
-          renderItem={LanguageItemForm}
+          renderItem={(item, onChange, onDelete) =>
+            LanguageItemForm(item, onChange, onDelete, t)
+          }
           createItem={createLanguage}
         />
       );
@@ -86,7 +95,9 @@ export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
         <ListForm<ProjectItem>
           content={section.content}
           onUpdate={onUpdate}
-          renderItem={ProjectItemForm}
+          renderItem={(item, onChange, onDelete) =>
+            ProjectItemForm(item, onChange, onDelete, t)
+          }
           createItem={createProject}
         />
       );
@@ -95,7 +106,9 @@ export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
         <ListForm<CertificationItem>
           content={section.content}
           onUpdate={onUpdate}
-          renderItem={CertificationItemForm}
+          renderItem={(item, onChange, onDelete) =>
+            CertificationItemForm(item, onChange, onDelete, t)
+          }
           createItem={createCertification}
         />
       );
@@ -104,7 +117,9 @@ export function SectionForm({ section, onUpdate, resume }: SectionFormProps) {
         <ListForm<InterestItem>
           content={section.content}
           onUpdate={onUpdate}
-          renderItem={InterestItemForm}
+          renderItem={(item, onChange, onDelete) =>
+            InterestItemForm(item, onChange, onDelete, t)
+          }
           createItem={createInterest}
         />
       );
@@ -123,6 +138,8 @@ function ProfileForm({
   onUpdate: (c: Record<string, unknown>) => void;
   resume?: Resume;
 }) {
+  const t = useT();
+
   function update(field: keyof ProfileContent, value: string) {
     onUpdate({ ...content, [field]: value });
   }
@@ -188,12 +205,12 @@ function ProfileForm({
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Label className="text-xs">Photo de profil</Label>
+        <Label className="text-xs">{t("forms.photo")}</Label>
         <div className="flex flex-wrap items-center gap-3">
           {content.photoBase64 && (
             <img
               src={content.photoBase64}
-              alt="Profil"
+              alt={t("forms.photoAlt")}
               className="w-12 h-12 rounded-full object-cover border"
             />
           )}
@@ -210,85 +227,84 @@ function ProfileForm({
               onClick={() => update("photoBase64", "")}
               className="text-xs"
             >
-              Supprimer
+              {t("common.delete")}
             </Button>
           )}
         </div>
         <p className="text-[11px] text-muted-foreground mt-1">
-          💡 Astuce : n&apos;hésitez pas à compresser votre image en amont pour
-          une taille idéale (moins de 100 Ko).
+          {t("forms.photoTip")}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Nom complet</Label>
+          <Label className="text-xs">{t("forms.fullName")}</Label>
           <Input
             value={content.fullName || ""}
             onChange={(e) => update("fullName", e.target.value)}
-            placeholder="Jean Dupont"
+            placeholder={t("forms.fullNamePh")}
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Titre du poste</Label>
+          <Label className="text-xs">{t("forms.jobTitle")}</Label>
           <Input
             value={content.jobTitle || ""}
             onChange={(e) => update("jobTitle", e.target.value)}
-            placeholder="Développeur Full-Stack"
+            placeholder={t("forms.jobTitlePh")}
           />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Email</Label>
+          <Label className="text-xs">{t("forms.email")}</Label>
           <Input
             value={content.email || ""}
             onChange={(e) => update("email", e.target.value)}
-            placeholder="jean@exemple.com"
+            placeholder={t("forms.emailPh")}
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Téléphone</Label>
+          <Label className="text-xs">{t("forms.phone")}</Label>
           <Input
             value={content.phone || ""}
             onChange={(e) => update("phone", e.target.value)}
-            placeholder="+33 6 12 34 56 78"
+            placeholder={t("forms.phonePh")}
           />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Localisation</Label>
+          <Label className="text-xs">{t("forms.location")}</Label>
           <Input
             value={content.location || ""}
             onChange={(e) => update("location", e.target.value)}
-            placeholder="Paris, France"
+            placeholder={t("forms.locationPh")}
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Site web</Label>
+          <Label className="text-xs">{t("forms.website")}</Label>
           <Input
             value={content.website || ""}
             onChange={(e) => update("website", e.target.value)}
-            placeholder="jeandupont.dev"
+            placeholder={t("forms.websitePh")}
           />
         </div>
       </div>
 
       {/* Custom contact fields */}
       <div className="space-y-2">
-        <Label className="text-xs">Informations supplémentaires</Label>
+        <Label className="text-xs">{t("forms.extraInfo")}</Label>
         {customFields.map((f) => (
           <div key={f.id} className="flex items-center gap-2">
             <Input
               value={f.label}
               onChange={(e) => updateCustomField(f.id, "label", e.target.value)}
-              placeholder="Libellé (ex : LinkedIn)"
+              placeholder={t("forms.fieldLabelPh")}
               className="w-1/3"
             />
             <Input
               value={f.value}
               onChange={(e) => updateCustomField(f.id, "value", e.target.value)}
-              placeholder="Valeur"
+              placeholder={t("forms.fieldValuePh")}
               className="flex-1"
             />
             <Button
@@ -296,7 +312,7 @@ function ProfileForm({
               size="sm"
               className="h-8 text-xs text-destructive shrink-0"
               onClick={() => removeCustomField(f.id)}
-              title="Supprimer"
+              title={t("common.delete")}
             >
               X
             </Button>
@@ -308,13 +324,13 @@ function ProfileForm({
           onClick={addCustomField}
           className="w-full"
         >
-          + Ajouter une information
+          {t("forms.addInfo")}
         </Button>
       </div>
 
       <div className="space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Label className="text-xs">Résumé</Label>
+          <Label className="text-xs">{t("forms.summary")}</Label>
           {resume && (
             <AIGenerateSummaryButton
               resume={resume}
@@ -324,17 +340,16 @@ function ProfileForm({
         </div>
         {resume && (
           <p className="text-xs text-muted-foreground">
-            <strong>Générer avec l&apos;IA</strong> crée un résumé à partir de
-            vos expériences et compétences (remplace le texte). Pour retoucher
-            le texte existant, utilisez le bouton <strong>IA</strong> dans la
-            barre d&apos;outils.
+            {t("forms.summaryHelp")}
           </p>
         )}
         <RichTextEditor
           content={content.summary || ""}
           onChange={(html) => update("summary", html)}
-          placeholder="Décrivez-vous en quelques lignes..."
-          aiContext={`Résumé professionnel pour ${content.jobTitle || "un professionnel"}`}
+          placeholder={t("forms.summaryPh")}
+          aiContext={t("forms.summaryAiContext", {
+            job: content.jobTitle || t("forms.summaryAiContextDefault"),
+          })}
         />
       </div>
     </div>
@@ -359,6 +374,7 @@ function ListForm<T extends { id: string }>({
   renderItem,
   createItem,
 }: ListFormProps<T>) {
+  const t = useT();
   const items = (content?.items as T[]) ?? [];
 
   function updateItem(index: number, item: T) {
@@ -388,7 +404,7 @@ function ListForm<T extends { id: string }>({
         </div>
       ))}
       <Button variant="outline" size="sm" onClick={addItem} className="w-full">
-        + Ajouter
+        {t("forms.add")}
       </Button>
     </div>
   );
@@ -396,13 +412,15 @@ function ListForm<T extends { id: string }>({
 
 // Shared item-form parts ----------------------------------------------------
 
-/** Title + "Supprimer" row atop expandable item forms (experience, etc.). */
+/** Title + delete row atop expandable item forms (experience, etc.). */
 function ItemHeader({
   title,
   onDelete,
+  t,
 }: {
   title: string;
   onDelete: () => void;
+  t: TranslateFn;
 }) {
   return (
     <div className="flex justify-between items-center">
@@ -413,7 +431,7 @@ function ItemHeader({
         onClick={onDelete}
         className="text-destructive h-7 text-xs"
       >
-        Supprimer
+        {t("common.delete")}
       </Button>
     </div>
   );
@@ -450,21 +468,23 @@ function ExperienceItemForm(
   item: ExperienceItem,
   onChange: (i: ExperienceItem) => void,
   onDelete: () => void,
+  t: TranslateFn,
 ) {
   return (
     <>
       <ItemHeader
-        title={item.position || "Nouvelle expérience"}
+        title={item.position || t("forms.newExperience")}
         onDelete={onDelete}
+        t={t}
       />
       <div className="grid grid-cols-2 gap-2">
         <Input
-          placeholder="Poste"
+          placeholder={t("forms.position")}
           value={item.position}
           onChange={(e) => onChange({ ...item, position: e.target.value })}
         />
         <Input
-          placeholder="Entreprise"
+          placeholder={t("forms.company")}
           value={item.company}
           onChange={(e) => onChange({ ...item, company: e.target.value })}
         />
@@ -488,13 +508,16 @@ function ExperienceItemForm(
           checked={item.current}
           onChange={(e) => onChange({ ...item, current: e.target.checked })}
         />
-        Poste actuel
+        {t("forms.current")}
       </label>
       <RichTextEditor
         content={item.description}
         onChange={(html) => onChange({ ...item, description: html })}
-        placeholder="Description..."
-        aiContext={`Expérience : ${item.position} chez ${item.company}`}
+        placeholder={t("forms.descriptionPh")}
+        aiContext={t("forms.expAiContext", {
+          position: item.position,
+          company: item.company,
+        })}
       />
     </>
   );
@@ -516,26 +539,28 @@ function EducationItemForm(
   item: EducationItem,
   onChange: (i: EducationItem) => void,
   onDelete: () => void,
+  t: TranslateFn,
 ) {
   return (
     <>
       <ItemHeader
-        title={item.degree || "Nouvelle formation"}
+        title={item.degree || t("forms.newEducation")}
         onDelete={onDelete}
+        t={t}
       />
       <Input
-        placeholder="Établissement"
+        placeholder={t("forms.institution")}
         value={item.institution}
         onChange={(e) => onChange({ ...item, institution: e.target.value })}
       />
       <div className="grid grid-cols-2 gap-2">
         <Input
-          placeholder="Diplôme"
+          placeholder={t("forms.degree")}
           value={item.degree}
           onChange={(e) => onChange({ ...item, degree: e.target.value })}
         />
         <Input
-          placeholder="Domaine"
+          placeholder={t("forms.field")}
           value={item.field}
           onChange={(e) => onChange({ ...item, field: e.target.value })}
         />
@@ -555,8 +580,12 @@ function EducationItemForm(
       <RichTextEditor
         content={item.description}
         onChange={(html) => onChange({ ...item, description: html })}
-        placeholder="Description..."
-        aiContext={`Formation : ${item.degree} ${item.field} à ${item.institution}`}
+        placeholder={t("forms.descriptionPh")}
+        aiContext={t("forms.eduAiContext", {
+          degree: item.degree,
+          field: item.field,
+          institution: item.institution,
+        })}
       />
     </>
   );
@@ -566,12 +595,13 @@ function createSkill(): SkillItem {
   return { id: crypto.randomUUID(), name: "", level: 3 };
 }
 
-const SKILL_DISPLAYS: { value: SkillsDisplay; label: string }[] = [
-  { value: "dots", label: "Points (niveau)" },
-  { value: "bar", label: "Barres (niveau)" },
-  { value: "tags", label: "Étiquettes (sans niveau)" },
-  { value: "text", label: "Liste simple (sans niveau)" },
-];
+const SKILL_DISPLAY_VALUES: SkillsDisplay[] = ["dots", "bar", "tags", "text"];
+const SKILL_DISPLAY_KEYS: Record<SkillsDisplay, string> = {
+  dots: "forms.skillDisplayDots",
+  bar: "forms.skillDisplayBar",
+  tags: "forms.skillDisplayTags",
+  text: "forms.skillDisplayText",
+};
 
 function SkillsForm({
   content,
@@ -580,13 +610,14 @@ function SkillsForm({
   content: Record<string, unknown>;
   onUpdate: (c: Record<string, unknown>) => void;
 }) {
+  const t = useT();
   const display = (content.display as SkillsDisplay) || "dots";
   const showLevel = display === "dots" || display === "bar";
 
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Label className="text-xs">Style d&apos;affichage</Label>
+        <Label className="text-xs">{t("forms.displayStyle")}</Label>
         <Select
           value={display}
           onValueChange={(v) =>
@@ -596,15 +627,16 @@ function SkillsForm({
           <SelectTrigger className="w-full">
             <SelectValue>
               {(value) =>
-                SKILL_DISPLAYS.find((d) => d.value === value)?.label ??
-                String(value)
+                value
+                  ? t(SKILL_DISPLAY_KEYS[value as SkillsDisplay])
+                  : String(value)
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {SKILL_DISPLAYS.map((d) => (
-              <SelectItem key={d.value} value={d.value}>
-                {d.label}
+            {SKILL_DISPLAY_VALUES.map((v) => (
+              <SelectItem key={v} value={v}>
+                {t(SKILL_DISPLAY_KEYS[v])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -614,7 +646,7 @@ function SkillsForm({
         content={content}
         onUpdate={onUpdate}
         renderItem={(item, onChange, onDelete) =>
-          SkillItemForm(item, onChange, onDelete, showLevel)
+          SkillItemForm(item, onChange, onDelete, showLevel, t)
         }
         createItem={createSkill}
       />
@@ -626,12 +658,13 @@ function SkillItemForm(
   item: SkillItem,
   onChange: (i: SkillItem) => void,
   onDelete: () => void,
-  showLevel = true,
+  showLevel: boolean,
+  t: TranslateFn,
 ) {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder="Compétence"
+        placeholder={t("forms.skillPh")}
         value={item.name}
         onChange={(e) => onChange({ ...item, name: e.target.value })}
         className="flex-1"
@@ -664,15 +697,25 @@ function createLanguage(): LanguageItem {
   return { id: crypto.randomUUID(), name: "", level: "Intermédiaire" };
 }
 
+// Stored language levels stay in French (the canonical data value); only the
+// displayed label is localized.
+const LANGUAGE_LEVELS = [
+  { value: "Natif", key: "forms.langNatif" },
+  { value: "Courant", key: "forms.langCourant" },
+  { value: "Intermédiaire", key: "forms.langIntermediaire" },
+  { value: "Débutant", key: "forms.langDebutant" },
+];
+
 function LanguageItemForm(
   item: LanguageItem,
   onChange: (i: LanguageItem) => void,
   onDelete: () => void,
+  t: TranslateFn,
 ) {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder="Langue"
+        placeholder={t("forms.languagePh")}
         value={item.name}
         onChange={(e) => onChange({ ...item, name: e.target.value })}
         className="flex-1"
@@ -684,12 +727,17 @@ function LanguageItemForm(
         }
       >
         <SelectTrigger className="w-36">
-          <SelectValue />
+          <SelectValue>
+            {(value) => {
+              const lvl = LANGUAGE_LEVELS.find((l) => l.value === value);
+              return lvl ? t(lvl.key) : String(value ?? "");
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {["Natif", "Courant", "Intermédiaire", "Débutant"].map((l) => (
-            <SelectItem key={l} value={l}>
-              {l}
+          {LANGUAGE_LEVELS.map((l) => (
+            <SelectItem key={l.value} value={l.value}>
+              {t(l.key)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -713,25 +761,30 @@ function ProjectItemForm(
   item: ProjectItem,
   onChange: (i: ProjectItem) => void,
   onDelete: () => void,
+  t: TranslateFn,
 ) {
   return (
     <>
-      <ItemHeader title={item.name || "Nouveau projet"} onDelete={onDelete} />
+      <ItemHeader
+        title={item.name || t("forms.newProject")}
+        onDelete={onDelete}
+        t={t}
+      />
       <Input
-        placeholder="Nom du projet"
+        placeholder={t("forms.projectNamePh")}
         value={item.name}
         onChange={(e) => onChange({ ...item, name: e.target.value })}
       />
       <Input
-        placeholder="Technologies"
+        placeholder={t("forms.technologiesPh")}
         value={item.technologies}
         onChange={(e) => onChange({ ...item, technologies: e.target.value })}
       />
       <RichTextEditor
         content={item.description}
         onChange={(html) => onChange({ ...item, description: html })}
-        placeholder="Description..."
-        aiContext={`Projet : ${item.name}`}
+        placeholder={t("forms.descriptionPh")}
+        aiContext={t("forms.projectAiContext", { name: item.name })}
       />
     </>
   );
@@ -745,17 +798,18 @@ function CertificationItemForm(
   item: CertificationItem,
   onChange: (i: CertificationItem) => void,
   onDelete: () => void,
+  t: TranslateFn,
 ) {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder="Certification"
+        placeholder={t("forms.certificationPh")}
         value={item.name}
         onChange={(e) => onChange({ ...item, name: e.target.value })}
         className="flex-1"
       />
       <Input
-        placeholder="Organisme"
+        placeholder={t("forms.issuerPh")}
         value={item.issuer}
         onChange={(e) => onChange({ ...item, issuer: e.target.value })}
         className="flex-1"
@@ -779,11 +833,12 @@ function InterestItemForm(
   item: InterestItem,
   onChange: (i: InterestItem) => void,
   onDelete: () => void,
+  t: TranslateFn,
 ) {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder="Centre d'intérêt"
+        placeholder={t("forms.interestPh")}
         value={item.name}
         onChange={(e) => onChange({ ...item, name: e.target.value })}
         className="flex-1"
@@ -793,10 +848,11 @@ function InterestItemForm(
   );
 }
 
-const CUSTOM_MODES: { value: CustomMode; label: string }[] = [
-  { value: "text", label: "Texte libre" },
-  { value: "list", label: "Liste" },
-];
+const CUSTOM_MODE_VALUES: CustomMode[] = ["text", "list"];
+const CUSTOM_MODE_KEYS: Record<CustomMode, string> = {
+  text: "forms.customTextMode",
+  list: "forms.customListMode",
+};
 
 function CustomForm({
   content,
@@ -805,12 +861,13 @@ function CustomForm({
   content: Record<string, unknown>;
   onUpdate: (c: Record<string, unknown>) => void;
 }) {
+  const t = useT();
   const mode: CustomMode = content.mode === "list" ? "list" : "text";
 
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Label className="text-xs">Type de contenu</Label>
+        <Label className="text-xs">{t("forms.contentType")}</Label>
         <Select
           value={mode}
           onValueChange={(v) =>
@@ -820,15 +877,14 @@ function CustomForm({
           <SelectTrigger className="w-full">
             <SelectValue>
               {(value) =>
-                CUSTOM_MODES.find((m) => m.value === value)?.label ??
-                String(value)
+                value ? t(CUSTOM_MODE_KEYS[value as CustomMode]) : String(value)
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {CUSTOM_MODES.map((m) => (
-              <SelectItem key={m.value} value={m.value}>
-                {m.label}
+            {CUSTOM_MODE_VALUES.map((m) => (
+              <SelectItem key={m} value={m}>
+                {t(CUSTOM_MODE_KEYS[m])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -840,7 +896,7 @@ function CustomForm({
         <RichTextEditor
           content={(content?.text as string) ?? ""}
           onChange={(html) => onUpdate({ ...content, text: html })}
-          placeholder="Contenu de la section..."
+          placeholder={t("forms.customTextPh")}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireAuth } from "@/lib/api-auth";
 import { parseLinkedInText } from "@/lib/linkedin-parser";
 import { rateLimitResponse } from "@/lib/rate-limit";
@@ -12,6 +13,7 @@ export async function POST(request: Request) {
     `linkedin-parse:${auth.userId}`,
     10,
     60_000,
+    request,
   );
   if (limited) return limited;
 
@@ -19,7 +21,10 @@ export async function POST(request: Request) {
   try {
     formData = await request.formData();
   } catch {
-    return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
+    return NextResponse.json(
+      { error: apiMessage(request, "requestInvalid") },
+      { status: 400 },
+    );
   }
 
   const file = formData.get("file");
@@ -29,14 +34,14 @@ export async function POST(request: Request) {
 
   if (file.type !== "application/pdf" && !file.type.includes("pdf")) {
     return NextResponse.json(
-      { error: "Le fichier doit être un PDF" },
+      { error: apiMessage(request, "fileMustBePdf") },
       { status: 422 },
     );
   }
 
   if (file.size > 10 * 1024 * 1024) {
     return NextResponse.json(
-      { error: "Le fichier ne doit pas dépasser 10 Mo" },
+      { error: apiMessage(request, "fileTooLarge10") },
       { status: 413 },
     );
   }
@@ -51,10 +56,7 @@ export async function POST(request: Request) {
     const text = result.text?.trim();
     if (!text || text.length < 50) {
       return NextResponse.json(
-        {
-          error:
-            "Le PDF ne contient pas assez de texte lisible. Utilisez le PDF exporté depuis LinkedIn (profil → « Enregistrer en PDF »).",
-        },
+        { error: apiMessage(request, "pdfNotEnoughText") },
         { status: 422 },
       );
     }
@@ -65,10 +67,7 @@ export async function POST(request: Request) {
     // Vérification minimale : on doit au moins avoir un nom
     if (!parsed.profile.fullName) {
       return NextResponse.json(
-        {
-          error:
-            "Impossible d'extraire le nom du profil. Vérifiez que le fichier est bien un export LinkedIn.",
-        },
+        { error: apiMessage(request, "pdfNoName") },
         { status: 422 },
       );
     }
@@ -77,10 +76,7 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[parse-linkedin-pdf]", err);
     return NextResponse.json(
-      {
-        error:
-          "Impossible de lire ce PDF. Vérifiez qu'il n'est pas protégé par un mot de passe.",
-      },
+      { error: apiMessage(request, "pdfCantRead") },
       { status: 422 },
     );
   }

@@ -10,15 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { TEMPLATES } from "@/components/templates";
+import { useT } from "@/components/i18n/language-provider";
 import type { Resume, TemplateProps } from "@/types/resume";
-
-const TEMPLATE_NAMES: Record<string, string> = {
-  classic: "Classique",
-  modern: "Moderne",
-  minimal: "Minimal",
-  creative: "Créatif",
-  professional: "Professionnel",
-};
 
 // A4 at 96dpi (210mm × 297mm). Templates render at this width, then we scale
 // the whole page down to whatever width the card ends up at — so two-column
@@ -86,13 +79,14 @@ export function TemplatePreviewModal({
   currentTemplate,
   onSelect,
 }: Props) {
+  const t = useT();
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Choisir un template</DialogTitle>
+          <DialogTitle>{t("templateModal.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
@@ -123,14 +117,14 @@ export function TemplatePreviewModal({
                     className="text-xs font-semibold truncate min-w-0"
                     style={{ color: "var(--fg)" }}
                   >
-                    {TEMPLATE_NAMES[key] ?? key}
+                    {t(`templateNames.${key}`)}
                   </span>
                   {currentTemplate === key && (
                     <span
                       className="text-xs font-bold shrink-0"
                       style={{ color: "var(--accent-violet)" }}
                     >
-                      Actuel
+                      {t("templateModal.current")}
                     </span>
                   )}
                 </div>
@@ -141,7 +135,7 @@ export function TemplatePreviewModal({
 
         <div className="flex justify-end mt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fermer
+            {t("common.close")}
           </Button>
         </div>
       </DialogContent>

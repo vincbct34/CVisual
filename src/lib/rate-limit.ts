@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { apiMessage } from "@/lib/i18n/api-messages";
 
 // Fixed-window rate limiter with two backends:
 //
@@ -140,11 +141,16 @@ export async function rateLimitResponse(
   key: string,
   limit: number,
   windowMs: number,
+  request?: { headers: Headers },
 ): Promise<NextResponse | null> {
   const rl = await checkRateLimit(key, limit, windowMs);
   if (rl.allowed) return null;
   return NextResponse.json(
-    { error: "Trop de tentatives. Réessayez plus tard." },
+    {
+      error: request
+        ? apiMessage(request, "rateLimited")
+        : "Trop de tentatives. Réessayez plus tard.",
+    },
     { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
   );
 }

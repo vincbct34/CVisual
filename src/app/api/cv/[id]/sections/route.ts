@@ -16,7 +16,7 @@ export async function POST(
   const { body, response: badJson } = await parseJsonBody(request);
   if (badJson) return badJson;
   const parsed = createSectionSchema.safeParse(body);
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, request);
 
   // Auto-assign order if not provided
   let order = parsed.data.order;

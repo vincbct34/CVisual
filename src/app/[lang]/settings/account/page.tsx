@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { toast } from "sonner";
+import { useT } from "@/components/i18n/language-provider";
 
 export default function AccountPage() {
   const { user, authFetch, updateUser, logout } = useAuth();
+  const t = useT();
 
   // Profile
   const [name, setName] = useState("");
@@ -47,12 +49,12 @@ export default function AccountPage() {
       const data = await res.json();
       if (res.ok) {
         updateUser({ name: data.user.name, email: data.user.email });
-        toast.success("Profil mis à jour");
+        toast.success(t("account.profileUpdated"));
       } else {
-        toast.error(data.error || "Erreur lors de la mise à jour");
+        toast.error(data.error || t("account.updateError"));
       }
     } catch {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error(t("account.updateError"));
     } finally {
       setSavingProfile(false);
     }
@@ -71,12 +73,12 @@ export default function AccountPage() {
       if (res.ok) {
         setCurrentPassword("");
         setNewPassword("");
-        toast.success("Mot de passe modifié");
+        toast.success(t("account.passwordUpdated"));
       } else {
-        toast.error(data.error || "Erreur lors de la modification");
+        toast.error(data.error || t("account.passwordError"));
       }
     } catch {
-      toast.error("Erreur lors de la modification");
+      toast.error(t("account.passwordError"));
     } finally {
       setSavingPassword(false);
     }
@@ -87,15 +89,15 @@ export default function AccountPage() {
     try {
       const res = await authFetch("/api/auth/me", { method: "DELETE" });
       if (res.ok) {
-        toast.success("Compte supprimé");
+        toast.success(t("account.deleted"));
         await logout();
       } else {
         const data = await res.json();
-        toast.error(data.error || "Erreur lors de la suppression");
+        toast.error(data.error || t("account.deleteError"));
         setDeleting(false);
       }
     } catch {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("account.deleteError"));
       setDeleting(false);
     }
   }
@@ -117,11 +119,10 @@ export default function AccountPage() {
           className="font-heading text-2xl mb-1"
           style={{ color: "var(--fg)" }}
         >
-          Mon compte
+          {t("account.title")}
         </h1>
         <p className="mb-8 text-sm" style={{ color: "var(--fg-muted)" }}>
-          Gérez vos informations personnelles, votre mot de passe et vos
-          sessions.
+          {t("account.subtitle")}
         </p>
 
         {/* Profile */}
@@ -130,7 +131,7 @@ export default function AccountPage() {
             className="font-heading text-lg mb-4"
             style={{ color: "var(--fg)" }}
           >
-            Profil
+            {t("account.profile")}
           </h2>
           <form onSubmit={saveProfile} className="space-y-4">
             <div className="space-y-1.5">
@@ -139,7 +140,7 @@ export default function AccountPage() {
                 className="text-sm font-semibold"
                 style={{ color: "var(--fg)" }}
               >
-                Nom
+                {t("account.name")}
               </label>
               <input
                 id="name"
@@ -175,7 +176,7 @@ export default function AccountPage() {
               disabled={!profileChanged || savingProfile}
               style={{ opacity: !profileChanged || savingProfile ? 0.6 : 1 }}
             >
-              {savingProfile ? "Enregistrement..." : "Enregistrer"}
+              {savingProfile ? t("common.saving") : t("common.save")}
             </button>
           </form>
         </section>
@@ -186,7 +187,7 @@ export default function AccountPage() {
             className="font-heading text-lg mb-4"
             style={{ color: "var(--fg)" }}
           >
-            Mot de passe
+            {t("account.password")}
           </h2>
           <form onSubmit={changePassword} className="space-y-4">
             <div className="space-y-1.5">
@@ -195,7 +196,7 @@ export default function AccountPage() {
                 className="text-sm font-semibold"
                 style={{ color: "var(--fg)" }}
               >
-                Mot de passe actuel
+                {t("account.currentPassword")}
               </label>
               <input
                 id="current-password"
@@ -214,7 +215,7 @@ export default function AccountPage() {
                 className="text-sm font-semibold"
                 style={{ color: "var(--fg)" }}
               >
-                Nouveau mot de passe
+                {t("account.newPassword")}
               </label>
               <input
                 id="new-password"
@@ -228,7 +229,7 @@ export default function AccountPage() {
                 style={inputStyle}
               />
               <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-                Au moins 8 caractères. Vos autres sessions seront déconnectées.
+                {t("account.passwordHint")}
               </p>
             </div>
             <button
@@ -244,7 +245,9 @@ export default function AccountPage() {
                     : 1,
               }}
             >
-              {savingPassword ? "Modification..." : "Modifier le mot de passe"}
+              {savingPassword
+                ? t("account.updating")
+                : t("account.changePassword")}
             </button>
           </form>
         </section>
@@ -255,13 +258,13 @@ export default function AccountPage() {
             className="font-heading text-lg mb-2"
             style={{ color: "var(--fg)" }}
           >
-            Sessions
+            {t("account.sessions")}
           </h2>
           <p className="mb-4 text-sm" style={{ color: "var(--fg-muted)" }}>
-            Consultez et révoquez les appareils connectés à votre compte.
+            {t("account.sessionsDesc")}
           </p>
           <Link href="/settings/sessions" className="btn-ghost inline-block">
-            Gérer les sessions
+            {t("account.manageSessions")}
           </Link>
         </section>
 
@@ -274,18 +277,18 @@ export default function AccountPage() {
             className="font-heading text-lg mb-2"
             style={{ color: "var(--destructive)" }}
           >
-            Supprimer le compte
+            {t("account.deleteTitle")}
           </h2>
           <p className="mb-4 text-sm" style={{ color: "var(--fg-muted)" }}>
-            Cette action est irréversible. Tous vos CV, lettres de motivation et
-            données seront définitivement supprimés. Saisissez votre email
-            <strong> {user?.email} </strong> pour confirmer.
+            {t("account.deleteDescBefore")}
+            <strong> {user?.email} </strong>
+            {t("account.deleteDescAfter")}
           </p>
           <input
             type="email"
             value={confirmDelete}
             onChange={(e) => setConfirmDelete(e.target.value)}
-            placeholder="Votre email"
+            placeholder={t("account.emailPlaceholder")}
             autoComplete="off"
             className="w-full rounded px-3 py-2 text-sm mb-4"
             style={inputStyle}
@@ -299,7 +302,7 @@ export default function AccountPage() {
                 deleting || confirmDelete.trim() !== user?.email ? 0.6 : 1,
             }}
           >
-            {deleting ? "Suppression..." : "Supprimer définitivement"}
+            {deleting ? t("account.deleting") : t("account.deleteConfirm")}
           </button>
         </section>
       </main>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import {
   getRefreshTokenFromCookie,
   getUserIdFromRefreshToken,
@@ -6,7 +7,7 @@ import {
   clearRefreshTokenCookie,
 } from "@/lib/auth";
 
-export async function POST() {
+export async function POST(request: Request) {
   // Read token before clearing the cookie
   let userId: string | null = null;
   try {
@@ -30,5 +31,5 @@ export async function POST() {
     }
   }
 
-  return NextResponse.json({ message: "Déconnecté" });
+  return NextResponse.json({ message: apiMessage(request, "loggedOut") });
 }

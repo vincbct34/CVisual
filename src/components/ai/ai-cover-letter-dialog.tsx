@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { useAI } from "@/hooks/use-ai";
 import { AISettingsDialog } from "./ai-settings-dialog";
@@ -43,7 +44,8 @@ export function AIGenerateCoverLetterDialog({
 }: AIGenerateCoverLetterDialogProps) {
   const { authFetch } = useAuth();
   const { hasKey, generateCoverLetter } = useAI();
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
 
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
@@ -78,11 +80,11 @@ export function AIGenerateCoverLetterDialog({
     }
 
     if (!selectedResumeId) {
-      toast.error("Sélectionnez un CV");
+      toast.error(t("ai.selectResume"));
       return;
     }
     if (!jobDescription.trim()) {
-      toast.error("Entrez la description du poste");
+      toast.error(t("ai.enterJobDesc"));
       return;
     }
 
@@ -92,7 +94,7 @@ export function AIGenerateCoverLetterDialog({
     try {
       // Fetch the full resume
       const res = await authFetch(`/api/cv/${selectedResumeId}`);
-      if (!res.ok) throw new Error("CV non trouvé");
+      if (!res.ok) throw new Error(t("ai.cvNotFound"));
       const { resume } = await res.json();
 
       const profile = getProfile(resume.sections);
@@ -121,9 +123,7 @@ export function AIGenerateCoverLetterDialog({
       if (err instanceof AIError && err.code === "no_key") {
         setShowSettings(true);
       } else {
-        toast.error(
-          err instanceof AIError ? err.message : "Erreur lors de la génération",
-        );
+        toast.error(err instanceof AIError ? err.message : t("ai.genError"));
       }
     } finally {
       setIsLoading(false);
@@ -138,7 +138,9 @@ export function AIGenerateCoverLetterDialog({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: `Lettre — ${jobTitle || companyName || "Nouvelle"}`,
+          title: t("ai.letterTitle", {
+            name: jobTitle || companyName || t("ai.letterTitleDefault"),
+          }),
           resumeId: selectedResumeId,
           content: {
             recipientName,
@@ -151,12 +153,12 @@ export function AIGenerateCoverLetterDialog({
 
       if (res.ok) {
         const data = await res.json();
-        toast.success("Lettre créée !");
+        toast.success(t("ai.letterCreated"));
         onOpenChange(false);
         router.push(`/cover-letter/${data.coverLetter.id}`);
       }
     } catch {
-      toast.error("Erreur lors de la création");
+      toast.error(t("ai.createError"));
     }
   }
 
@@ -165,27 +167,23 @@ export function AIGenerateCoverLetterDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Générer une lettre de motivation</DialogTitle>
-            <DialogDescription>
-              {
-                "Sélectionnez un CV et décrivez le poste visé. L'IA générera une lettre personnalisée."
-              }
-            </DialogDescription>
+            <DialogTitle>{t("ai.clDialogTitle")}</DialogTitle>
+            <DialogDescription>{t("ai.clDialogDesc")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 mt-2">
             {/* Resume selection */}
             <div className="space-y-1">
-              <Label className="text-sm">CV source</Label>
+              <Label className="text-sm">{t("ai.sourceResume")}</Label>
               <Select
                 value={selectedResumeId}
                 onValueChange={(v) => v && setSelectedResumeId(String(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir un CV...">
+                  <SelectValue placeholder={t("ai.chooseResume")}>
                     {(value) =>
                       resumes.find((r) => r.id === value)?.title ??
-                      "Choisir un CV..."
+                      t("ai.chooseResume")
                     }
                   </SelectValue>
                 </SelectTrigger>
@@ -202,41 +200,39 @@ export function AIGenerateCoverLetterDialog({
             {/* Job details */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-sm">Poste visé</Label>
+                <Label className="text-sm">{t("ai.targetJob")}</Label>
                 <Input
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="Développeur Full-Stack"
+                  placeholder={t("cl.jobTitlePh")}
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-sm">Entreprise</Label>
+                <Label className="text-sm">{t("ai.company")}</Label>
                 <Input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Google"
+                  placeholder={t("cl.companyPh")}
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <Label className="text-sm">Destinataire (optionnel)</Label>
+              <Label className="text-sm">{t("ai.recipientOptional")}</Label>
               <Input
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
-                placeholder="Mme Dupont"
+                placeholder={t("ai.recipientPh")}
               />
             </div>
 
             <div className="space-y-1">
-              <Label className="text-sm">
-                {"Description du poste / offre d'emploi"}
-              </Label>
+              <Label className="text-sm">{t("ai.jobDescLabel")}</Label>
               <textarea
                 className="flex w-full rounded-md border bg-background px-3 py-2 text-sm min-h-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Collez ici la description du poste..."
+                placeholder={t("ai.jobDescPh")}
               />
             </div>
 
@@ -245,25 +241,25 @@ export function AIGenerateCoverLetterDialog({
               disabled={isLoading}
               className="w-full"
             >
-              {isLoading ? "Génération en cours..." : "Générer avec l'IA"}
+              {isLoading ? t("ai.generating2") : t("ai.generateAI")}
             </Button>
 
             {/* Preview */}
             {preview && (
               <div className="border rounded-md p-4 bg-muted/30 space-y-3">
-                <p className="text-sm font-medium">Aperçu :</p>
+                <p className="text-sm font-medium">{t("ai.preview")}</p>
                 <div
                   className="prose prose-sm max-w-none [&_p]:mb-3"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(preview) }}
                 />
                 <div className="flex gap-2">
-                  <Button onClick={handleCreate}>Créer la lettre</Button>
+                  <Button onClick={handleCreate}>{t("ai.createLetter")}</Button>
                   <Button
                     variant="outline"
                     onClick={handleGenerate}
                     disabled={isLoading}
                   >
-                    Régénérer
+                    {t("ai.regenerate")}
                   </Button>
                 </div>
               </div>

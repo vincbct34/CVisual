@@ -3,35 +3,83 @@ import { LandingShell } from "@/components/landing/landing-shell";
 import { RegisterCta } from "@/components/landing/home-cta";
 import { getTemplate } from "@/components/templates";
 import { TEMPLATE_SHOWCASE, sampleForTemplate } from "@/lib/sample-resume";
-import "../landing.css";
+import {
+  defaultLocale,
+  isLocale,
+  type Locale,
+  withLocale,
+} from "@/lib/i18n/config";
+import "@/app/landing.css";
 
-const TITLE = "Modèles de CV";
-const DESCRIPTION =
-  "Cinq modèles de CV professionnels et optimisés ATS : Classique, Moderne, Minimal, Créatif et Professionnel. Personnalisables et exportables en PDF / DOCX.";
+const COPY = {
+  fr: {
+    title: "Modèles de CV",
+    description:
+      "Cinq modèles de CV professionnels et optimisés ATS : Classique, Moderne, Minimal, Créatif et Professionnel. Personnalisables et exportables en PDF / DOCX.",
+    kicker: "5 templates",
+    h1: "Des modèles dessinés pour",
+    h1Em: "se démarquer",
+    intro:
+      "Chaque modèle est conçu avec une hiérarchie typographique nette, lisible par les recruteurs comme par les robots ATS. Choisissez une base, personnalisez couleurs, polices et mise en page.",
+    bandTitle: "Trouvez le vôtre",
+    bandTitleEm: "en quelques clics",
+    band: "Démarrez sur n’importe quel modèle — vous pourrez en changer à tout moment sans rien reperdre.",
+    cta: "Commencer gratuitement",
+  },
+  en: {
+    title: "Resume templates",
+    description:
+      "Five professional, ATS-optimized resume templates: Classic, Modern, Minimal, Creative, and Professional. Customizable and exportable to PDF / DOCX.",
+    kicker: "5 templates",
+    h1: "Templates designed to",
+    h1Em: "stand out",
+    intro:
+      "Each template uses a clean typographic hierarchy, readable by recruiters and ATS systems alike. Pick a base, then customize colors, fonts, and layout.",
+    bandTitle: "Find yours",
+    bandTitleEm: "in a few clicks",
+    band: "Start from any template — you can switch later without losing your content.",
+    cta: "Start for free",
+  },
+} as const;
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: "/modeles" },
-  openGraph: { title: TITLE, description: DESCRIPTION },
-};
+function getLocale(lang: string): Locale {
+  return isLocale(lang) ? lang : defaultLocale;
+}
 
-export default function ModelesPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = getLocale(lang);
+  const copy = COPY[locale];
+  return {
+    title: copy.title,
+    description: copy.description,
+    alternates: { canonical: withLocale("/modeles", locale) },
+    openGraph: { title: copy.title, description: copy.description },
+  };
+}
+
+export default async function ModelesPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const copy = COPY[getLocale(lang)];
   return (
     <LandingShell>
       <section className="subhero">
         <div className="wrap">
           <span className="kicker">
-            <span className="num">( Modèles )</span> 5 templates
+            <span className="num">( {copy.title} )</span> {copy.kicker}
           </span>
           <h1 className="subhero-h">
-            Des modèles dessinés pour <em>se démarquer</em>
+            {copy.h1} <em>{copy.h1Em}</em>
           </h1>
-          <p className="subhero-p">
-            Chaque modèle est conçu avec une hiérarchie typographique nette,
-            lisible par les recruteurs comme par les robots ATS. Choisissez une
-            base, personnalisez couleurs, polices et mise en page.
-          </p>
+          <p className="subhero-p">{copy.intro}</p>
         </div>
       </section>
 
@@ -70,17 +118,11 @@ export default function ModelesPage() {
           <div className="tpl-band reveal">
             <div>
               <h3>
-                Trouvez le vôtre <em>en quelques clics</em>
+                {copy.bandTitle} <em>{copy.bandTitleEm}</em>
               </h3>
-              <p>
-                Démarrez sur n’importe quel modèle — vous pourrez en changer à
-                tout moment sans rien reperdre.
-              </p>
+              <p>{copy.band}</p>
             </div>
-            <RegisterCta
-              className="btn btn-paper"
-              label="Commencer gratuitement"
-            />
+            <RegisterCta className="btn btn-paper" label={copy.cta} />
           </div>
         </div>
       </section>

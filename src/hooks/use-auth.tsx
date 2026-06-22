@@ -7,7 +7,13 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  defaultLocale,
+  isLocale,
+  type Locale,
+  withLocale,
+} from "@/lib/i18n/config";
 
 interface User {
   id: string;
@@ -27,6 +33,11 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+function localeFromPathname(pathname: string | null): Locale {
+  const segment = pathname?.split("/")[1] ?? "";
+  return isLocale(segment) ? segment : defaultLocale;
+}
 
 function setAccessCookie(token: string) {
   const secure = window.location.protocol === "https:" ? "; secure" : "";
@@ -51,6 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = localeFromPathname(pathname);
 
   const accessTokenRef = React.useRef<string | null>(null);
 
@@ -137,9 +150,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(data.accessToken);
       accessTokenRef.current = data.accessToken;
       setAccessCookie(data.accessToken);
-      router.push("/dashboard");
+      router.push(withLocale("/dashboard", locale));
     },
-    [router],
+    [router, locale],
   );
 
   const register = useCallback(
@@ -161,9 +174,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(data.accessToken);
       accessTokenRef.current = data.accessToken;
       setAccessCookie(data.accessToken);
-      router.push("/dashboard");
+      router.push(withLocale("/dashboard", locale));
     },
-    [router],
+    [router, locale],
   );
 
   const updateUser = useCallback((updates: Partial<User>) => {
@@ -186,8 +199,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Hard redirect (not router.push): logout is triggered from a portal menu
     // that unmounts on click, which drops a soft navigation. A full reload also
     // guarantees all in-memory session state is torn down.
-    window.location.href = "/login";
-  }, []);
+    window.location.href = withLocale("/login", locale);
+  }, [locale]);
 
   useEffect(() => {
     async function init() {

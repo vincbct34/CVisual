@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiMessage } from "@/lib/i18n/api-messages";
 import { requireAuth } from "@/lib/api-auth";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
     `cl-create:${auth.userId}`,
     20,
     60_000,
+    request,
   );
   if (limited) return limited;
 
@@ -56,7 +58,7 @@ export async function POST(request: Request) {
 
   const coverLetter = await prisma.coverLetter.create({
     data: {
-      title: data.title || "Ma lettre de motivation",
+      title: data.title || apiMessage(request, "defaultLetterTitle"),
       language: data.language || "fr",
       resumeId: data.resumeId || null,
       userId: auth.userId,

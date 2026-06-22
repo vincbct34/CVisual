@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, use, Suspense } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useLocalizedRouter } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AuthCard } from "../auth-card";
 
 function ResetPasswordForm({ token }: { token: string }) {
-  const router = useRouter();
+  const router = useLocalizedRouter();
+  const t = useT();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,11 +18,11 @@ function ResetPasswordForm({ token }: { token: string }) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas");
+      toast.error(t("auth.pwMismatch"));
       return;
     }
     if (password.length < 8) {
-      toast.error("Le mot de passe doit contenir au moins 8 caractères");
+      toast.error(t("auth.pwTooShort"));
       return;
     }
     setIsSubmitting(true);
@@ -32,14 +33,12 @@ function ResetPasswordForm({ token }: { token: string }) {
         body: JSON.stringify({ token, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Une erreur est survenue.");
-      toast.success("Mot de passe réinitialisé avec succès !");
+      if (!res.ok) throw new Error(data.error || t("auth.genericError"));
+      toast.success(t("auth.resetSuccess"));
       router.push("/login");
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Erreur lors de la réinitialisation",
+        error instanceof Error ? error.message : t("auth.resetError"),
       );
     } finally {
       setIsSubmitting(false);
@@ -49,7 +48,7 @@ function ResetPasswordForm({ token }: { token: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="password">Nouveau mot de passe</Label>
+        <Label htmlFor="password">{t("auth.resetNewPassword")}</Label>
         <Input
           id="password"
           type="password"
@@ -60,7 +59,7 @@ function ResetPasswordForm({ token }: { token: string }) {
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+        <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
         <Input
           id="confirmPassword"
           type="password"
@@ -76,7 +75,7 @@ function ResetPasswordForm({ token }: { token: string }) {
         className="btn-gradient w-full mt-2"
         style={{ opacity: isSubmitting ? 0.7 : 1 }}
       >
-        {isSubmitting ? "Réinitialisation..." : "Réinitialiser le mot de passe"}
+        {isSubmitting ? t("auth.resetSubmitting") : t("auth.resetSubmit")}
       </button>
     </form>
   );
@@ -89,6 +88,7 @@ function ResetPasswordContent({
 }) {
   const params = use(searchParams);
   const token = params.token;
+  const t = useT();
 
   if (!token) {
     return (
@@ -101,11 +101,11 @@ function ResetPasswordContent({
             border: "1px solid var(--destructive)",
           }}
         >
-          Lien de réinitialisation invalide ou manquant.
+          {t("auth.resetInvalidLink")}
         </p>
         <Link href="/forgot-password">
           <button className="btn-gradient w-full">
-            Demander un nouveau lien
+            {t("auth.resetRequestNew")}
           </button>
         </Link>
       </div>
@@ -120,6 +120,11 @@ interface Props {
 }
 
 export default function ResetPasswordPage({ searchParams }: Props) {
+  return <ResetPasswordPageInner searchParams={searchParams} />;
+}
+
+function ResetPasswordPageInner({ searchParams }: Props) {
+  const t = useT();
   return (
     <AuthCard>
       <div className="text-center mb-8">
@@ -127,17 +132,17 @@ export default function ResetPasswordPage({ searchParams }: Props) {
           className="font-heading text-3xl mb-1"
           style={{ color: "var(--fg)" }}
         >
-          Nouveau mot de passe
+          {t("auth.resetTitle")}
         </h1>
         <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
-          Créez un nouveau mot de passe pour votre compte
+          {t("auth.resetSubtitle")}
         </p>
       </div>
 
       <Suspense
         fallback={
           <p style={{ color: "var(--fg-muted)", textAlign: "center" }}>
-            Chargement...
+            {t("common.loading")}
           </p>
         }
       >
@@ -153,7 +158,7 @@ export default function ResetPasswordPage({ searchParams }: Props) {
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: "var(--accent-violet)" }}
         >
-          ← Retour à la connexion
+          ← {t("auth.backToLogin")}
         </Link>
       </p>
     </AuthCard>

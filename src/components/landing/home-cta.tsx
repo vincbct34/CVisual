@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/i18n/link";
+import { useT } from "@/components/i18n/language-provider";
 import { Arrow } from "@/components/landing/landing-shell";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -25,13 +26,14 @@ export function HomeCta({
   secondaryLabel,
 }: HomeCtaProps) {
   const { user, isLoading } = useAuth();
+  const t = useT();
 
   if (isLoading) return null;
 
   if (user) {
     return (
       <Link className={primaryClass} href="/dashboard">
-        Accéder à mon espace <Arrow />
+        {t("landing.goToSpace")} <Arrow />
       </Link>
     );
   }
@@ -60,12 +62,13 @@ interface RegisterCtaProps {
  */
 export function RegisterCta({ className, label }: RegisterCtaProps) {
   const { user, isLoading } = useAuth();
+  const t = useT();
 
   if (isLoading) return null;
 
   return (
     <Link className={className} href={user ? "/dashboard" : "/register"}>
-      {user ? "Accéder à mon espace" : label} <Arrow />
+      {user ? t("landing.goToSpace") : label} <Arrow />
     </Link>
   );
 }

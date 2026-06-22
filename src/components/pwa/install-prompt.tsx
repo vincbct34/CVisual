@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Download, X } from "lucide-react";
+import { useT } from "@/components/i18n/language-provider";
+import { stripLocale } from "@/lib/i18n/config";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -10,6 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallPrompt() {
+  const t = useT();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -18,12 +21,14 @@ export function InstallPrompt() {
   // The banner is fixed bottom-right; on the scrollable editor/cover-letter
   // forms it floats over inputs and section controls. And on public/shared CV
   // links it's recruiter-facing noise that can overlap the document. Suppress
-  // it on all of these.
+  // it on all of these. Pathnames are locale-prefixed, so compare the stripped
+  // path.
+  const route = stripLocale(pathname ?? "/");
   const onSuppressedRoute =
-    pathname?.startsWith("/editor/") ||
-    pathname?.startsWith("/cover-letter/") ||
-    pathname?.startsWith("/public/") ||
-    pathname?.startsWith("/share/");
+    route.startsWith("/editor/") ||
+    route.startsWith("/cover-letter/") ||
+    route.startsWith("/public/") ||
+    route.startsWith("/share/");
 
   useEffect(() => {
     if (localStorage.getItem("pwa-install-dismissed")) return;
@@ -52,10 +57,10 @@ export function InstallPrompt() {
     <div className="pwa-banner fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-50 p-4 flex items-start gap-3">
       <div className="flex-1">
         <p className="text-sm font-semibold" style={{ color: "var(--fg)" }}>
-          Installer CVisual
+          {t("ui.installTitle")}
         </p>
         <p className="text-xs mt-0.5" style={{ color: "var(--fg-muted)" }}>
-          Accédez à l&apos;app directement depuis votre écran d&apos;accueil
+          {t("ui.installDesc")}
         </p>
         <button
           onClick={handleInstall}
@@ -67,12 +72,12 @@ export function InstallPrompt() {
           }}
         >
           <Download className="h-3.5 w-3.5" />
-          Installer
+          {t("ui.install")}
         </button>
       </div>
       <button
         onClick={handleDismiss}
-        aria-label="Fermer"
+        aria-label={t("common.close")}
         className="p-1 rounded-lg transition-colors"
         style={{ color: "var(--fg-muted)" }}
       >

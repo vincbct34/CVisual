@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useSyncExternalStore } from "react";
+import { useT } from "@/components/i18n/language-provider";
 import { callAI, streamAI, stripCodeFence } from "@/lib/ai/ai-client";
 import {
   improveContentPrompt,
@@ -95,6 +96,7 @@ export function useAI() {
     getProviderSnapshot,
     getServerProviderSnapshot,
   );
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -176,7 +178,8 @@ export function useAI() {
         return stripCodeFence(result);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") throw err;
-        const msg = err instanceof AIError ? err.message : "Erreur inattendue";
+        const msg =
+          err instanceof AIError ? err.message : t("ai.unexpectedError");
         setError(msg);
         throw err;
       } finally {
@@ -184,7 +187,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider],
+    [apiKey, provider, t],
   );
 
   /**
@@ -210,7 +213,8 @@ export function useAI() {
         });
         return stripCodeFence(result);
       } catch (err) {
-        const msg = err instanceof AIError ? err.message : "Erreur inattendue";
+        const msg =
+          err instanceof AIError ? err.message : t("ai.unexpectedError");
         setError(msg);
         throw err;
       } finally {
@@ -218,7 +222,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider],
+    [apiKey, provider, t],
   );
 
   /**
@@ -250,7 +254,8 @@ export function useAI() {
         return stripCodeFence(full);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") throw err;
-        const msg = err instanceof AIError ? err.message : "Erreur inattendue";
+        const msg =
+          err instanceof AIError ? err.message : t("ai.unexpectedError");
         setError(msg);
         throw err;
       } finally {
@@ -258,7 +263,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider],
+    [apiKey, provider, t],
   );
 
   const generate = useCallback(
@@ -275,7 +280,8 @@ export function useAI() {
           model: getFastModel(),
         });
       } catch (err) {
-        const msg = err instanceof AIError ? err.message : "Erreur inattendue";
+        const msg =
+          err instanceof AIError ? err.message : t("ai.unexpectedError");
         setError(msg);
         throw err;
       } finally {
@@ -283,7 +289,7 @@ export function useAI() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apiKey, provider],
+    [apiKey, provider, t],
   );
 
   function cancelAI() {
